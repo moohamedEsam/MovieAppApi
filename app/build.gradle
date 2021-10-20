@@ -44,7 +44,10 @@ android {
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            excludes += "**/attach_hotspot_windows.dll"
+            excludes += "META-INF/licenses/**"
         }
+
     }
 }
 
@@ -108,4 +111,12 @@ dependencies {
 
     //truth
     testImplementation "com.google.truth:truth:$truth_version"
+    androidTestImplementation "com.google.truth:truth:$truth_version"
+
+
+    testImplementation("org.mockito:mockito-core:$mockito_version")
+    androidTestImplementation("org.mockito:mockito-core:$mockito_version")
+    testImplementation "org.mockito:mockito-inline:$mockito_version"
+
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
 }
