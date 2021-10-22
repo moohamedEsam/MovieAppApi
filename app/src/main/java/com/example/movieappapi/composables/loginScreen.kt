@@ -8,12 +8,9 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -27,14 +24,22 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.movieappapi.R
+import com.example.movieappapi.dataModels.Credentials
+import com.example.movieappapi.utils.Resource
+import com.example.movieappapi.utils.Screens
+import com.example.movieappapi.utils.SemanticContentDescription
+import com.example.movieappapi.viewModels.LoginViewModel
+import org.koin.androidx.compose.getViewModel
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navHostController: NavHostController) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
         LoginColumn(
+            navHostController = navHostController,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.Center)
@@ -46,13 +51,15 @@ fun LoginScreen() {
                     append("sign up")
                 }
             },
-            modifier = Modifier.align(Alignment.CenterEnd)
+            modifier = Modifier.align(Alignment.BottomStart)
         )
     }
 }
 
 @Composable
-private fun LoginColumn(modifier: Modifier) {
+private fun LoginColumn(navHostController: NavHostController, modifier: Modifier) {
+    val viewModel: LoginViewModel = getViewModel()
+    val userState by viewModel.userState
     Column(modifier = modifier) {
         Text(
             text = stringResource(id = R.string.app_name),
@@ -60,9 +67,23 @@ private fun LoginColumn(modifier: Modifier) {
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
-        userNameTextField()
+        val username = userNameTextField()
         Spacer(modifier = Modifier.height(8.dp))
-        passwordTextField()
+        val password = passwordTextField()
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = {
+                if (userState !is Resource.Loading)
+                    viewModel.signIn(Credentials(username, password))
+            },
+            modifier = Modifier.align(End)
+        ) {
+            Text(text = "login")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        userState.DisplayComposable {
+            navHostController.navigate(Screens.MAIN)
+        }
     }
 }
 
@@ -81,7 +102,7 @@ fun userNameTextField(
     OutlinedTextField(
         value = value,
         onValueChange = {
-            value = it
+            value = it.trim()
             isError = it.isBlank()
         },
         label = { Text(text = title) },
@@ -89,6 +110,9 @@ fun userNameTextField(
         isError = isError,
         modifier = Modifier
             .fillMaxWidth()
+            .semantics {
+                contentDescription = SemanticContentDescription.LOGIN_SCREEN_USERNAME_TEXT_FIELD
+            }
 
     )
     return value
@@ -110,8 +134,8 @@ fun passwordTextField(): String {
     OutlinedTextField(
         value = value,
         onValueChange = {
-            value = it
-            isError = it.isBlank() && it.length < 5
+            value = it.trim()
+            isError = it.isBlank() || it.length < 5
         },
         leadingIcon = {
             Icon(imageVector = Icons.Default.Lock, contentDescription = null)
@@ -127,7 +151,10 @@ fun passwordTextField(): String {
                 }
         },
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .semantics {
+                contentDescription = SemanticContentDescription.LOGIN_SCREEN_PASSWORD_TEXT_FIELD
+            },
         label = { Text(text = "password") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         visualTransformation = if (visible)

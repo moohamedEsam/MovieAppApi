@@ -8,12 +8,15 @@ import com.example.movieappapi.utils.Screens
 
 @Composable
 fun NavHostScreen(navHostController: NavHostController) {
-    NavHost(navController = navHostController, startDestination = Screens.SPLASH) {
+    NavHost(navController = navHostController, startDestination = Screens.LOGIN) {
         composable(Screens.SPLASH) {
-
+            SplashWindow(navHostController = navHostController)
         }
         composable(Screens.LOGIN) {
-            LoginScreen()
+            LoginScreen(navHostController = navHostController)
+        }
+        composable(Screens.MAIN) {
+
         }
     }
 

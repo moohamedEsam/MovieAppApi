@@ -30,3 +30,13 @@ A
 gradle.properties,2/a/2afbb999f001938c88fa43fc2ef52abf0f8213e4
 F
 app/proguard-rules.pro,9/e/9e08934d811afe28fbc77aaa3c0d747b94348db9
+s
+Capp/src/main/java/com/example/movieappapi/utils/ApplicationClass.kt,5/9/59e5dfaacc2d2c06b8282be144e27f0cc0f9126b
+l
+<app/src/main/java/com/example/movieappapi/utils/Constants.kt,4/1/419e6dc9a6463669ee35e0096fc90fd9661a0390
+z
+Japp/src/test/java/com/example/movieappapi/viewModels/LoginViewModelTest.kt,3/6/36b7dcb9eb67067a0da9722bd616c168c0c71bab
+s
+Capp/src/main/java/com/example/movieappapi/dataModels/Credentials.kt,f/f/ff5321d4c925673f9165ef3c514a5a873a351591
+s
+Capp/src/main/java/com/example/movieappapi/composables/mainScreen.kt,3/f/3f06b1f980cfd2e3839bbb93fc00ac0ef5f504f7

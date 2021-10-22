@@ -26,12 +26,9 @@ class LoginViewModel(private val repository: Repository) : ViewModel() {
     fun signIn(credentials: Credentials) = viewModelScope.launch {
         _userState.value = Resource.Loading()
         if (validCredentials(credentials)) {
-            if (repository.signIn(credentials))
-                _userState.value = Resource.Success(RequestTokenResponse())
-            else
-                _userState.value = Resource.Error("")
+            _userState.value = repository.signIn(credentials)
         } else
-            _userState.value = Resource.Error("")
+            _userState.value = Resource.Error("not valid username or password")
     }
 
     fun register(context: Context) {
