@@ -38,7 +38,9 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun LoginScreen(navHostController: NavHostController) {
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
     ) {
         LoginColumn(
             navHostController = navHostController,
@@ -89,10 +91,9 @@ private fun LoginColumn(navHostController: NavHostController, modifier: Modifier
         )
         Spacer(modifier = Modifier.height(8.dp))
         userState.DisplayComposable {
-            LaunchedEffect(key1 = Unit){
-                Log.d("loginScreen", "LoginColumn: called")
-                navHostController.navigate(Screens.MAIN)
-            }
+            Log.d("loginScreen", "LoginColumn: called")
+            navHostController.navigate(Screens.MAIN)
+            viewModel.reinitializeUserState()
         }
     }
 }

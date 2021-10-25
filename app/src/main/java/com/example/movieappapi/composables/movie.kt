@@ -77,7 +77,7 @@ fun MovieDetails(movie: Movie) {
 }
 
 @Composable
-fun CreateVerticalSpacer(dp: Dp) {
+fun CreateVerticalSpacer(dp: Dp = 8.dp) {
     Spacer(modifier = Modifier.height(dp))
 }
 

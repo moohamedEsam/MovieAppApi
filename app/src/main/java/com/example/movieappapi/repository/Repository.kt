@@ -101,4 +101,31 @@ class Repository(private val client: HttpClient) {
         }
     }
 
+    suspend fun getTopRatedMovies(): Resource<MoviesResponse> {
+        return try {
+            Resource.Success(client.get(Url.TOP_RATED_MOVIES))
+        } catch (exception: Exception) {
+            Log.d("Repository", "getPopularMovies: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    suspend fun getNowPlayingMovies(): Resource<MoviesResponse> {
+        return try {
+            Resource.Success(client.get(Url.NOW_PLAYING_MOVIES))
+        } catch (exception: Exception) {
+            Log.d("Repository", "getPopularMovies: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    suspend fun getUpcomingMovies(): Resource<MoviesResponse> {
+        return try {
+            Resource.Success(client.get(Url.UPCOMING_MOVIES))
+        } catch (exception: Exception) {
+            Log.d("Repository", "getPopularMovies: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
 }

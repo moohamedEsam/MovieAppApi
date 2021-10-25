@@ -31,7 +31,7 @@ class LoginViewModel(private val repository: Repository) : ViewModel() {
             _userState.value = Resource.Error("not valid username or password")
     }
 
-    fun signInAsGuest() = viewModelScope.launch{
+    fun signInAsGuest() = viewModelScope.launch {
         _userState.value = repository.loginAsGuest()
     }
 
@@ -41,5 +41,9 @@ class LoginViewModel(private val repository: Repository) : ViewModel() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         context.startActivity(intent)
+    }
+
+    fun reinitializeUserState() {
+        _userState.value = Resource.Initialized()
     }
 }
