@@ -7,14 +7,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import coil.annotation.ExperimentalCoilApi
+import com.google.accompanist.pager.ExperimentalPagerApi
+import kotlinx.serialization.ExperimentalSerializationApi
 
+@ExperimentalSerializationApi
+@ExperimentalCoilApi
+@ExperimentalPagerApi
 @Composable
 fun MainScreen() {
     val navHostController = rememberNavController()
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
+        modifier = Modifier.fillMaxSize(),
         topBar = { TopBarSetup() },
         bottomBar = { BottomBarSetup() },
         content = { NavHostScreen(navHostController = navHostController) }

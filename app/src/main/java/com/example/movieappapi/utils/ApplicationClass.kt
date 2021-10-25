@@ -18,6 +18,7 @@ class ApplicationClass : Application() {
             }
         }
         startKoin {
+            allowOverride(true)
             androidContext(this@ApplicationClass)
             modules(listOf(module))
             logger(logger)

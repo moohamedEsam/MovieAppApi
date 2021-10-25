@@ -10,6 +10,8 @@ data class RequestTokenResponse(
     var expiresAt: String? = null,
     @SerialName("request_token")
     var requestToken: String? = null,
+    @SerialName("guest_session_id")
+    var guestSessionId: String? = null,
     @SerialName("success")
     var success: Boolean? = null
 )

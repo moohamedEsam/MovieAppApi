@@ -31,6 +31,10 @@ class LoginViewModel(private val repository: Repository) : ViewModel() {
             _userState.value = Resource.Error("not valid username or password")
     }
 
+    fun signInAsGuest() = viewModelScope.launch{
+        _userState.value = repository.loginAsGuest()
+    }
+
     fun register(context: Context) {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse("https://www.themoviedb.org/signup")

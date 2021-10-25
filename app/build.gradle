@@ -104,6 +104,8 @@ dependencies {
     //serialization
     implementation "io.ktor:ktor-client-serialization-jvm:$ktor_version"
 
+    implementation "com.google.accompanist:accompanist-pager:$pager_version"
+
     // Test rules and transitive dependencies:
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$compose_version")
     // Needed for createComposeRule, but not createAndroidComposeRule:
@@ -121,4 +123,6 @@ dependencies {
     androidTestImplementation 'io.mockk:mockk-android:1.12.0'
 
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
+
+
 }

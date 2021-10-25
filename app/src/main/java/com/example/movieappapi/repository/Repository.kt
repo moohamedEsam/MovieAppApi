@@ -1,7 +1,9 @@
 package com.example.movieappapi.repository
 
 import android.util.Log
+import com.example.movieappapi.dataModels.AccountDetailsResponse
 import com.example.movieappapi.dataModels.Credentials
+import com.example.movieappapi.dataModels.MoviesResponse
 import com.example.movieappapi.dataModels.RequestTokenResponse
 import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Url
@@ -10,7 +12,8 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 
 class Repository(private val client: HttpClient) {
-
+    private lateinit var loginResponse: RequestTokenResponse
+    private var accountDetails: AccountDetailsResponse? = null
     private suspend fun createRequestToken(): Resource<RequestTokenResponse> {
         return try {
             Resource.Success(client.get(Url.REQUEST_TOKEN))
@@ -44,7 +47,7 @@ class Repository(private val client: HttpClient) {
         requestResponse: RequestTokenResponse
     ): Resource<RequestTokenResponse> {
         return try {
-            val response = client.post<RequestTokenResponse>(Url.LOGIN_USER) {
+            loginResponse = client.post<RequestTokenResponse>(Url.LOGIN_USER) {
                 contentType(ContentType.Application.Json)
                 body = mapOf(
                     "username" to credentials.username,
@@ -53,8 +56,8 @@ class Repository(private val client: HttpClient) {
                 )
 
             }
-            if (response.success == true)
-                Resource.Success(response)
+            if (loginResponse.success == true)
+                Resource.Success(loginResponse)
             else
                 Resource.Error("something went wrong")
         } catch (e: Exception) {
@@ -64,4 +67,38 @@ class Repository(private val client: HttpClient) {
         }
 
     }
+
+    suspend fun loginAsGuest(): Resource<RequestTokenResponse> {
+        return try {
+            loginResponse = client.get(Url.GUEST_LOGIN)
+            Resource.Success(loginResponse)
+        } catch (exception: Exception) {
+            Log.d("Repository", "loginAsGuest: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    suspend fun getAccountDetails(): Resource<AccountDetailsResponse> {
+        return try {
+            if (loginResponse.guestSessionId != null)
+                Resource.Error("currently logged in as guest")
+            else {
+                accountDetails = client.get(Url.ACCOUNT_DETAILS)
+                Resource.Success(accountDetails!!)
+            }
+        } catch (exception: Exception) {
+            Log.d("Repository", "getAccountDetails: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    suspend fun getPopularMovies(): Resource<MoviesResponse> {
+        return try {
+            Resource.Success(client.get(Url.POPULAR_MOVIES))
+        } catch (exception: Exception) {
+            Log.d("Repository", "getPopularMovies: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
 }

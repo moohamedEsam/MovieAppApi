@@ -1,5 +1,9 @@
 package com.example.movieappapi.utils
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -28,14 +32,17 @@ sealed class Resource<T>(var data: T? = null, var message: String? = null) {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.semantics {
                     contentDescription = SemanticContentDescription.ERROR_RESOURCE_TEXT
-                })
+                }
+            )
         }
     }
 
     class Loading<T> : Resource<T>() {
         @Composable
         override fun DisplayComposable(code: @Composable () -> Unit) {
-            CircularProgressIndicator(color = MaterialTheme.colors.primary)
+            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                CircularProgressIndicator(color = MaterialTheme.colors.primary)
+            }
         }
     }
 

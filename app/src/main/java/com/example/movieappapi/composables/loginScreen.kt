@@ -1,5 +1,7 @@
 package com.example.movieappapi.composables
 
+import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -81,8 +83,16 @@ private fun LoginColumn(navHostController: NavHostController, modifier: Modifier
             Text(text = "login")
         }
         Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "or sign in as guest",
+            modifier = Modifier.clickable { viewModel.signInAsGuest() }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         userState.DisplayComposable {
-            navHostController.navigate(Screens.MAIN)
+            LaunchedEffect(key1 = Unit){
+                Log.d("loginScreen", "LoginColumn: called")
+                navHostController.navigate(Screens.MAIN)
+            }
         }
     }
 }
