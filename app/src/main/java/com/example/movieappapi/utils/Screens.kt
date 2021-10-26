@@ -7,4 +7,5 @@ object Screens {
     const val ACCOUNT = "account"
     const val ACCOUNT_LISTS = "account_lists"
     const val MOVIE_DETAILS = "details"
+    const val SIMILAR_MOVIES_SCREEN = "similar"
 }

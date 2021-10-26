@@ -128,4 +128,22 @@ class Repository(private val client: HttpClient) {
         }
     }
 
+    suspend fun getRecommendations(movieId: Int): Resource<MoviesResponse> {
+        return try {
+            Resource.Success(client.get(Url.getRecommendations(movieId = movieId)))
+        } catch (exception: Exception) {
+            Log.d("Repository", "getRecommendations: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    suspend fun getSimilarMovies(movieId: Int): Resource<MoviesResponse> {
+        return try {
+            Resource.Success(client.get(Url.getSimilarMovies(movieId = movieId)))
+        } catch (exception: Exception) {
+            Log.d("Repository", "getRecommendations: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
 }

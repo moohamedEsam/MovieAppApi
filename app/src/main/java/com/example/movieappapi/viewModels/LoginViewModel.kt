@@ -12,6 +12,8 @@ import com.example.movieappapi.dataModels.Credentials
 import com.example.movieappapi.dataModels.RequestTokenResponse
 import com.example.movieappapi.repository.Repository
 import com.example.movieappapi.utils.Resource
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 import kotlinx.coroutines.launch
 
@@ -19,6 +21,7 @@ class LoginViewModel(private val repository: Repository) : ViewModel() {
     private val _userState: MutableState<Resource<RequestTokenResponse>> =
         mutableStateOf(Resource.Initialized())
     val userState: State<Resource<RequestTokenResponse>> = _userState
+
     fun validCredentials(credentials: Credentials): Boolean =
         credentials.username.trim().isNotBlank() && credentials.password.trim().isNotBlank()
 

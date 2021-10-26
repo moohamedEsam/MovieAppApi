@@ -1,8 +1,6 @@
 package com.example.movieappapi.composables
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -53,7 +51,31 @@ fun NavHostScreen(navHostController: NavHostController) {
                 ignoreUnknownKeys = true
             }
             val movie: Movie = json.decodeFromString(movieString)
-            MovieDetails(movie = movie)
+            MovieDetails(movie = movie, navHostController = navHostController)
+        }
+        composable(
+            "${Screens.SIMILAR_MOVIES_SCREEN}/{movieId}/{title}",
+            arguments = listOf(
+                navArgument("movieId")
+                {
+                    type = NavType.IntType
+                    nullable = true
+                    defaultValue = 1
+                },
+                navArgument("title") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = ""
+                }
+            )
+        ) {
+            val movieId = it.arguments?.getInt("movieId", 1) ?: 1
+            val title = it.arguments?.getString("title", " ") ?: ""
+            SimilarMovieScreen(
+                movieId = movieId,
+                title = title,
+                navHostController = navHostController
+            )
         }
     }
 

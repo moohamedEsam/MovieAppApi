@@ -15,5 +15,6 @@ object Url {
     fun getUserCreatedListsUrl(accountId: Int) = "${BASE_URL}account/$accountId/lists"
     fun getUserFavouriteMoviesUrl(accountId: Int) = "${BASE_URL}account/$accountId/favourite/movies"
     fun getImageUrl(path: String) = "${BASE_IMAGE_URL}original/$path"
-
+    fun getRecommendations(movieId: Int) = "${BASE_URL}movie/$movieId/recommendations"
+    fun getSimilarMovies(movieId: Int) = "${BASE_URL}movie/$movieId/similar"
 }
