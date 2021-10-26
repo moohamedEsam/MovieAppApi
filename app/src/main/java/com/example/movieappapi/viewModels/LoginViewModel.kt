@@ -1,5 +1,6 @@
 package com.example.movieappapi.viewModels
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -12,9 +13,6 @@ import com.example.movieappapi.dataModels.Credentials
 import com.example.movieappapi.dataModels.RequestTokenResponse
 import com.example.movieappapi.repository.Repository
 import com.example.movieappapi.utils.Resource
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-
 import kotlinx.coroutines.launch
 
 class LoginViewModel(private val repository: Repository) : ViewModel() {
@@ -25,17 +23,21 @@ class LoginViewModel(private val repository: Repository) : ViewModel() {
     fun validCredentials(credentials: Credentials): Boolean =
         credentials.username.trim().isNotBlank() && credentials.password.trim().isNotBlank()
 
+    fun checkPreviousLogin(activity: Activity) = viewModelScope.launch {
+        if (repository.getLoginResponseFromPreference(activity = activity))
+            _userState.value = Resource.Success(repository.loginResponse)
+    }
 
-    fun signIn(credentials: Credentials) = viewModelScope.launch {
+    fun signIn(credentials: Credentials, activity: Activity) = viewModelScope.launch {
         _userState.value = Resource.Loading()
         if (validCredentials(credentials)) {
-            _userState.value = repository.signIn(credentials)
+            _userState.value = repository.signIn(credentials, activity)
         } else
             _userState.value = Resource.Error("not valid username or password")
     }
 
-    fun signInAsGuest() = viewModelScope.launch {
-        _userState.value = repository.loginAsGuest()
+    fun signInAsGuest(activity: Activity) = viewModelScope.launch {
+        _userState.value = repository.loginAsGuest(activity)
     }
 
     fun register(context: Context) {

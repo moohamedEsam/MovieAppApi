@@ -1,5 +1,6 @@
 package com.example.movieappapi.composables
 
+import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -64,6 +66,10 @@ fun LoginScreen(navHostController: NavHostController) {
 private fun LoginColumn(navHostController: NavHostController, modifier: Modifier) {
     val viewModel: LoginViewModel = getViewModel()
     val userState by viewModel.userState
+    val activity = LocalContext.current as Activity
+    LaunchedEffect(key1 = Unit) {
+        viewModel.checkPreviousLogin(activity)
+    }
     Column(modifier = modifier) {
         Text(
             text = stringResource(id = R.string.app_name),
@@ -78,7 +84,7 @@ private fun LoginColumn(navHostController: NavHostController, modifier: Modifier
         Button(
             onClick = {
                 if (userState !is Resource.Loading)
-                    viewModel.signIn(Credentials(username, password))
+                    viewModel.signIn(Credentials(username, password), activity = activity)
             },
             modifier = Modifier.align(End)
         ) {
@@ -90,13 +96,14 @@ private fun LoginColumn(navHostController: NavHostController, modifier: Modifier
         Text(
             text = "sign in as guest",
             modifier = Modifier
-                .clickable { viewModel.signInAsGuest() }
+                .clickable { viewModel.signInAsGuest(activity = activity) }
                 .padding(8.dp),
             color = MaterialTheme.colors.primary
         )
         CreateVerticalSpacer()
         userState.DisplayComposable {
             Log.d("loginScreen", "LoginColumn: called")
+            navHostController.popBackStack()
             navHostController.navigate(Screens.MAIN)
             viewModel.reinitializeUserState()
         }

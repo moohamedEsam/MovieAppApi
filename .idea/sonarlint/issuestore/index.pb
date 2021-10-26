@@ -9,8 +9,6 @@ k
 app/.gitignore,5/1/51e1c5d383dfaa35e0e7e5873a0a99355a86880f
 k
 ;app/src/main/java/com/example/movieappapi/ui/theme/Color.kt,c/1/c1c5fcc4602b0a8cbf00c5756597698807d0d2dc
-l
-<app/src/test/java/com/example/movieappapi/ExampleUnitTest.kt,6/2/62c9f36f0f875ae3c293f476d499cdee21a355fc
 {
 Kapp/src/androidTest/java/com/example/movieappapi/ExampleInstrumentedTest.kt,e/0/e074fecb5de54bae202b8f2803cdfebb71a5fb5f
 ;
@@ -28,16 +26,10 @@ A
 gradle.properties,2/a/2afbb999f001938c88fa43fc2ef52abf0f8213e4
 F
 app/proguard-rules.pro,9/e/9e08934d811afe28fbc77aaa3c0d747b94348db9
-l
-<app/src/main/java/com/example/movieappapi/utils/Constants.kt,4/1/419e6dc9a6463669ee35e0096fc90fd9661a0390
-z
-Japp/src/test/java/com/example/movieappapi/viewModels/LoginViewModelTest.kt,3/6/36b7dcb9eb67067a0da9722bd616c168c0c71bab
 s
 Capp/src/main/java/com/example/movieappapi/dataModels/Credentials.kt,f/f/ff5321d4c925673f9165ef3c514a5a873a351591
 }
 Mapp/src/main/java/com/example/movieappapi/utils/SemanticContentDescription.kt,8/e/8e612a11f3ef4724265f0dc48744fc7154b9b48f
-u
-Eapp/src/main/java/com/example/movieappapi/composables/splashScreen.kt,7/0/70f7bfa27a0ce6e4d5d7e6fef1ee0c70ae5feb91
 
 Oapp/src/androidTest/java/com/example/movieappapi/composables/LoginScreenTest.kt,9/7/97a0cdc8cc59077d48d38620e9fbcbd31a85b258
 s
@@ -68,3 +60,11 @@ s
 Capp/src/main/java/com/example/movieappapi/composables/mainScreen.kt,3/f/3f06b1f980cfd2e3839bbb93fc00ac0ef5f504f7
 k
 ;app/src/main/java/com/example/movieappapi/ui/theme/Theme.kt,3/1/317b0a7d51c1d96167adcfde18e560a7f4659c96
+w
+Gapp/src/main/java/com/example/movieappapi/composables/mainFeedScreen.kt,0/9/09ba26b002d80a9870584671db53711353354890
+j
+:app/src/main/java/com/example/movieappapi/utils/Screens.kt,8/a/8a39cb94b3642b6c6a6d22b6794121fab1a9c376
+m
+=app/src/main/java/com/example/movieappapi/dataModels/Movie.kt,1/1/114f927f8177fdc63b36b5d8eb679da9e54309dd
+|
+Lapp/src/main/java/com/example/movieappapi/composables/similarMoviesScreen.kt,a/a/aa6340a05bded9fd3377165fc9fb4743e51b4ad9
