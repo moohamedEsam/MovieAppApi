@@ -66,11 +66,7 @@ m
 =app/src/main/java/com/example/movieappapi/dataModels/Movie.kt,1/1/114f927f8177fdc63b36b5d8eb679da9e54309dd
 v
 Fapp/src/main/java/com/example/movieappapi/dataModels/MoviesResponse.kt,f/e/fe6eb9f87d4cc82097820dc773dd344c21e88632
-k
-;app/src/main/java/com/example/movieappapi/koin/appModule.kt,7/a/7ad575566983435fbbfb2a789122f20e00ef213b
 s
 Capp/src/main/java/com/example/movieappapi/composables/mainScreen.kt,3/f/3f06b1f980cfd2e3839bbb93fc00ac0ef5f504f7
 k
 ;app/src/main/java/com/example/movieappapi/ui/theme/Theme.kt,3/1/317b0a7d51c1d96167adcfde18e560a7f4659c96
-t
-Dapp/src/main/java/com/example/movieappapi/composables/loginScreen.kt,c/5/c5426b653d474540770911b8a5ccf0668d0c2428
