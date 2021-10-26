@@ -5,6 +5,7 @@ import com.example.movieappapi.repository.Repository
 import com.example.movieappapi.utils.Constants
 import com.example.movieappapi.viewModels.LoginViewModel
 import com.example.movieappapi.viewModels.MainFeedViewModel
+import com.example.movieappapi.viewModels.MovieRecommendationsViewModel
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.*
@@ -22,6 +23,7 @@ val module = module {
     single { Repository(get()) }
     viewModel { LoginViewModel(get()) }
     viewModel { MainFeedViewModel(get()) }
+    viewModel { MovieRecommendationsViewModel(get()) }
 }
 
 fun provideHttpClient(json: Json) = HttpClient(CIO) {

@@ -17,10 +17,9 @@ class MovieRecommendationsViewModel(private val repository: Repository) : ViewMo
     val similarMovies: State<Resource<MoviesResponse>> = _similarMovies
 
 
-
     fun setSimilarMovies(movieId: Int) = viewModelScope.launch {
-        _recommendations.value = Resource.Loading()
-        _recommendations.value = repository.getSimilarMovies(movieId = movieId)
+        _similarMovies.value = Resource.Loading()
+        _similarMovies.value = repository.getSimilarMovies(movieId = movieId)
     }
 
     fun setRecommendations(movieId: Int) = viewModelScope.launch {

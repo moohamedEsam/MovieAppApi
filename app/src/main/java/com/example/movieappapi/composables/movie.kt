@@ -91,10 +91,17 @@ private fun MovieDescription(
             CreateVerticalSpacer(4.dp)
             OutlinedButton(
                 onClick = {
-                    navHostController.navigate("${Screens.SIMILAR_MOVIES_SCREEN}/${movie.id}/${movie.title}")
+                    navHostController.navigate(
+                        "${Screens.SIMILAR_MOVIES_SCREEN}/${movie.id ?: 1}/${
+                            movie.posterPath?.substring(
+                                1,
+                                movie.posterPath?.length ?: 1
+                            )
+                        }"
+                    )
                 }
             ) {
-                Text(text = "see  similar movies")
+                Text(text = "see similar movies")
             }
         }
     }

@@ -54,15 +54,14 @@ fun NavHostScreen(navHostController: NavHostController) {
             MovieDetails(movie = movie, navHostController = navHostController)
         }
         composable(
-            "${Screens.SIMILAR_MOVIES_SCREEN}/{movieId}/{title}",
+            "${Screens.SIMILAR_MOVIES_SCREEN}/{movieId}/{posterPath}",
             arguments = listOf(
                 navArgument("movieId")
                 {
                     type = NavType.IntType
-                    nullable = true
                     defaultValue = 1
                 },
-                navArgument("title") {
+                navArgument("posterPath") {
                     type = NavType.StringType
                     nullable = true
                     defaultValue = ""
@@ -70,10 +69,10 @@ fun NavHostScreen(navHostController: NavHostController) {
             )
         ) {
             val movieId = it.arguments?.getInt("movieId", 1) ?: 1
-            val title = it.arguments?.getString("title", " ") ?: ""
+            val posterPath = it.arguments?.getString("posterPath", " ") ?: ""
             SimilarMovieScreen(
                 movieId = movieId,
-                title = title,
+                posterPath = posterPath,
                 navHostController = navHostController
             )
         }

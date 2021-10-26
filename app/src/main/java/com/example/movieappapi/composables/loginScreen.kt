@@ -70,11 +70,11 @@ private fun LoginColumn(navHostController: NavHostController, modifier: Modifier
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        CreateVerticalSpacer()
         val username = userNameTextField()
-        Spacer(modifier = Modifier.height(8.dp))
+        CreateVerticalSpacer()
         val password = passwordTextField()
-        Spacer(modifier = Modifier.height(8.dp))
+        CreateVerticalSpacer()
         Button(
             onClick = {
                 if (userState !is Resource.Loading)
@@ -84,12 +84,17 @@ private fun LoginColumn(navHostController: NavHostController, modifier: Modifier
         ) {
             Text(text = "login")
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        CreateVerticalSpacer()
+        Divider()
+        CreateVerticalSpacer()
         Text(
-            text = "or sign in as guest",
-            modifier = Modifier.clickable { viewModel.signInAsGuest() }
+            text = "sign in as guest",
+            modifier = Modifier
+                .clickable { viewModel.signInAsGuest() }
+                .padding(8.dp),
+            color = MaterialTheme.colors.primary
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        CreateVerticalSpacer()
         userState.DisplayComposable {
             Log.d("loginScreen", "LoginColumn: called")
             navHostController.navigate(Screens.MAIN)
