@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -47,21 +48,28 @@ fun MainFeed(navHostController: NavHostController) {
     val popularMovies by viewModel.popularMovies
     val topRatedMovies by viewModel.topRatedMovies
     val nowPlayingMovies by viewModel.nowPlayingMovies
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        popularMovies.DisplayComposable {
-            Log.d("mainFeedScreen", "MainFeed: called")
-            popularMovies.data?.results?.let {
-                PopularMovieViewPager(movies = it, navHostController = navHostController)
+    BoxWithConstraints {
+        val height = maxHeight
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            popularMovies.DisplayComposable {
+                Log.d("mainFeedScreen", "MainFeed: called")
+                popularMovies.data?.results?.let {
+                    PopularMovieViewPager(
+                        movies = it,
+                        navHostController = navHostController,
+                        imageHeight = height.div(2.5f)
+                    )
+                }
             }
+            CreateVerticalSpacer(dp = 4.dp)
+            TopRatedMovieList(topRatedMovies, navHostController)
+            CreateVerticalSpacer()
+            NowPlayingMoviesList(nowPlayingMovies, navHostController)
         }
-        CreateVerticalSpacer(dp = 4.dp)
-        TopRatedMovieList(topRatedMovies, navHostController)
-        CreateVerticalSpacer()
-        NowPlayingMoviesList(nowPlayingMovies, navHostController)
     }
 }
 
@@ -109,7 +117,11 @@ private fun TopRatedMovieList(
 @ExperimentalCoilApi
 @ExperimentalPagerApi
 @Composable
-fun PopularMovieViewPager(movies: List<Movie>, navHostController: NavHostController) {
+fun PopularMovieViewPager(
+    movies: List<Movie>,
+    navHostController: NavHostController,
+    imageHeight: Dp
+) {
     val state = rememberPagerState(1)
     LaunchedEffect(key1 = state.currentPage) {
         delay(3000)
@@ -123,7 +135,7 @@ fun PopularMovieViewPager(movies: List<Movie>, navHostController: NavHostControl
         count = movies.size,
         modifier = Modifier
             .fillMaxWidth()
-            .height(340.dp),
+            .height(imageHeight),
         state = state
     ) { page ->
         PagerMovieItem(movie = movies[page], navHostController = navHostController)

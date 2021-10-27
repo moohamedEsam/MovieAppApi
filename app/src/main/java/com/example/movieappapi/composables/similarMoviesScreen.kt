@@ -2,10 +2,9 @@ package com.example.movieappapi.composables
 
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,22 +32,29 @@ fun SimilarMovieScreen(movieId: Int, posterPath: String, navHostController: NavH
         viewModel.setRecommendations(movieId)
         viewModel.setSimilarMovies(movieId)
     }
-    Column(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = rememberImagePainter(data = Url.getImageUrl("/$posterPath")),
-            contentDescription = null,
+    BoxWithConstraints {
+        val height = maxHeight
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.4f),
-            contentScale = ContentScale.FillBounds
-        )
-        CreateVerticalSpacer()
-        SimilarMovies(similar, navHostController)
-        CreateVerticalSpacer()
-        RecommendationsMovies(
-            recommendations = recommendations,
-            navHostController = navHostController
-        )
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            Image(
+                painter = rememberImagePainter(data = Url.getImageUrl("/$posterPath")),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(height = height.div(2.5f)),
+                contentScale = ContentScale.FillBounds
+            )
+            CreateVerticalSpacer()
+            SimilarMovies(similar, navHostController)
+            CreateVerticalSpacer()
+            RecommendationsMovies(
+                recommendations = recommendations,
+                navHostController = navHostController
+            )
+        }
     }
 }
 

@@ -33,15 +33,20 @@ fun NavHostScreen(navHostController: NavHostController) {
             MainFeed(navHostController)
         }
 
+        composable(Screens.SEARCH_SCREEN) {
+
+        }
+
         composable(Screens.ACCOUNT_LISTS) {
 
         }
         composable(Screens.ACCOUNT) {
 
         }
-        composable("${Screens.MOVIE_DETAILS}/{movie}", arguments = listOf(
-            navArgument("movie") {
-                type = NavType.StringType
+        composable(
+            "${Screens.MOVIE_DETAILS}/{movie}", arguments = listOf(
+                navArgument("movie") {
+                    type = NavType.StringType
             }
         )) {
             var movieString = it.arguments?.getString("movie", "") ?: ""
@@ -76,6 +81,8 @@ fun NavHostScreen(navHostController: NavHostController) {
                 navHostController = navHostController
             )
         }
+
+
     }
 
 }
