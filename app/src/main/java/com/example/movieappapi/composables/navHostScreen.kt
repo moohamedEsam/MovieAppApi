@@ -26,8 +26,14 @@ fun NavHostScreen(navHostController: NavHostController) {
         composable(Screens.SPLASH) {
             SplashWindow(navHostController = navHostController)
         }
-        composable(Screens.LOGIN) {
-            LoginScreen(navHostController = navHostController)
+        composable("${Screens.LOGIN}/{checkPrevious}",
+            arguments = listOf(
+                navArgument("checkPrevious") {
+                    type = NavType.BoolType
+                }
+            )) {
+            val check = it.arguments?.getBoolean("checkPrevious", true) ?: true
+            LoginScreen(navHostController = navHostController, checkPrevious = check)
         }
         composable(Screens.MAIN) {
             MainFeed(navHostController)
@@ -38,7 +44,7 @@ fun NavHostScreen(navHostController: NavHostController) {
         }
 
         composable(Screens.ACCOUNT_LISTS) {
-
+            UserListsScreen(navHostController = navHostController)
         }
         composable(Screens.ACCOUNT) {
 
@@ -47,8 +53,8 @@ fun NavHostScreen(navHostController: NavHostController) {
             "${Screens.MOVIE_DETAILS}/{movie}", arguments = listOf(
                 navArgument("movie") {
                     type = NavType.StringType
-            }
-        )) {
+                }
+            )) {
             var movieString = it.arguments?.getString("movie", "") ?: ""
             movieString = movieString.replace("*", "/")
             val json = Json {

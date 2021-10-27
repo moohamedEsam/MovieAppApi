@@ -99,9 +99,11 @@ private fun RowScope.NavItemSetup(
     BottomNavigationItem(
         selected = currentDestination == itemRoute,
         onClick = {
-            navHostController.popBackStack(route = Screens.MAIN, true)
             navHostController.navigate(itemRoute) {
                 launchSingleTop = true
+                popUpTo(0) {
+                    inclusive = false
+                }
             }
         },
         icon = {

@@ -3,10 +3,7 @@ package com.example.movieappapi.repository
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import com.example.movieappapi.dataModels.AccountDetailsResponse
-import com.example.movieappapi.dataModels.Credentials
-import com.example.movieappapi.dataModels.MoviesResponse
-import com.example.movieappapi.dataModels.RequestTokenResponse
+import com.example.movieappapi.dataModels.*
 import com.example.movieappapi.utils.Constants
 import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Url
@@ -137,7 +134,9 @@ class Repository(private val client: HttpClient) {
             if (loginResponse.guestSessionId != null)
                 Resource.Error("currently logged in as guest")
             else {
-                accountDetails = client.get(Url.ACCOUNT_DETAILS)
+                accountDetails = client.get(Url.ACCOUNT_DETAILS) {
+                    parameter("session_id", loginResponse.requestToken)
+                }
                 Resource.Success(accountDetails!!)
             }
         } catch (exception: Exception) {
@@ -200,4 +199,23 @@ class Repository(private val client: HttpClient) {
         }
     }
 
+    suspend fun getUserFavouriteLists(): Resource<UserListResponse> {
+        return try {
+            if (loginResponse.requestToken == null)
+                return Resource.Error("user signed in as guest")
+            if (accountDetails == null)
+                getAccountDetails()
+            val response: UserListResponse =
+                client.get(Url.getUserCreatedListsUrl(accountId = accountDetails?.id ?: 1)) {
+                    parameter("session_id", loginResponse.requestToken)
+                }
+
+            Resource.Success(response)
+
+        } catch (exception: Exception) {
+            Log.d("Repository", "getUserFavouriteLists: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+
+    }
 }

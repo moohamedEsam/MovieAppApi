@@ -26,6 +26,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.movieappapi.dataModels.Movie
 import com.example.movieappapi.dataModels.MoviesResponse
+import com.example.movieappapi.utils.HandleResourceChange
 import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Screens
 import com.example.movieappapi.utils.Url
@@ -55,7 +56,7 @@ fun MainFeed(navHostController: NavHostController) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            popularMovies.DisplayComposable {
+            HandleResourceChange(state = popularMovies) {
                 Log.d("mainFeedScreen", "MainFeed: called")
                 popularMovies.data?.results?.let {
                     PopularMovieViewPager(
@@ -86,7 +87,7 @@ private fun NowPlayingMoviesList(
         modifier = Modifier.padding(8.dp)
     )
     CreateVerticalSpacer(4.dp)
-    nowPlayingMovies.DisplayComposable {
+    HandleResourceChange(state = nowPlayingMovies) {
         nowPlayingMovies.data?.results?.let {
             HorizontalMovieList(movies = it, navHostController = navHostController)
         }
@@ -106,7 +107,7 @@ private fun TopRatedMovieList(
         modifier = Modifier.padding(8.dp)
     )
     CreateVerticalSpacer(dp = 4.dp)
-    topRatedMovies.DisplayComposable {
+    HandleResourceChange(state = topRatedMovies) {
         topRatedMovies.data?.results?.let {
             HorizontalMovieList(movies = it, navHostController = navHostController)
         }

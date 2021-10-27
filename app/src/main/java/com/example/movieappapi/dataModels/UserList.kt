@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Result(
+data class UserList(
     @SerialName("description")
     var description: String? = null,
     @SerialName("favorite_count")

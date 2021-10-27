@@ -31,7 +31,7 @@ fun SplashWindow(navHostController: NavHostController) {
         if (user is Resource.Success)
             navHostController.navigate(Screens.MAIN)
         else
-            navHostController.navigate(Screens.LOGIN)
+            navHostController.navigate("${Screens.LOGIN}/${true}")
         viewModel.reinitializeUserState()
     }
     Box(

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.movieappapi.R
 import com.example.movieappapi.dataModels.Credentials
+import com.example.movieappapi.utils.HandleResourceChange
 import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Screens
 import com.example.movieappapi.utils.SemanticContentDescription
@@ -38,7 +39,7 @@ import com.example.movieappapi.viewModels.LoginViewModel
 import org.koin.androidx.compose.getViewModel
 
 @Composable
-fun LoginScreen(navHostController: NavHostController) {
+fun LoginScreen(navHostController: NavHostController, checkPrevious: Boolean) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -48,7 +49,8 @@ fun LoginScreen(navHostController: NavHostController) {
             navHostController = navHostController,
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.Center)
+                .align(Alignment.Center),
+            checkPrevious = checkPrevious
         )
         Text(
             text = buildAnnotatedString {
@@ -63,12 +65,17 @@ fun LoginScreen(navHostController: NavHostController) {
 }
 
 @Composable
-private fun LoginColumn(navHostController: NavHostController, modifier: Modifier) {
+private fun LoginColumn(
+    navHostController: NavHostController,
+    modifier: Modifier,
+    checkPrevious: Boolean
+) {
     val viewModel: LoginViewModel = getViewModel()
     val userState by viewModel.userState
     val activity = LocalContext.current as Activity
     LaunchedEffect(key1 = Unit) {
-        viewModel.checkPreviousLogin(activity)
+        if (checkPrevious)
+            viewModel.checkPreviousLogin(activity)
     }
     Column(modifier = modifier) {
         Text(
@@ -101,12 +108,15 @@ private fun LoginColumn(navHostController: NavHostController, modifier: Modifier
             color = MaterialTheme.colors.primary
         )
         CreateVerticalSpacer()
-        userState.DisplayComposable {
-            Log.d("loginScreen", "LoginColumn: called")
-            navHostController.popBackStack()
-            navHostController.navigate(Screens.MAIN)
-            viewModel.reinitializeUserState()
-        }
+        HandleResourceChange(
+            state = userState,
+            onSuccess = {
+                Log.d("loginScreen", "LoginColumn: called")
+                navHostController.popBackStack()
+                navHostController.navigate(Screens.MAIN)
+                viewModel.reinitializeUserState()
+            }
+        )
     }
 }
 
