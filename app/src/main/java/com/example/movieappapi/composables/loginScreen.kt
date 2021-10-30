@@ -1,10 +1,18 @@
 package com.example.movieappapi.composables
 
-import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.util.Log
-import androidx.compose.foundation.clickable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.*
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -15,7 +23,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -36,90 +47,177 @@ import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Screens
 import com.example.movieappapi.utils.SemanticContentDescription
 import com.example.movieappapi.viewModels.LoginViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import org.koin.androidx.compose.getViewModel
 
+@ExperimentalAnimationApi
 @Composable
-fun LoginScreen(navHostController: NavHostController, checkPrevious: Boolean) {
+fun LoginScreen(navHostController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        LoginColumn(
+        LoginUi(
             navHostController = navHostController,
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.Center),
-            checkPrevious = checkPrevious
+                .align(Alignment.Center)
         )
-        Text(
-            text = buildAnnotatedString {
-                append("don't have account? ")
-                withStyle(SpanStyle(color = MaterialTheme.colors.primary)) {
-                    append("sign up")
-                }
-            },
-            modifier = Modifier.align(Alignment.BottomStart)
+        SignUpText(
+            navHostController = navHostController,
+            modifier = Modifier.Companion.align(Alignment.BottomStart)
         )
     }
 }
 
 @Composable
-private fun LoginColumn(
+private fun SignUpText(navHostController: NavHostController, modifier: Modifier) {
+    Text(
+        text = buildAnnotatedString {
+            append("don't have account? ")
+            withStyle(SpanStyle(color = MaterialTheme.colors.primary)) {
+                append("sign up")
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@ExperimentalAnimationApi
+@Composable
+private fun LoginUi(
     navHostController: NavHostController,
-    modifier: Modifier,
-    checkPrevious: Boolean
+    modifier: Modifier
 ) {
     val viewModel: LoginViewModel = getViewModel()
     val userState by viewModel.userState
-    val activity = LocalContext.current as Activity
-    LaunchedEffect(key1 = Unit) {
-        if (checkPrevious)
-            viewModel.checkPreviousLogin(activity)
-    }
     Column(modifier = modifier) {
         Text(
             text = stringResource(id = R.string.app_name),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
-        CreateVerticalSpacer()
         val username = userNameTextField()
-        CreateVerticalSpacer()
         val password = passwordTextField()
-        CreateVerticalSpacer()
-        Button(
-            onClick = {
-                if (userState !is Resource.Loading)
-                    viewModel.signIn(Credentials(username, password), activity = activity)
-            },
-            modifier = Modifier.align(End)
-        ) {
-            Text(text = "login")
-        }
-        CreateVerticalSpacer()
-        Divider()
-        CreateVerticalSpacer()
-        Text(
-            text = "sign in as guest",
-            modifier = Modifier
-                .clickable { viewModel.signInAsGuest(activity = activity) }
-                .padding(8.dp),
-            color = MaterialTheme.colors.primary
+        LoginButton(
+            username = username,
+            password = password,
+            modifier = Modifier.Companion
+                .align(End)
+                .padding(8.dp)
         )
-        CreateVerticalSpacer()
+        DividerRow()
+        GoogleSignInButton()
         HandleResourceChange(
             state = userState,
             onSuccess = {
                 Log.d("loginScreen", "LoginColumn: called")
                 navHostController.popBackStack()
                 navHostController.navigate(Screens.MAIN)
-                viewModel.reinitializeUserState()
             }
         )
     }
 }
 
+@ExperimentalAnimationApi
+@Composable
+private fun LoginButton(
+    username: String,
+    password: String,
+    modifier: Modifier
+) {
+    val viewModel: LoginViewModel = getViewModel()
+    val userState by viewModel.userState
+    val isVisible = remember {
+        MutableTransitionState(false).apply { targetState = true }
+    }
+    AnimatedVisibility(
+        visibleState = isVisible,
+        enter = fadeIn(animationSpec = tween(1000)),
+        exit = fadeOut(),
+        modifier = modifier
+    ) {
+        Button(
+            onClick = {
+                viewModel.signIn(Credentials(username, password))
+            },
+            modifier = modifier,
+            enabled = userState !is Resource.Loading,
+        ) {
+            Text(text = "login")
+        }
+    }
+
+}
+
+@Composable
+private fun GoogleSignInButton() {
+    val viewModel: LoginViewModel = getViewModel()
+    val activity = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            Log.d("loginScreen", "GoogleSignInButton: account id: ${account.idToken}")
+            if (account.idToken != null)
+                viewModel.signInWithGoogle(token = account.idToken!!)
+        } catch (exception: Exception) {
+            Log.d("loginScreen", "GoogleSignInButton: ${exception.message}")
+        }
+    }
+    val authId = stringResource(id = R.string.authId)
+    val context = LocalContext.current
+    IconButton(
+        onClick = {
+            val intent = getGoogleSignInIntent(authId, context)
+            activity.launch(intent)
+        },
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.google),
+            contentDescription = null,
+            modifier = Modifier.size(48.dp)
+        )
+    }
+}
+
+fun getGoogleSignInIntent(
+    authId: String,
+    context: Context
+): Intent {
+    val gso = GoogleSignInOptions.Builder()
+        .requestIdToken(authId)
+        .requestEmail()
+        .requestProfile()
+        .build()
+    val client = GoogleSignIn.getClient(context, gso)
+    client.signOut()
+    return client.signInIntent
+}
+
+@Composable
+private fun DividerRow() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Divider(modifier = Modifier.fillMaxWidth(0.4f))
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text = "or")
+        Spacer(modifier = Modifier.width(4.dp))
+        Divider(modifier = Modifier.weight(1f))
+    }
+}
+
+
+@ExperimentalAnimationApi
 @Composable
 fun userNameTextField(
     initialValue: String = "",
@@ -132,25 +230,49 @@ fun userNameTextField(
         mutableStateOf(false)
     }
 
-    OutlinedTextField(
-        value = value,
-        onValueChange = {
-            value = it.trim()
-            isError = it.isBlank()
-        },
-        label = { Text(text = title) },
-        leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = null) },
-        isError = isError,
-        modifier = Modifier
-            .fillMaxWidth()
-            .semantics {
-                contentDescription = SemanticContentDescription.LOGIN_SCREEN_USERNAME_TEXT_FIELD
-            }
+    var focusColor by remember {
+        mutableStateOf(Color.DarkGray)
+    }
 
-    )
+    val isVisible = remember {
+        MutableTransitionState(false).apply { targetState = true }
+    }
+    AnimatedVisibility(
+        visibleState = isVisible,
+        enter = expandHorizontally(expandFrom = Alignment.Start, animationSpec = tween(1000)),
+        exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = {
+                value = it.trim()
+                isError = it.isBlank() || it.contains(" ")
+            },
+            label = { Text(text = title) },
+            leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = null) },
+            isError = isError,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .onFocusChanged {
+                    focusColor = if (it.isFocused)
+                        Color.Green
+                    else
+                        Color.DarkGray
+                }
+                .semantics {
+                    contentDescription = SemanticContentDescription.LOGIN_SCREEN_USERNAME_TEXT_FIELD
+                },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                leadingIconColor = focusColor
+            )
+
+        )
+    }
     return value
 }
 
+@ExperimentalAnimationApi
 @Composable
 fun passwordTextField(): String {
     var value by remember {
@@ -164,37 +286,63 @@ fun passwordTextField(): String {
         mutableStateOf(false)
     }
 
-    OutlinedTextField(
-        value = value,
-        onValueChange = {
-            value = it.trim()
-            isError = it.isBlank() || it.length < 5
-        },
-        leadingIcon = {
-            Icon(imageVector = Icons.Default.Lock, contentDescription = null)
-        },
-        trailingIcon = {
-            if (visible)
-                IconButton(onClick = { visible = false }) {
-                    Icon(imageVector = Icons.Outlined.VisibilityOff, contentDescription = null)
-                }
-            else
-                IconButton(onClick = { visible = true }) {
-                    Icon(imageVector = Icons.Outlined.Visibility, contentDescription = null)
-                }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .semantics {
-                contentDescription = SemanticContentDescription.LOGIN_SCREEN_PASSWORD_TEXT_FIELD
+    var focusColor by remember {
+        mutableStateOf(Color.DarkGray)
+    }
+
+    val isVisible = remember {
+        MutableTransitionState(false).apply { targetState = true }
+    }
+    AnimatedVisibility(
+        visibleState = isVisible,
+        enter = expandHorizontally(expandFrom = Alignment.Start, animationSpec = tween(1000)),
+        exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
+    ) {
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = {
+                value = it.trim()
+                isError = it.isBlank() || it.length < 5 || it.contains(" ")
             },
-        label = { Text(text = "password") },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        visualTransformation = if (visible)
-            VisualTransformation.None
-        else
-            PasswordVisualTransformation(),
-        isError = isError
-    )
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.Lock, contentDescription = null)
+            },
+            trailingIcon = {
+                if (visible)
+                    IconButton(onClick = { visible = false }) {
+                        Icon(imageVector = Icons.Outlined.VisibilityOff, contentDescription = null)
+                    }
+                else
+                    IconButton(onClick = { visible = true }) {
+                        Icon(imageVector = Icons.Outlined.Visibility, contentDescription = null)
+                    }
+
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .onFocusChanged {
+                    focusColor = if (it.isFocused)
+                        Color.Green
+                    else
+                        Color.DarkGray
+                }
+                .semantics {
+                    contentDescription = SemanticContentDescription.LOGIN_SCREEN_PASSWORD_TEXT_FIELD
+                },
+            label = { Text(text = "password") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            visualTransformation = if (visible)
+                VisualTransformation.None
+            else
+                PasswordVisualTransformation(),
+            isError = isError,
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                leadingIconColor = focusColor,
+                trailingIconColor = focusColor
+            )
+        )
+    }
     return value
 }

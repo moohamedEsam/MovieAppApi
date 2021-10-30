@@ -55,7 +55,7 @@ fun UserListsScreen(navHostController: NavHostController) {
                         modifier = Modifier
                             .padding(8.dp)
                             .clickable {
-                                navHostController.navigate("${Screens.LOGIN}/${false}") {
+                                navHostController.navigate(Screens.LOGIN) {
                                     popUpTo(0) {
                                         inclusive = false
                                     }

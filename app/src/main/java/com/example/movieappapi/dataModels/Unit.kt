@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RequestTokenResponse(
+data class Unit(
     @SerialName("expires_at")
     var expiresAt: String? = null,
     @SerialName("request_token")

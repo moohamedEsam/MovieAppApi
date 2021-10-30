@@ -20,7 +20,7 @@ class UserListsViewModel(private val repository: Repository) : ViewModel() {
 
     fun setUserLists() = viewModelScope.launch {
         _userLists.value = Resource.Loading()
-        _userLists.value = repository.getUserFavouriteLists()
+        //_userLists.value = repository.getUserFavouriteLists()
         if (_userLists.value is Resource.Success)
             Log.d("UserListsViewModel", "setUserLists: ${_userLists.value.data?.userLists?.size}")
     }

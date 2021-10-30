@@ -7,6 +7,8 @@ import com.example.movieappapi.viewModels.LoginViewModel
 import com.example.movieappapi.viewModels.MainFeedViewModel
 import com.example.movieappapi.viewModels.MovieRecommendationsViewModel
 import com.example.movieappapi.viewModels.UserListsViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.*
@@ -21,7 +23,7 @@ import org.koin.dsl.module
 val module = module {
     single { provideJson() }
     single { provideHttpClient(get()) }
-    single { Repository(get()) }
+    single { Repository(get(), FirebaseAuth.getInstance(), FirebaseFirestore.getInstance()) }
     viewModel { LoginViewModel(get()) }
     viewModel { MainFeedViewModel(get()) }
     viewModel { MovieRecommendationsViewModel(get()) }

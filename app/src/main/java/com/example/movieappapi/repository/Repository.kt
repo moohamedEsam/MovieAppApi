@@ -1,149 +1,89 @@
 package com.example.movieappapi.repository
 
-import android.app.Activity
-import android.content.Context
 import android.util.Log
-import com.example.movieappapi.dataModels.*
-import com.example.movieappapi.utils.Constants
+import com.example.movieappapi.dataModels.Credentials
+import com.example.movieappapi.dataModels.MoviesResponse
 import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Url
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 import io.ktor.client.*
 import io.ktor.client.request.*
-import io.ktor.http.*
-import java.util.*
+import kotlinx.coroutines.tasks.await
 
-class Repository(private val client: HttpClient) {
-    lateinit var loginResponse: RequestTokenResponse
-    private var accountDetails: AccountDetailsResponse? = null
+class Repository(
+    private val client: HttpClient,
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
+) {
+    private val unknownError = "something went wrong"
+    val root = firestore.collection("root")
 
-    private fun saveLoginResponse(activity: Activity) {
-        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE) ?: return
-        with(sharedPref.edit()) {
-            putString(Constants.REQUEST_TOKEN_PREFERENCE_KEY, loginResponse.requestToken)
-            putString(Constants.EXPIRE_DATE_PREFERENCE_KEY, loginResponse.expiresAt)
-            putString(Constants.GUEST_SESSION_ID, loginResponse.guestSessionId)
-            apply()
-        }
-    }
+    fun isUserSignedIn(): Boolean = auth.currentUser != null
 
-    fun getLoginResponseFromPreference(activity: Activity): Boolean {
-        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+    suspend fun register(credentials: Credentials): Resource<Unit> {
         return try {
-            val expireDate = sharedPref.getString(Constants.EXPIRE_DATE_PREFERENCE_KEY, null)
-            val requestToken = sharedPref.getString(Constants.REQUEST_TOKEN_PREFERENCE_KEY, null)
-            val guestToken = sharedPref.getString(Constants.GUEST_SESSION_ID, null)
-            if (expireDate == null)
-                return false
-            val calendar = getDateFromString(expireDate)
-            if (Date(calendar.timeInMillis).before(Date()))
-                return false
-            loginResponse = RequestTokenResponse(expireDate, requestToken, guestToken, true)
-            true
-
+            auth.createUserWithEmailAndPassword(credentials.username, credentials.password).await()
+            if (isUserSignedIn()) {
+                auth.currentUser?.sendEmailVerification()?.await()
+                return Resource.Success(Unit)
+            }
+            Resource.Error(unknownError)
         } catch (exception: Exception) {
-            Log.d("Repository", "getLoginResponseFromPreference: ${exception.message}")
-            false
-        }
-    }
-
-    private fun getDateFromString(expireDate: String): Calendar {
-        val date = expireDate.substring(0, 10).trim().split("-").map { it.toInt() }
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.YEAR, date[0])
-        calendar.set(Calendar.MONTH, date[1])
-        calendar.set(Calendar.DAY_OF_MONTH, date[2])
-        return calendar
-    }
-
-    private suspend fun createRequestToken(): Resource<RequestTokenResponse> {
-        return try {
-            Resource.Success(client.get(Url.REQUEST_TOKEN))
-        } catch (exception: Exception) {
-            Log.d("Repository", "createRequestToken: ${exception.message}")
-            exception.printStackTrace()
+            Log.d("Repository", "register: ${exception.message}")
             Resource.Error(exception.localizedMessage)
         }
     }
 
     suspend fun signIn(
-        credentials: Credentials,
-        activity: Activity
-    ): Resource<RequestTokenResponse> {
+        credentials: Credentials
+    ): Resource<Unit> {
         return try {
-            val response = handleUserPostRequest(credentials)
-            if (response is Resource.Success)
-                saveLoginResponse(activity)
-            response
+            if (isUserSignedIn())
+                return Resource.Error("user already signed in")
+            auth.signInWithEmailAndPassword(credentials.username, credentials.password).await()
+            return when {
+                isUserSignedIn() && auth.currentUser?.isEmailVerified == true -> Resource.Success(
+                    Unit
+                )
+                isUserSignedIn() -> Resource.Error("user need to authenticate the email")
+                else -> Resource.Error(unknownError)
+            }
         } catch (exception: Exception) {
             Log.d("Repository", "signIn: ${exception.message}")
-            exception.printStackTrace()
             Resource.Error(exception.localizedMessage)
         }
     }
 
-    private suspend fun handleUserPostRequest(credentials: Credentials): Resource<RequestTokenResponse> {
-        val requestResponse = createRequestToken()
-        return if (requestResponse is Resource.Success && requestResponse.data != null) {
-            makeUserLoginPostRequest(credentials, requestResponse.data!!)
-        } else
-            Resource.Error(requestResponse.message)
-    }
-
-    private suspend fun makeUserLoginPostRequest(
-        credentials: Credentials,
-        requestResponse: RequestTokenResponse
-    ): Resource<RequestTokenResponse> {
+    suspend fun signInWithGoogle(token: String): Resource<Unit> {
         return try {
-            loginResponse = client.post<RequestTokenResponse>(Url.LOGIN_USER) {
-                contentType(ContentType.Application.Json)
-                body = mapOf(
-                    "username" to credentials.username,
-                    "password" to credentials.password,
-                    "request_token" to requestResponse.requestToken
-                )
-
-            }
-            if (loginResponse.success == true)
-                Resource.Success(loginResponse)
-            else
-                Resource.Error("something went wrong")
-        } catch (e: Exception) {
-            Log.d("Repository", "signIn: ${e.message}")
-            e.printStackTrace()
-            Resource.Error(e.localizedMessage)
+            val credentials = GoogleAuthProvider.getCredential(token, null)
+            auth.signInWithCredential(credentials).await()
+            if (isUserSignedIn())
+                return Resource.Success(Unit)
+            Resource.Error(unknownError)
+        } catch (exception: Exception) {
+            Log.d("Repository", "signInWithGoogle: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
         }
-
     }
 
-    suspend fun loginAsGuest(activity: Activity): Resource<RequestTokenResponse> {
+    suspend fun loginAsGuest(): Resource<Unit> {
         return try {
-            loginResponse = client.get(Url.GUEST_LOGIN)
-            if (loginResponse.success == true) {
-                saveLoginResponse(activity = activity)
-                Resource.Success(loginResponse)
-            } else
-                Resource.Error("something went wrong")
+            if (isUserSignedIn())
+                return Resource.Error("user already signed in")
+            auth.signInAnonymously().await()
+            if (isUserSignedIn())
+                Resource.Success(Unit)
+            Resource.Error(unknownError)
         } catch (exception: Exception) {
             Log.d("Repository", "loginAsGuest: ${exception.message}")
             Resource.Error(exception.localizedMessage)
         }
+
     }
 
-    suspend fun getAccountDetails(): Resource<AccountDetailsResponse> {
-        return try {
-            if (loginResponse.guestSessionId != null)
-                Resource.Error("currently logged in as guest")
-            else {
-                accountDetails = client.get(Url.ACCOUNT_DETAILS) {
-                    parameter("session_id", loginResponse.requestToken)
-                }
-                Resource.Success(accountDetails!!)
-            }
-        } catch (exception: Exception) {
-            Log.d("Repository", "getAccountDetails: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
-        }
-    }
 
     suspend fun getPopularMovies(): Resource<MoviesResponse> {
         return try {
@@ -199,23 +139,4 @@ class Repository(private val client: HttpClient) {
         }
     }
 
-    suspend fun getUserFavouriteLists(): Resource<UserListResponse> {
-        return try {
-            if (loginResponse.requestToken == null)
-                return Resource.Error("user signed in as guest")
-            if (accountDetails == null)
-                getAccountDetails()
-            val response: UserListResponse =
-                client.get(Url.getUserCreatedListsUrl(accountId = accountDetails?.id ?: 1)) {
-                    parameter("session_id", loginResponse.requestToken)
-                }
-
-            Resource.Success(response)
-
-        } catch (exception: Exception) {
-            Log.d("Repository", "getUserFavouriteLists: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
-        }
-
-    }
 }

@@ -1,5 +1,6 @@
 package com.example.movieappapi.composables
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -14,6 +15,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
+@ExperimentalAnimationApi
 @ExperimentalSerializationApi
 @ExperimentalCoilApi
 @ExperimentalPagerApi
@@ -26,14 +28,8 @@ fun NavHostScreen(navHostController: NavHostController) {
         composable(Screens.SPLASH) {
             SplashWindow(navHostController = navHostController)
         }
-        composable("${Screens.LOGIN}/{checkPrevious}",
-            arguments = listOf(
-                navArgument("checkPrevious") {
-                    type = NavType.BoolType
-                }
-            )) {
-            val check = it.arguments?.getBoolean("checkPrevious", true) ?: true
-            LoginScreen(navHostController = navHostController, checkPrevious = check)
+        composable(Screens.LOGIN) {
+            LoginScreen(navHostController = navHostController)
         }
         composable(Screens.MAIN) {
             MainFeed(navHostController)
