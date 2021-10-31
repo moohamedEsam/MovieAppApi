@@ -31,6 +31,11 @@ fun NavHostScreen(navHostController: NavHostController) {
         composable(Screens.LOGIN) {
             LoginScreen(navHostController = navHostController)
         }
+
+        composable(Screens.REGISTER_SCREEN) {
+            SignUpScreen(navHostController = navHostController)
+        }
+
         composable(Screens.MAIN) {
             MainFeed(navHostController)
         }

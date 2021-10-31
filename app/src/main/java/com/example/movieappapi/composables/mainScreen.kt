@@ -39,7 +39,8 @@ fun MainScreen() {
                 currentDestination !in listOf(
                     Screens.LOGIN,
                     Screens.SPLASH,
-                    Screens.MOVIE_DETAILS
+                    Screens.MOVIE_DETAILS,
+                    Screens.REGISTER_SCREEN
                 ) &&
                 currentDestination != null
             )

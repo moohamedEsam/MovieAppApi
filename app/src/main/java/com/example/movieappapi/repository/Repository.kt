@@ -1,8 +1,9 @@
 package com.example.movieappapi.repository
 
-import android.util.Log
+import com.example.movieappapi.dataModels.AllSearchResponse
 import com.example.movieappapi.dataModels.Credentials
 import com.example.movieappapi.dataModels.MoviesResponse
+import com.example.movieappapi.dataModels.TvShowsResponse
 import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Url
 import com.google.firebase.auth.FirebaseAuth
@@ -22,121 +23,107 @@ class Repository(
 
     fun isUserSignedIn(): Boolean = auth.currentUser != null
 
+    private suspend fun <T> baseTry(code: suspend () -> Resource<T>): Resource<T> {
+        return baseTry {
+            code()
+        }
+    }
+
     suspend fun register(credentials: Credentials): Resource<Unit> {
-        return try {
+        return baseTry {
             auth.createUserWithEmailAndPassword(credentials.username, credentials.password).await()
             if (isUserSignedIn()) {
                 auth.currentUser?.sendEmailVerification()?.await()
-                return Resource.Success(Unit)
+                Resource.Success(Unit)
             }
             Resource.Error(unknownError)
-        } catch (exception: Exception) {
-            Log.d("Repository", "register: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
         }
     }
 
     suspend fun signIn(
         credentials: Credentials
     ): Resource<Unit> {
-        return try {
+        return baseTry {
             if (isUserSignedIn())
-                return Resource.Error("user already signed in")
+                Resource.Error<Unit>("user already signed in")
             auth.signInWithEmailAndPassword(credentials.username, credentials.password).await()
-            return when {
+            when {
                 isUserSignedIn() && auth.currentUser?.isEmailVerified == true -> Resource.Success(
                     Unit
                 )
                 isUserSignedIn() -> Resource.Error("user need to authenticate the email")
                 else -> Resource.Error(unknownError)
             }
-        } catch (exception: Exception) {
-            Log.d("Repository", "signIn: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
         }
     }
 
     suspend fun signInWithGoogle(token: String): Resource<Unit> {
-        return try {
+        return baseTry {
             val credentials = GoogleAuthProvider.getCredential(token, null)
             auth.signInWithCredential(credentials).await()
             if (isUserSignedIn())
-                return Resource.Success(Unit)
+                Resource.Success(Unit)
             Resource.Error(unknownError)
-        } catch (exception: Exception) {
-            Log.d("Repository", "signInWithGoogle: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
         }
     }
 
     suspend fun loginAsGuest(): Resource<Unit> {
-        return try {
+        return baseTry {
             if (isUserSignedIn())
-                return Resource.Error("user already signed in")
+                Resource.Error<Unit>("user already signed in")
             auth.signInAnonymously().await()
             if (isUserSignedIn())
                 Resource.Success(Unit)
             Resource.Error(unknownError)
-        } catch (exception: Exception) {
-            Log.d("Repository", "loginAsGuest: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
-        }
-
-    }
-
-
-    suspend fun getPopularMovies(): Resource<MoviesResponse> {
-        return try {
-            Resource.Success(client.get(Url.POPULAR_MOVIES))
-        } catch (exception: Exception) {
-            Log.d("Repository", "getPopularMovies: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
         }
     }
 
-    suspend fun getTopRatedMovies(): Resource<MoviesResponse> {
-        return try {
-            Resource.Success(client.get(Url.TOP_RATED_MOVIES))
-        } catch (exception: Exception) {
-            Log.d("Repository", "getPopularMovies: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
-        }
+
+    suspend fun getPopularMovies(): Resource<MoviesResponse> = baseTry {
+        Resource.Success(client.get(Url.POPULAR_MOVIES))
     }
 
-    suspend fun getNowPlayingMovies(): Resource<MoviesResponse> {
-        return try {
-            Resource.Success(client.get(Url.NOW_PLAYING_MOVIES))
-        } catch (exception: Exception) {
-            Log.d("Repository", "getPopularMovies: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
-        }
+
+    suspend fun getTopRatedMovies(): Resource<MoviesResponse> = baseTry {
+        Resource.Success(client.get(Url.TOP_RATED_MOVIES))
     }
 
-    suspend fun getUpcomingMovies(): Resource<MoviesResponse> {
-        return try {
+
+    suspend fun getNowPlayingMovies(): Resource<MoviesResponse> = baseTry {
+        Resource.Success(client.get(Url.NOW_PLAYING_MOVIES))
+    }
+
+
+    suspend fun getUpcomingMovies(): Resource<MoviesResponse> =
+        baseTry {
             Resource.Success(client.get(Url.UPCOMING_MOVIES))
-        } catch (exception: Exception) {
-            Log.d("Repository", "getPopularMovies: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
+        }
+
+
+    suspend fun getRecommendations(movieId: Int): Resource<MoviesResponse> = baseTry {
+        Resource.Success(client.get(Url.getRecommendations(movieId = movieId)))
+    }
+
+
+    suspend fun getSimilarMovies(movieId: Int): Resource<MoviesResponse> = baseTry {
+        Resource.Success(client.get(Url.getSimilarMovies(movieId = movieId)))
+    }
+
+    private suspend fun <T> baseSearch(url: String, query: String): Resource<T> = baseTry {
+        client.get(url) {
+            parameter("query", query)
         }
     }
 
-    suspend fun getRecommendations(movieId: Int): Resource<MoviesResponse> {
-        return try {
-            Resource.Success(client.get(Url.getRecommendations(movieId = movieId)))
-        } catch (exception: Exception) {
-            Log.d("Repository", "getRecommendations: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
-        }
-    }
+    suspend fun searchAll(query: String): Resource<AllSearchResponse> =
+        baseSearch(Url.SEARCH_ALL, query)
 
-    suspend fun getSimilarMovies(movieId: Int): Resource<MoviesResponse> {
-        return try {
-            Resource.Success(client.get(Url.getSimilarMovies(movieId = movieId)))
-        } catch (exception: Exception) {
-            Log.d("Repository", "getRecommendations: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
-        }
-    }
+
+    suspend fun searchMovie(query: String): Resource<MoviesResponse> =
+        baseSearch(Url.SEARCH_MOVIE, query)
+
+    suspend fun searchTv(query: String): Resource<TvShowsResponse> =
+        baseSearch(Url.SEARCH_TV, query)
+
 
 }

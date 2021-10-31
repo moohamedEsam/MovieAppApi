@@ -1,8 +1,13 @@
 package com.example.movieappapi.composables
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,11 +19,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +34,7 @@ import com.example.movieappapi.dataModels.Movie
 import com.example.movieappapi.utils.Screens
 import com.example.movieappapi.utils.Url
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 fun MovieDetails(movie: Movie, navHostController: NavHostController) {
@@ -38,8 +44,7 @@ fun MovieDetails(movie: Movie, navHostController: NavHostController) {
             painter = rememberImagePainter(data = Url.getImageUrl(movie.posterPath ?: "")),
             contentDescription = null,
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.8f),
+                .fillMaxSize(),
             contentScale = ContentScale.FillBounds
         )
         MovieDescription(
@@ -53,55 +58,67 @@ fun MovieDetails(movie: Movie, navHostController: NavHostController) {
     }
 }
 
+@ExperimentalAnimationApi
 @Composable
 private fun MovieDescription(
     movie: Movie,
     modifier: Modifier,
     navHostController: NavHostController
 ) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(topEnd = 8.dp, topStart = 8.dp)
+    val isVisible = remember {
+        MutableTransitionState(false).apply { targetState = true }
+    }
+    AnimatedVisibility(
+        visibleState = isVisible,
+        enter = expandVertically(expandFrom = Alignment.Top, animationSpec = tween(2000)) + fadeIn(
+            animationSpec = tween(2000)
+        ),
+        modifier = modifier
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .verticalScroll(rememberScrollState())
+        Card(
+            modifier = modifier,
+            shape = RoundedCornerShape(topEnd = 8.dp, topStart = 8.dp),
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Text(
-                    text = movie.title ?: "",
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 24.sp
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.StarRate, contentDescription = null)
-                    Text(text = "${movie.voteAverage}")
-                }
-            }
-            CreateVerticalSpacer(4.dp)
-            Text(text = "action, drama, thrill")
-            CreateVerticalSpacer(dp = 4.dp)
-            Text(text = movie.overview ?: "")
-            CreateVerticalSpacer(4.dp)
-            OutlinedButton(
-                onClick = {
-                    navHostController.navigate(
-                        "${Screens.SIMILAR_MOVIES_SCREEN}/${movie.id ?: 1}/${
-                            movie.posterPath?.substring(
-                                1,
-                                movie.posterPath?.length ?: 1
-                            )
-                        }"
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = movie.title ?: "",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp
                     )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Default.StarRate, contentDescription = null)
+                        Text(text = "${movie.voteAverage}")
+                    }
                 }
-            ) {
-                Text(text = "see similar movies")
+                CreateVerticalSpacer(4.dp)
+                Text(text = "action, drama, thrill")
+                CreateVerticalSpacer(dp = 4.dp)
+                Text(text = movie.overview ?: "")
+                CreateVerticalSpacer(4.dp)
+                OutlinedButton(
+                    onClick = {
+                        navHostController.navigate(
+                            "${Screens.SIMILAR_MOVIES_SCREEN}/${movie.id ?: 1}/${
+                                movie.posterPath?.substring(
+                                    1,
+                                    movie.posterPath?.length ?: 1
+                                )
+                            }"
+                        )
+                    }
+                ) {
+                    Text(text = "see similar movies")
+                }
             }
         }
     }

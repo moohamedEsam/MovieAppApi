@@ -11,7 +11,9 @@ object Url {
     const val TOP_RATED_MOVIES = "${BASE_URL}movie/top_rated"
     const val UPCOMING_MOVIES = "${BASE_URL}movie/upcoming"
     const val NOW_PLAYING_MOVIES = "${BASE_URL}movie/now_playing"
-
+    const val SEARCH_ALL = "${BASE_URL}search/multi"
+    const val SEARCH_MOVIE = "${BASE_URL}search/movie"
+    const val SEARCH_TV = "${BASE_URL}search/tv"
     fun getUserCreatedListsUrl(accountId: Int) = "${BASE_URL}account/$accountId/lists"
     fun getUserFavouriteMoviesUrl(accountId: Int) = "${BASE_URL}account/$accountId/favourite/movies"
     fun getImageUrl(path: String) = "${BASE_IMAGE_URL}original/$path"

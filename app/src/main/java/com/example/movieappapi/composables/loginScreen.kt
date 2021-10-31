@@ -9,6 +9,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -55,6 +56,7 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalAnimationApi
 @Composable
 fun LoginScreen(navHostController: NavHostController) {
+    val viewModel: LoginViewModel = getViewModel()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -62,20 +64,34 @@ fun LoginScreen(navHostController: NavHostController) {
             .verticalScroll(rememberScrollState())
     ) {
         LoginUi(
-            navHostController = navHostController,
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.Center)
+                .align(Alignment.Center),
+            onLoginClick = { username, password ->
+                viewModel.signIn(
+                    Credentials(
+                        username,
+                        password
+                    )
+                )
+            },
+            onStateSuccess = {
+                navHostController.popBackStack()
+                navHostController.navigate(Screens.MAIN)
+            }
         )
         SignUpText(
-            navHostController = navHostController,
-            modifier = Modifier.Companion.align(Alignment.BottomStart)
+            modifier = Modifier.Companion
+                .align(Alignment.BottomStart)
+                .clickable {
+                    navHostController.navigate(Screens.REGISTER_SCREEN)
+                }
         )
     }
 }
 
 @Composable
-private fun SignUpText(navHostController: NavHostController, modifier: Modifier) {
+fun SignUpText(modifier: Modifier) {
     Text(
         text = buildAnnotatedString {
             append("don't have account? ")
@@ -89,9 +105,11 @@ private fun SignUpText(navHostController: NavHostController, modifier: Modifier)
 
 @ExperimentalAnimationApi
 @Composable
-private fun LoginUi(
-    navHostController: NavHostController,
-    modifier: Modifier
+fun LoginUi(
+    modifier: Modifier,
+    loginButtonText: String = "login",
+    onLoginClick: (String, String) -> Unit,
+    onStateSuccess: () -> Unit
 ) {
     val viewModel: LoginViewModel = getViewModel()
     val userState by viewModel.userState
@@ -104,20 +122,21 @@ private fun LoginUi(
         val username = userNameTextField()
         val password = passwordTextField()
         LoginButton(
-            username = username,
-            password = password,
             modifier = Modifier.Companion
                 .align(End)
-                .padding(8.dp)
+                .padding(8.dp),
+            text = loginButtonText,
+            onClick = { onLoginClick(username, password) },
+            enabled = userState !is Resource.Loading
         )
         DividerRow()
         GoogleSignInButton()
         HandleResourceChange(
             state = userState,
             onSuccess = {
-                Log.d("loginScreen", "LoginColumn: called")
-                navHostController.popBackStack()
-                navHostController.navigate(Screens.MAIN)
+                LaunchedEffect(key1 = Unit) {
+                    onStateSuccess()
+                }
             }
         )
     }
@@ -125,15 +144,14 @@ private fun LoginUi(
 
 @ExperimentalAnimationApi
 @Composable
-private fun LoginButton(
-    username: String,
-    password: String,
-    modifier: Modifier
+fun LoginButton(
+    modifier: Modifier,
+    text: String = "login",
+    onClick: () -> Unit,
+    enabled: Boolean
 ) {
-    val viewModel: LoginViewModel = getViewModel()
-    val userState by viewModel.userState
     val isVisible = remember {
-        MutableTransitionState(false).apply { targetState = true }
+        MutableTransitionState(enabled).apply { targetState = true }
     }
     AnimatedVisibility(
         visibleState = isVisible,
@@ -143,19 +161,20 @@ private fun LoginButton(
     ) {
         Button(
             onClick = {
-                viewModel.signIn(Credentials(username, password))
+                onClick()
             },
             modifier = modifier,
-            enabled = userState !is Resource.Loading,
+            enabled = enabled,
         ) {
-            Text(text = "login")
+            Text(text = text)
         }
     }
 
 }
 
 @Composable
-private fun GoogleSignInButton() {
+fun GoogleSignInButton(
+) {
     val viewModel: LoginViewModel = getViewModel()
     val activity = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -165,7 +184,7 @@ private fun GoogleSignInButton() {
             val account = task.getResult(ApiException::class.java)
             Log.d("loginScreen", "GoogleSignInButton: account id: ${account.idToken}")
             if (account.idToken != null)
-                viewModel.signInWithGoogle(token = account.idToken!!)
+                viewModel.signInWithGoogle(account.idToken!!)
         } catch (exception: Exception) {
             Log.d("loginScreen", "GoogleSignInButton: ${exception.message}")
         }
@@ -202,7 +221,7 @@ fun getGoogleSignInIntent(
 }
 
 @Composable
-private fun DividerRow() {
+fun DividerRow() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
