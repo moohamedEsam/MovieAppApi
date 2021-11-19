@@ -14,6 +14,7 @@ object Url {
     const val SEARCH_ALL = "${BASE_URL}search/multi"
     const val SEARCH_MOVIE = "${BASE_URL}search/movie"
     const val SEARCH_TV = "${BASE_URL}search/tv"
+    const val GENRES = "${BASE_URL}genre/movie/list"
     fun getUserCreatedListsUrl(accountId: Int) = "${BASE_URL}account/$accountId/lists"
     fun getUserFavouriteMoviesUrl(accountId: Int) = "${BASE_URL}account/$accountId/favourite/movies"
     fun getImageUrl(path: String) = "${BASE_IMAGE_URL}original/$path"

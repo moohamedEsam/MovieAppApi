@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.movieappapi.R
 import com.example.movieappapi.dataModels.Credentials
-import com.example.movieappapi.utils.HandleResourceChange
 import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Screens
 import com.example.movieappapi.utils.SemanticContentDescription
@@ -131,14 +130,11 @@ fun LoginUi(
         )
         DividerRow()
         GoogleSignInButton()
-        HandleResourceChange(
-            state = userState,
-            onSuccess = {
-                LaunchedEffect(key1 = Unit) {
-                    onStateSuccess()
-                }
+        userState.HandleResourceChange {
+            LaunchedEffect(key1 = Unit) {
+                onStateSuccess()
             }
-        )
+        }
     }
 }
 

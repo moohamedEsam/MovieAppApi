@@ -1,6 +1,7 @@
 package com.example.movieappapi.composables
 
 import android.util.Log
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +23,7 @@ import com.example.movieappapi.utils.Url
 import com.example.movieappapi.viewModels.MovieRecommendationsViewModel
 import org.koin.androidx.compose.getViewModel
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 fun SimilarMovieScreen(movieId: Int, posterPath: String, navHostController: NavHostController) {
@@ -58,6 +60,7 @@ fun SimilarMovieScreen(movieId: Int, posterPath: String, navHostController: NavH
     }
 }
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 private fun SimilarMovies(
@@ -75,6 +78,7 @@ private fun SimilarMovies(
     }
 }
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 private fun RecommendationsMovies(

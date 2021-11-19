@@ -33,7 +33,7 @@ data class Result(
     @SerialName("overview")
     var overview: String? = null,
     @SerialName("popularity")
-    var popularity: Int? = null,
+    var popularity: Float? = null,
     @SerialName("poster_path")
     var posterPath: String? = null,
     @SerialName("profile_path")
@@ -45,7 +45,7 @@ data class Result(
     @SerialName("video")
     var video: Boolean? = null,
     @SerialName("vote_average")
-    var voteAverage: Int? = null,
+    var voteAverage: Float? = null,
     @SerialName("vote_count")
-    var voteCount: Int? = null
+    var voteCount: Float? = null
 )

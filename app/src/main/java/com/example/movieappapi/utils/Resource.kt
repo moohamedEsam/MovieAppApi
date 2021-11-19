@@ -15,6 +15,41 @@ import androidx.compose.ui.text.font.FontWeight
 
 sealed class Resource<T>(var data: T? = null, var message: String? = null) {
 
+    @Composable
+    fun HandleResourceChange(
+        onLoading: @Composable () -> Unit = { LoadingStateComposable() },
+        onError: @Composable () -> Unit = { ErrorStateComposable() },
+        onSuccess: @Composable (T) -> Unit
+    ) {
+        when (this) {
+            is Success -> {
+                data?.let { onSuccess(it) }
+            }
+            is Loading -> onLoading()
+            is Error -> onError()
+            else -> Unit
+        }
+    }
+
+    @Composable
+    fun ErrorStateComposable() {
+        Text(
+            text = message ?: "",
+            color = Color.Red,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.semantics {
+                contentDescription = SemanticContentDescription.ERROR_RESOURCE_TEXT
+            }
+        )
+    }
+
+    @Composable
+    fun LoadingStateComposable() {
+        Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+            CircularProgressIndicator(color = MaterialTheme.colors.primary)
+        }
+    }
+
     class Success<T>(data: T, message: String? = null) : Resource<T>(data, message)
 
     class Error<T>(message: String?, data: T? = null) : Resource<T>(data, message)
@@ -25,33 +60,3 @@ sealed class Resource<T>(var data: T? = null, var message: String? = null) {
 }
 
 
-@Composable
-fun <T> HandleResourceChange(
-    state: Resource<T>,
-
-    onLoading: @Composable () -> Unit = {
-        Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-            CircularProgressIndicator(color = MaterialTheme.colors.primary)
-        }
-    },
-
-    onError: @Composable () -> Unit = {
-        Text(
-            text = state.message ?: "",
-            color = Color.Red,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.semantics {
-                contentDescription = SemanticContentDescription.ERROR_RESOURCE_TEXT
-            }
-        )
-    },
-
-    onSuccess: @Composable () -> Unit
-) {
-    when (state) {
-        is Resource.Success -> onSuccess()
-        is Resource.Loading -> onLoading()
-        is Resource.Error -> onError()
-        else -> Unit
-    }
-}

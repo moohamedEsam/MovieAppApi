@@ -1,9 +1,7 @@
 package com.example.movieappapi.repository
 
-import com.example.movieappapi.dataModels.AllSearchResponse
-import com.example.movieappapi.dataModels.Credentials
-import com.example.movieappapi.dataModels.MoviesResponse
-import com.example.movieappapi.dataModels.TvShowsResponse
+import android.util.Log
+import com.example.movieappapi.dataModels.*
 import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Url
 import com.google.firebase.auth.FirebaseAuth
@@ -19,13 +17,19 @@ class Repository(
     private val firestore: FirebaseFirestore
 ) {
     private val unknownError = "something went wrong"
-    val root = firestore.collection("root")
+    private val root = firestore.collection("users")
+    var genreResponse: GenreResponse? = null
 
     fun isUserSignedIn(): Boolean = auth.currentUser != null
 
+    private fun getCurrentUser() = auth.currentUser?.uid ?: ""
+
     private suspend fun <T> baseTry(code: suspend () -> Resource<T>): Resource<T> {
-        return baseTry {
+        return try {
             code()
+        } catch (exception: Exception) {
+            Log.d("Repository", "${exception.stackTrace[1].methodName}: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
         }
     }
 
@@ -78,6 +82,37 @@ class Repository(
         }
     }
 
+    suspend fun likeMovie(movie: Movie) {
+        baseTry {
+            root.document(getCurrentUser())
+                .collection("likes")
+                .document("${movie.id}")
+                .set(movie).await()
+            Resource.Success(Unit)
+        }
+    }
+
+    suspend fun isMovieLiked(movie: Movie) = try {
+        val result = root.document(getCurrentUser())
+            .collection("likes")
+            .document("${movie.id}")
+            .get().await().exists()
+
+        Resource.Success(result)
+    } catch (exception: Exception) {
+        Log.d("Repository", "isMovieLiked: ${exception.message}")
+        Resource.Error(exception.message)
+    }
+
+    suspend fun unlikeMovie(movie: Movie) {
+        baseTry {
+            root.document(getCurrentUser())
+                .collection("likes")
+                .document("${movie.id}")
+                .delete().await()
+            Resource.Initialized<Unit>()
+        }
+    }
 
     suspend fun getPopularMovies(): Resource<MoviesResponse> = baseTry {
         Resource.Success(client.get(Url.POPULAR_MOVIES))
@@ -109,11 +144,14 @@ class Repository(
         Resource.Success(client.get(Url.getSimilarMovies(movieId = movieId)))
     }
 
-    private suspend fun <T> baseSearch(url: String, query: String): Resource<T> = baseTry {
-        client.get(url) {
-            parameter("query", query)
+    private suspend inline fun <reified T> baseSearch(url: String, query: String): Resource<T> =
+        baseTry {
+            Resource.Success(
+                client.get(url) {
+                    parameter("query", query)
+                }
+            )
         }
-    }
 
     suspend fun searchAll(query: String): Resource<AllSearchResponse> =
         baseSearch(Url.SEARCH_ALL, query)
@@ -125,5 +163,10 @@ class Repository(
     suspend fun searchTv(query: String): Resource<TvShowsResponse> =
         baseSearch(Url.SEARCH_TV, query)
 
-
+    suspend fun getGenres() {
+        baseTry {
+            genreResponse = client.get<GenreResponse>(Url.GENRES)
+            Resource.Success(Unit)
+        }
+    }
 }

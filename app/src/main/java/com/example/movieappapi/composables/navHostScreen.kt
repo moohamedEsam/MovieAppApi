@@ -2,6 +2,7 @@ package com.example.movieappapi.composables
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -41,7 +42,7 @@ fun NavHostScreen(navHostController: NavHostController) {
         }
 
         composable(Screens.SEARCH_SCREEN) {
-
+            SearchScreen(navHostController = navHostController)
         }
 
         composable(Screens.ACCOUNT_LISTS) {
@@ -56,13 +57,7 @@ fun NavHostScreen(navHostController: NavHostController) {
                     type = NavType.StringType
                 }
             )) {
-            var movieString = it.arguments?.getString("movie", "") ?: ""
-            movieString = movieString.replace("*", "/")
-            val json = Json {
-                isLenient = true
-                ignoreUnknownKeys = true
-            }
-            val movie: Movie = json.decodeFromString(movieString)
+            val movie: Movie = getMovieFromStack(it)
             MovieDetails(movie = movie, navHostController = navHostController)
         }
         composable(
@@ -92,4 +87,15 @@ fun NavHostScreen(navHostController: NavHostController) {
 
     }
 
+}
+
+@Composable
+fun getMovieFromStack(it: NavBackStackEntry): Movie {
+    var movieString = it.arguments?.getString("movie", "") ?: ""
+    movieString = movieString.replace("*", "/")
+    val json = Json {
+        isLenient = true
+        ignoreUnknownKeys = true
+    }
+    return json.decodeFromString(movieString)
 }

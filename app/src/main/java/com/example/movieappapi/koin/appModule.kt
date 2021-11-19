@@ -3,10 +3,7 @@ package com.example.movieappapi.koin
 import android.util.Log
 import com.example.movieappapi.repository.Repository
 import com.example.movieappapi.utils.Constants
-import com.example.movieappapi.viewModels.LoginViewModel
-import com.example.movieappapi.viewModels.MainFeedViewModel
-import com.example.movieappapi.viewModels.MovieRecommendationsViewModel
-import com.example.movieappapi.viewModels.UserListsViewModel
+import com.example.movieappapi.viewModels.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import io.ktor.client.*
@@ -28,6 +25,8 @@ val module = module {
     viewModel { MainFeedViewModel(get()) }
     viewModel { MovieRecommendationsViewModel(get()) }
     viewModel { UserListsViewModel(get()) }
+    viewModel { MovieViewModel(get()) }
+    viewModel { SearchViewModel(get()) }
 }
 
 fun provideHttpClient(json: Json) = HttpClient(CIO) {

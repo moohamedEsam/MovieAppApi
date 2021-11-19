@@ -24,7 +24,8 @@ import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.movieappapi.dataModels.UserList
-import com.example.movieappapi.utils.HandleResourceChange
+import com.example.movieappapi.dataModels.UserListResponse
+import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Screens
 import com.example.movieappapi.utils.Url
 import com.example.movieappapi.viewModels.UserListsViewModel
@@ -35,46 +36,56 @@ import org.koin.androidx.compose.getViewModel
 fun UserListsScreen(navHostController: NavHostController) {
     val viewModel: UserListsViewModel = getViewModel()
     val userList by viewModel.userLists
-    HandleResourceChange(
-        state = userList,
+    userList.HandleResourceChange(
         onError = {
-            if (userList.message == "user signed in as guest") {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(SpanStyle(color = Color.Red)) {
-                                append(userList.message ?: "")
-                            }
-                            withStyle(SpanStyle(color = MaterialTheme.colors.primary)) {
-                                append("  sign in")
-                            }
-                        },
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .clickable {
-                                navHostController.navigate(Screens.LOGIN) {
-                                    popUpTo(0) {
-                                        inclusive = false
-                                    }
-                                }
-                            },
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                }
-            }
+            if (userList.message == "user signed in as guest")
+                SignInBox(userList, navHostController)
+            else
+                userList.ErrorStateComposable()
         }
-    ) {
-        userList.data?.userLists?.let {
+    ) { userListResponse ->
+        userListResponse.userLists?.let {
             LazyColumn(contentPadding = PaddingValues(8.dp), modifier = Modifier.fillMaxSize()) {
                 items(it) {
                     UserMoviesList(userList = it)
                 }
             }
         }
+    }
+
+
+}
+
+@Composable
+private fun SignInBox(
+    userList: Resource<UserListResponse>,
+    navHostController: NavHostController
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = buildAnnotatedString {
+                withStyle(SpanStyle(color = Color.Red)) {
+                    append(userList.message ?: "")
+                }
+                withStyle(SpanStyle(color = MaterialTheme.colors.primary)) {
+                    append("  sign in")
+                }
+            },
+            modifier = Modifier
+                .padding(8.dp)
+                .clickable {
+                    navHostController.navigate(Screens.LOGIN) {
+                        popUpTo(0) {
+                            inclusive = false
+                        }
+                    }
+                },
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
+        )
     }
 }
 

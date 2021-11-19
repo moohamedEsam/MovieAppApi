@@ -1,6 +1,12 @@
 package com.example.movieappapi.composables
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,20 +19,18 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.movieappapi.dataModels.Movie
 import com.example.movieappapi.dataModels.MoviesResponse
-import com.example.movieappapi.utils.HandleResourceChange
 import com.example.movieappapi.utils.Resource
 import com.example.movieappapi.utils.Screens
 import com.example.movieappapi.utils.Url
@@ -40,6 +44,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.getViewModel
 
+@ExperimentalAnimationApi
 @ExperimentalSerializationApi
 @ExperimentalCoilApi
 @ExperimentalPagerApi
@@ -56,9 +61,9 @@ fun MainFeed(navHostController: NavHostController) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            HandleResourceChange(state = popularMovies) {
+            popularMovies.HandleResourceChange { moviesResponse ->
                 Log.d("mainFeedScreen", "MainFeed: called")
-                popularMovies.data?.results?.let {
+                moviesResponse.results?.let {
                     PopularMovieViewPager(
                         movies = it,
                         navHostController = navHostController,
@@ -74,6 +79,7 @@ fun MainFeed(navHostController: NavHostController) {
     }
 }
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 private fun NowPlayingMoviesList(
@@ -87,13 +93,14 @@ private fun NowPlayingMoviesList(
         modifier = Modifier.padding(8.dp)
     )
     CreateVerticalSpacer(4.dp)
-    HandleResourceChange(state = nowPlayingMovies) {
-        nowPlayingMovies.data?.results?.let {
+    nowPlayingMovies.HandleResourceChange { moviesResponse ->
+        moviesResponse.results?.let {
             HorizontalMovieList(movies = it, navHostController = navHostController)
         }
     }
 }
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 private fun TopRatedMovieList(
@@ -107,8 +114,8 @@ private fun TopRatedMovieList(
         modifier = Modifier.padding(8.dp)
     )
     CreateVerticalSpacer(dp = 4.dp)
-    HandleResourceChange(state = topRatedMovies) {
-        topRatedMovies.data?.results?.let {
+    topRatedMovies.HandleResourceChange { moviesResponse ->
+        moviesResponse.results?.let {
             HorizontalMovieList(movies = it, navHostController = navHostController)
         }
     }
@@ -143,6 +150,7 @@ fun PopularMovieViewPager(
     }
 }
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 fun HorizontalMovieList(movies: List<Movie>, navHostController: NavHostController) {
@@ -153,29 +161,39 @@ fun HorizontalMovieList(movies: List<Movie>, navHostController: NavHostControlle
     }
 }
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 fun HorizontalListMovieItem(movie: Movie, navHostController: NavHostController) {
-    Column(
-        modifier = Modifier
-            .width(90.dp)
-            .padding(horizontal = 4.dp)
+    val isVisible = remember {
+        MutableTransitionState(false).apply { targetState = true }
+    }
+    AnimatedVisibility(
+        visibleState = isVisible,
+        enter = fadeIn(animationSpec = tween(1000)),
+        exit = slideOutVertically()
     ) {
-        Card(modifier = Modifier
-            .size(90.dp, 120.dp)
-            .clickable {
-                navigateToMovieDetail(movie = movie, navHostController = navHostController)
-            }
+        Column(
+            modifier = Modifier
+                .width(90.dp)
+                .padding(horizontal = 4.dp)
         ) {
-            Image(
-                painter = rememberImagePainter(data = Url.getImageUrl(movie.posterPath ?: "")),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillBounds
-            )
+            Card(modifier = Modifier
+                .size(90.dp, 120.dp)
+                .clickable {
+                    navigateToMovieDetail(movie = movie, navHostController = navHostController)
+                }
+            ) {
+                Image(
+                    painter = rememberImagePainter(data = Url.getImageUrl(movie.posterPath ?: "")),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds
+                )
+            }
+            CreateVerticalSpacer(2.dp)
+            Text(text = movie.title ?: "", maxLines = 2, fontWeight = FontWeight.Bold)
         }
-        CreateVerticalSpacer(2.dp)
-        Text(text = movie.title ?: "", maxLines = 2, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -196,7 +214,7 @@ fun PagerMovieItem(movie: Movie, navHostController: NavHostController) {
 }
 
 
-private fun navigateToMovieDetail(
+fun navigateToMovieDetail(
     movie: Movie,
     navHostController: NavHostController
 ) {
@@ -207,12 +225,3 @@ private fun navigateToMovieDetail(
     navHostController.navigate("${Screens.MOVIE_DETAILS}/$movieString")
 }
 
-@Preview
-@Composable
-fun HorizontalItemMovie() {
-    HorizontalListMovieItem(
-        movie = Movie(title = "joker"), navHostController = rememberNavController(
-
-        )
-    )
-}
