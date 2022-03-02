@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'com.google.gms.google-services'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.20'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
 }
 
 android {
@@ -106,16 +106,8 @@ dependencies {
 
     implementation "com.google.accompanist:accompanist-pager:$pager_version"
 
-    //firebase
-    implementation platform("com.google.firebase:firebase-bom:$bom_version")
-    //firestore
-    implementation 'com.google.firebase:firebase-firestore-ktx'
-    //authentication
-    implementation 'com.google.firebase:firebase-auth-ktx'
-
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutines_version"
-    // Also declare the dependency for the Google Play services library and specify its version
-    implementation 'com.google.android.gms:play-services-auth:19.2.0'
+    //splash screen
+    implementation "androidx.core:core-splashscreen:$splash_screen_version"
 
 
 

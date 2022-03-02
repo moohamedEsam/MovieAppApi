@@ -13,10 +13,13 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
 
 class MainActivity : ComponentActivity() {
-    @ExperimentalAnimationApi
-    @ExperimentalSerializationApi
-    @ExperimentalCoilApi
-    @ExperimentalPagerApi
+
+    @OptIn(
+        ExperimentalAnimationApi::class,
+        ExperimentalCoilApi::class,
+        ExperimentalPagerApi::class,
+        ExperimentalSerializationApi::class
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

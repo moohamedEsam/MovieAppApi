@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-            android:name=".utils.ApplicationClass"
+            android:name="com.example.movieappapi.domain.utils.ApplicationClass"
             android:fullBackupContent="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
