@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'com.google.gms.google-services'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
+    id 'com.google.protobuf'
 }
 
 android {
@@ -109,7 +110,9 @@ dependencies {
     //splash screen
     implementation "androidx.core:core-splashscreen:$splash_screen_version"
 
-
+    //data store
+    implementation "androidx.datastore:datastore:1.0.0"
+    implementation  "com.google.protobuf:protobuf-javalite:3.10.0"
 
     // Test rules and transitive dependencies:
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$compose_version")
@@ -121,6 +124,8 @@ dependencies {
     androidTestImplementation "com.google.truth:truth:$truth_version"
 
 
+
+
     testImplementation("org.mockito:mockito-core:$mockito_version")
     androidTestImplementation("org.mockito:mockito-core:$mockito_version")
     testImplementation "org.mockito:mockito-inline:$mockito_version"
@@ -130,4 +135,20 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
 
 
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.10.0"
+    }
+    //Generates the java Protobuf-lite code for the Protobufs in this project
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+        }
+    }
 }

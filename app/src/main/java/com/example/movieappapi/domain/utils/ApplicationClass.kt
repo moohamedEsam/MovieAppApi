@@ -22,7 +22,7 @@ class ApplicationClass : Application() {
         startKoin {
             allowOverride(true)
             androidContext(this@ApplicationClass)
-            modules(viewModelsModule, repositoryModule, useCaseModule)
+            modules(repositoryModule, viewModelsModule, useCaseModule)
             logger(logger)
         }
     }

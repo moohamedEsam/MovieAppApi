@@ -1,4 +1,4 @@
-package com.example.movieappapi.composables
+package com.example.movieappapi.presentation.navigation
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
@@ -9,8 +9,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import coil.annotation.ExperimentalCoilApi
+import com.example.movieappapi.composables.*
 import com.example.movieappapi.domain.model.Movie
 import com.example.movieappapi.domain.utils.Screens
+import com.example.movieappapi.presentation.screen.login.LoginScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
@@ -21,17 +23,13 @@ import kotlinx.serialization.json.Json
 @ExperimentalCoilApi
 @ExperimentalPagerApi
 @Composable
-fun NavHostScreen(navHostController: NavHostController) {
+fun NavHostScreen(navHostController: NavHostController, startDestination: String) {
     NavHost(
         navController = navHostController,
-        startDestination = Screens.MAIN
+        startDestination = startDestination
     ) {
         composable(Screens.LOGIN) {
             LoginScreen(navHostController = navHostController)
-        }
-
-        composable(Screens.REGISTER_SCREEN) {
-            SignUpScreen(navHostController = navHostController)
         }
 
         composable(Screens.MAIN) {

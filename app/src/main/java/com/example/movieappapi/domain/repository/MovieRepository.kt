@@ -1,15 +1,20 @@
 package com.example.movieappapi.domain.repository
 
+import android.content.Context
+import com.example.movieappapi.CachedUser
+import com.example.movieappapi.Token
 import com.example.movieappapi.domain.model.AllSearchResponse
 import com.example.movieappapi.domain.model.GenreResponse
 import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.model.TvShowsResponse
 import com.example.movieappapi.domain.utils.Resource
+import kotlinx.coroutines.flow.Flow
+
 
 interface MovieRepository {
-    suspend fun requestToken(): Resource<Boolean>
+    suspend fun requestToken(context: Context): Resource<Boolean>
 
-    suspend fun login(username: String, password: String): Resource<Boolean>
+    suspend fun login(context: Context, username: String, password: String): Resource<Boolean>
 
     suspend fun createSession(): Resource<Boolean>
 
@@ -32,4 +37,14 @@ interface MovieRepository {
     suspend fun searchTv(query: String): Resource<TvShowsResponse>
 
     suspend fun getGenres(): Resource<GenreResponse>
+
+    suspend fun assignCachedToken(context: Context)
+
+    suspend fun updateToken(context: Context, token: Token)
+
+    suspend fun getToken(context: Context): Resource<Boolean>
+
+    suspend fun getCachedUser(context: Context): Flow<CachedUser>
+
+    suspend fun updateUser(context: Context, user: CachedUser)
 }

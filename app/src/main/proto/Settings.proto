@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_package = "com.example.movieappapi";
+option java_multiple_files = true;
+
+message Token {
+  string accessToken = 1;
+  string expires_at = 2;
+}
+
+message CachedUser{
+  string username = 1;
+  string password = 2;
+  bool loggedIn = 3;
+}

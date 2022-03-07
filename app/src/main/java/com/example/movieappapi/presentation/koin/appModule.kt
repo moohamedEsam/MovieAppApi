@@ -2,9 +2,10 @@ package com.example.movieappapi.presentation.koin
 
 import android.util.Log
 import com.example.movieappapi.data.repository.MovieRepositoryImpl
+import com.example.movieappapi.data.repository.dataSource.MovieRemoteDataSource
 import com.example.movieappapi.data.repository.dataSourceImpl.MovieRemoteDataSourceImpl
+import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.useCase.*
-
 import com.example.movieappapi.domain.utils.Constants
 import com.example.movieappapi.presentation.screen.home.MainFeedViewModel
 import com.example.movieappapi.presentation.screen.login.LoginViewModel
@@ -21,6 +22,7 @@ import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import kotlinx.serialization.json.Json
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.scope.Scope
 import org.koin.dsl.module
 
 val useCaseModule = module {
@@ -35,25 +37,32 @@ val useCaseModule = module {
     single { SearchMoviesUseCase(get()) }
     single { SearchTvUseCase(get()) }
     single { GetGenresUseCase(get()) }
+    single { GetUserUseCase(get()) }
+    single { UpdateCachedUser(get()) }
 }
 
 val repositoryModule = module {
     single { provideJson() }
     single { provideHttpClient(get()) }
 
-    single { MovieRemoteDataSourceImpl(get()) }
-    single { MovieRepositoryImpl(get()) }
+    single { provideMovieRemoteDataSource() }
+    single { provideMovieRepository() }
 }
 
 val viewModelsModule = module {
-
-    viewModel { LoginViewModel(get()) }
+    viewModel { LoginViewModel(get(), get(), get()) }
     viewModel { MainFeedViewModel(get(), get(), get()) }
     viewModel { MovieRecommendationsViewModel(get(), get()) }
     viewModel { UserListsViewModel() }
     viewModel { MovieViewModel(get()) }
     viewModel { SearchViewModel(get(), get(), get(), get()) }
+
 }
+
+private fun Scope.provideMovieRemoteDataSource(): MovieRemoteDataSource =
+    MovieRemoteDataSourceImpl(get())
+
+private fun Scope.provideMovieRepository(): MovieRepository = MovieRepositoryImpl(get())
 
 fun provideHttpClient(json: Json) = HttpClient(CIO) {
     install(Logging) {
@@ -71,6 +80,7 @@ fun provideHttpClient(json: Json) = HttpClient(CIO) {
     defaultRequest {
         parameter("api_key", Constants.API_KEY)
     }
+
 }
 
 fun provideJson() = Json {

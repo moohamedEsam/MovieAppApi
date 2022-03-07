@@ -1,17 +1,16 @@
-package com.example.movieappapi.composables
+package com.example.movieappapi.presentation.screen.login
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -24,10 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -39,10 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.movieappapi.R
-import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
-import com.example.movieappapi.domain.utils.SemanticContentDescription
-import com.example.movieappapi.presentation.screen.login.LoginViewModel
+import com.example.movieappapi.presentation.components.TextFieldSetup
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -59,19 +53,13 @@ fun LoginScreen(navHostController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.Center),
-            onLoginClick = { username, password ->
-                viewModel.login(username, password)
-            },
-            onStateSuccess = {
-                navHostController.popBackStack()
-                navHostController.navigate(Screens.MAIN)
-            }
+            navHostController = navHostController
         )
         SignUpText(
-            modifier = Modifier.Companion
-                .align(Alignment.BottomStart)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
                 .clickable {
-                    navHostController.navigate(Screens.REGISTER_SCREEN)
+
                 }
         )
     }
@@ -94,9 +82,7 @@ fun SignUpText(modifier: Modifier) {
 @Composable
 fun LoginUi(
     modifier: Modifier,
-    loginButtonText: String = "login",
-    onLoginClick: (String, String) -> Unit,
-    onStateSuccess: () -> Unit
+    navHostController: NavHostController
 ) {
     val viewModel: LoginViewModel = getViewModel()
     val userState by viewModel.userState
@@ -106,21 +92,17 @@ fun LoginUi(
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
-        val username = userNameTextField()
-        val password = passwordTextField()
+        UserNameTextField()
+        PasswordTextField()
         LoginButton(
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .align(End)
-                .padding(8.dp),
-            text = loginButtonText,
-            onClick = { onLoginClick(username, password) },
-            enabled = userState !is Resource.Loading
+                .padding(8.dp)
         )
-        DividerRow()
-        GoogleSignInButton()
         userState.HandleResourceChange {
             LaunchedEffect(key1 = Unit) {
-                onStateSuccess()
+                navHostController.popBackStack()
+                navHostController.navigate(Screens.MAIN)
             }
         }
     }
@@ -129,13 +111,11 @@ fun LoginUi(
 @ExperimentalAnimationApi
 @Composable
 fun LoginButton(
-    modifier: Modifier,
-    text: String = "login",
-    onClick: () -> Unit,
-    enabled: Boolean
+    modifier: Modifier
 ) {
+    val viewModel: LoginViewModel = getViewModel()
     val isVisible = remember {
-        MutableTransitionState(enabled).apply { targetState = true }
+        MutableTransitionState(false).apply { targetState = true }
     }
     AnimatedVisibility(
         visibleState = isVisible,
@@ -143,70 +123,33 @@ fun LoginButton(
         exit = fadeOut(),
         modifier = modifier
     ) {
+        val context = LocalContext.current
         Button(
             onClick = {
-                onClick()
+                viewModel.login(context)
+                isVisible.targetState = false
             },
             modifier = modifier,
-            enabled = enabled,
+            enabled = isVisible.currentState,
         ) {
-            Text(text = text)
+            Text(text = "Login")
+        }
+        viewModel.userState.value.HandleResourceChange(
+            onLoading = {},
+            onError = { isVisible.targetState = true }) {
+
         }
     }
 
 }
 
-@Composable
-fun GoogleSignInButton(
-) {
-    val viewModel: LoginViewModel = getViewModel()
-    val activity = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) {
-
-    }
-    val authId = stringResource(id = R.string.authId)
-    val context = LocalContext.current
-    IconButton(
-        onClick = {
-
-        },
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.google),
-            contentDescription = null,
-            modifier = Modifier.size(48.dp)
-        )
-    }
-}
-
-
-@Composable
-fun DividerRow() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        Divider(modifier = Modifier.fillMaxWidth(0.4f))
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(text = "or")
-        Spacer(modifier = Modifier.width(4.dp))
-        Divider(modifier = Modifier.weight(1f))
-    }
-}
-
-
 @ExperimentalAnimationApi
 @Composable
-fun userNameTextField(
-    initialValue: String = "",
-    title: String = "username"
-): String {
-    var value by remember {
-        mutableStateOf(initialValue)
-    }
+fun UserNameTextField(
+
+) {
+    val viewModel: LoginViewModel = getViewModel()
+    val value by viewModel.username
     var isError by remember {
         mutableStateOf(false)
     }
@@ -223,46 +166,36 @@ fun userNameTextField(
         enter = expandHorizontally(expandFrom = Alignment.Start, animationSpec = tween(1000)),
         exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
     ) {
-        OutlinedTextField(
-            value = value,
+        TextFieldSetup(
+            text = value,
+            label = "username",
             onValueChange = {
-                value = it.trim()
-                isError = it.isBlank() || it.contains(" ")
+                viewModel.setUsername(it)
             },
-            label = { Text(text = title) },
-            leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = null) },
-            isError = isError,
+            error = { it.isBlank() || it.contains(" ") },
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
                 .onFocusChanged {
                     focusColor = if (it.isFocused)
                         Color.Green
                     else
                         Color.DarkGray
-                }
-                .semantics {
-                    contentDescription = SemanticContentDescription.LOGIN_SCREEN_USERNAME_TEXT_FIELD
                 },
+            leadingIcon = Icons.Default.Email,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 leadingIconColor = focusColor
             )
-
         )
+
     }
-    return value
+
 }
 
 @ExperimentalAnimationApi
 @Composable
-fun passwordTextField(): String {
-    var value by remember {
-        mutableStateOf("")
-    }
+fun PasswordTextField() {
+    val viewModel: LoginViewModel = getViewModel()
+    val value by viewModel.password
 
-    var isError by remember {
-        mutableStateOf(false)
-    }
     var visible by remember {
         mutableStateOf(false)
     }
@@ -279,51 +212,40 @@ fun passwordTextField(): String {
         enter = expandHorizontally(expandFrom = Alignment.Start, animationSpec = tween(1000)),
         exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
     ) {
-
-        OutlinedTextField(
-            value = value,
+        TextFieldSetup(
+            text = value,
+            label = "password",
             onValueChange = {
-                value = it.trim()
-                isError = it.isBlank() || it.length < 5 || it.contains(" ")
+                viewModel.setPassword(it)
             },
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Lock, contentDescription = null)
-            },
-            trailingIcon = {
-                if (visible)
-                    IconButton(onClick = { visible = false }) {
-                        Icon(imageVector = Icons.Outlined.VisibilityOff, contentDescription = null)
-                    }
+            modifier = Modifier.onFocusChanged {
+                focusColor = if (it.isFocused)
+                    Color.Green
                 else
-                    IconButton(onClick = { visible = true }) {
-                        Icon(imageVector = Icons.Outlined.Visibility, contentDescription = null)
-                    }
-
+                    Color.DarkGray
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .onFocusChanged {
-                    focusColor = if (it.isFocused)
-                        Color.Green
-                    else
-                        Color.DarkGray
-                }
-                .semantics {
-                    contentDescription = SemanticContentDescription.LOGIN_SCREEN_PASSWORD_TEXT_FIELD
-                },
-            label = { Text(text = "password") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            leadingIcon = Icons.Default.Lock,
+            trailingIcon = if (visible)
+                Icons.Outlined.VisibilityOff
+            else
+                Icons.Outlined.Visibility,
+            onTrailingIconClick = {
+                visible = !visible
+            },
             visualTransformation = if (visible)
                 VisualTransformation.None
             else
                 PasswordVisualTransformation(),
-            isError = isError,
+            keyboardType = KeyboardType.Password,
+            error = { it.isBlank() || it.length < 5 || it.contains(" ") },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 leadingIconColor = focusColor,
                 trailingIconColor = focusColor
             )
         )
     }
-    return value
 }
+
+
+
+

@@ -5,24 +5,24 @@ import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.utils.Url
 import io.ktor.client.*
 import io.ktor.client.request.*
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import io.ktor.http.*
 
 class MovieRemoteDataSourceImpl(private val client: HttpClient) : MovieRemoteDataSource {
     override suspend fun requestToken(): TokenResponse = client.get(Url.REQUEST_TOKEN)
 
     override suspend fun login(token: String, username: String, password: String): TokenResponse =
-        client.get(Url.LOGIN_USER) {
+        client.post(Url.LOGIN_USER) {
+            contentType(ContentType.Application.Json)
             val map = mapOf(
                 "request_token" to token,
                 "username" to username,
                 "password" to password
             )
-            body = Json.encodeToString(map)
+            body = map
         }
 
     override suspend fun createSession(token: String): SessionResponse =
-        client.get(Url.CREATE_SESSION) {
+        client.post(Url.CREATE_SESSION) {
             url {
                 parameter("request_token", token)
             }

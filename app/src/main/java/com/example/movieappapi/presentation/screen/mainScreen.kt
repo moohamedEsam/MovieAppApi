@@ -20,6 +20,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.domain.utils.Screens
+import com.example.movieappapi.presentation.navigation.NavHostScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
 
@@ -28,7 +29,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 @ExperimentalCoilApi
 @ExperimentalPagerApi
 @Composable
-fun MainScreen() {
+fun MainScreen(startDestination: String) {
     val navHostController = rememberNavController()
     val navBackStack by navHostController.currentBackStackEntryAsState()
     val currentDestination = navBackStack?.destination?.route?.split("/")?.get(0)
@@ -46,7 +47,7 @@ fun MainScreen() {
             )
                 BottomBarSetup(navHostController = navHostController)
         },
-        content = { NavHostScreen(navHostController = navHostController) }
+        content = { NavHostScreen(navHostController = navHostController, startDestination) }
     )
 }
 
