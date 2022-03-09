@@ -5,13 +5,13 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movieappapi.domain.model.UserListResponse
+import com.example.movieappapi.domain.model.UserListsResponse
 import com.example.movieappapi.domain.utils.Resource
 import kotlinx.coroutines.launch
 
 class UserListsViewModel : ViewModel() {
-    private val _userLists = mutableStateOf<Resource<UserListResponse>>(Resource.Initialized())
-    val userLists: State<Resource<UserListResponse>> = _userLists
+    private val _userLists = mutableStateOf<Resource<UserListsResponse>>(Resource.Initialized())
+    val userLists: State<Resource<UserListsResponse>> = _userLists
 
     init {
         setUserLists()

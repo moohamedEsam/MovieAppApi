@@ -1,8 +1,7 @@
 package com.example.movieappapi.domain.repository
 
 import android.content.Context
-import com.example.movieappapi.CachedUser
-import com.example.movieappapi.Token
+import com.example.movieappapi.AppData
 import com.example.movieappapi.domain.model.AllSearchResponse
 import com.example.movieappapi.domain.model.GenreResponse
 import com.example.movieappapi.domain.model.MoviesResponse
@@ -40,11 +39,11 @@ interface MovieRepository {
 
     suspend fun assignCachedToken(context: Context)
 
-    suspend fun updateToken(context: Context, token: Token)
+    suspend fun updateToken(context: Context, accessToken: String, expiresAt: String)
 
     suspend fun getToken(context: Context): Resource<Boolean>
 
-    suspend fun getCachedUser(context: Context): Flow<CachedUser>
+    suspend fun getCachedUser(context: Context): Flow<AppData>
 
-    suspend fun updateUser(context: Context, user: CachedUser)
+    suspend fun updateUser(context: Context, username: String, password: String, loggedIn: Boolean)
 }

@@ -6,7 +6,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movieappapi.CachedUser
 import com.example.movieappapi.domain.useCase.GetUserUseCase
 import com.example.movieappapi.domain.useCase.LoginUseCase
 import com.example.movieappapi.domain.useCase.UpdateCachedUser
@@ -51,14 +50,9 @@ class LoginViewModel(
         val result = loginUseCase(context, _username.value.trim(), _password.value.trim())
         if (result is Resource.Success && result.data == true) {
             _userState.value = Resource.Success(Unit)
-            updateCachedUser(context, buildCachedUser())
+            updateCachedUser(context, _username.value, _password.value, true)
         }
         _userState.value = Resource.Error(result.message)
     }
 
-    private fun buildCachedUser() = CachedUser.newBuilder()
-        .setLoggedIn(true)
-        .setPassword(_password.value)
-        .setUsername(_username.value)
-        .build()
 }

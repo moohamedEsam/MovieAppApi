@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UserListResponse(
+data class UserListsResponse(
     @SerialName("page")
     var page: Int? = null,
     @SerialName("results")

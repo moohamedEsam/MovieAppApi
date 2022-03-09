@@ -24,7 +24,7 @@ import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.movieappapi.domain.model.UserList
-import com.example.movieappapi.domain.model.UserListResponse
+import com.example.movieappapi.domain.model.UserListsResponse
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
@@ -58,7 +58,7 @@ fun UserListsScreen(navHostController: NavHostController) {
 
 @Composable
 private fun SignInBox(
-    userList: Resource<UserListResponse>,
+    userList: Resource<UserListsResponse>,
     navHostController: NavHostController
 ) {
     Box(

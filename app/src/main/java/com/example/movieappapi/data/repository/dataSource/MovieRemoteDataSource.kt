@@ -1,20 +1,22 @@
 package com.example.movieappapi.data.repository.dataSource
 
-import com.example.movieappapi.domain.model.*
+import com.example.movieappapi.domain.model.MoviesResponse
 
 interface MovieRemoteDataSource {
 
-    suspend fun requestToken(): TokenResponse
-
-    suspend fun login(token: String, username: String, password: String): TokenResponse
-
-    suspend fun createSession(token: String): SessionResponse
-
     suspend fun getPopularMovies(): MoviesResponse
+
+    suspend fun discoverMovies(): MoviesResponse
 
     suspend fun getTopRatedMovies(): MoviesResponse
 
     suspend fun getNowPlayingMovies(): MoviesResponse
+
+    suspend fun getUserFavoriteMovies(accountId: Int, token: String): MoviesResponse
+
+    suspend fun getUserMovieWatchList(accountId: Int, token: String): MoviesResponse
+
+    suspend fun getUserRatedMovies(accountId: Int, token: String): MoviesResponse
 
     suspend fun getUpcomingMovies(): MoviesResponse
 
@@ -22,13 +24,5 @@ interface MovieRemoteDataSource {
 
     suspend fun getSimilarMovies(movieId: Int): MoviesResponse
 
-    suspend fun searchAll(query: String): AllSearchResponse
-
     suspend fun searchMovie(query: String): MoviesResponse
-
-    suspend fun searchTv(query: String): TvShowsResponse
-
-    suspend fun getGenres(): GenreResponse
-
-
 }

@@ -2,22 +2,20 @@ package com.example.movieappapi.data.repository
 
 import android.content.Context
 import android.util.Log
-import com.example.movieappapi.CachedUser
-import com.example.movieappapi.Token
-import com.example.movieappapi.data.repository.dataSource.MovieRemoteDataSource
+import com.example.movieappapi.AppData
+import com.example.movieappapi.data.repository.dataSource.TMDBRemoteDataSource
 import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.utils.Resource
-import com.example.movieappapi.domain.utils.datstoreSerializers.tokenDataStore
-//import com.example.movieappapi.domain.utils.datstoreSerializers.tokenDataStore
-import com.example.movieappapi.domain.utils.datstoreSerializers.userDataStore
+import com.example.movieappapi.domain.utils.datastore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
-import java.text.DateFormat
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
+import java.text.SimpleDateFormat
 import java.util.*
 
 class MovieRepositoryImpl(
-    private val remote: MovieRemoteDataSource
+    private val remote: TMDBRemoteDataSource
 ) : MovieRepository {
 
     private var tokenResponse = TokenResponse()
@@ -30,16 +28,22 @@ class MovieRepositoryImpl(
     }
 
     override suspend fun getToken(context: Context): Resource<Boolean> {
-        assignCachedToken(context)
-        if (tokenResponse.success != true)
-            return requestToken(context)
-        return Resource.Success(true)
+        return try {
+            assignCachedToken(context)
+            if (tokenResponse.success != true)
+                return requestToken(context)
+            Resource.Success(true)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getToken: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+
     }
 
     override suspend fun requestToken(context: Context): Resource<Boolean> {
         return try {
             tokenResponse = remote.requestToken()
-            //updateToken(context, tokenResponse.toToken())
+            updateToken(context, tokenResponse.requestToken ?: "", tokenResponse.expiresAt ?: "")
             Resource.Success(tokenResponse.success ?: false)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "requestToken: ${exception.message}")
@@ -175,31 +179,44 @@ class MovieRepositoryImpl(
     }
 
     override suspend fun assignCachedToken(context: Context) {
-        context.tokenDataStore.data.collectLatest {
-            tokenResponse = it.toTokenResponse()
-            tokenResponse.success = true
-            val date = DateFormat.getInstance().parse(it.expiresAt)
+        val data = context.datastore.data.take(1).toList()[0]
+        assignTokenFromDatastore(data)
+    }
+
+    private fun assignTokenFromDatastore(it: AppData) {
+        try {
+            tokenResponse.requestToken = it.accessToken
+            tokenResponse.expiresAt = it.expiresAt
+            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            val date = format.parse(it.expiresAt.substring(0, it.expiresAt.lastIndex - 2))
             tokenResponse.success = date?.after(Date())
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "assignTokenFromDatastore: ${exception.message}")
         }
     }
 
-    override suspend fun updateToken(context: Context, token: Token) {
-        context.tokenDataStore.updateData {
-            it.toBuilder().setAccessToken(token.accessToken)
-                .setExpiresAt(token.expiresAt)
+    override suspend fun updateToken(context: Context, accessToken: String, expiresAt: String) {
+        context.datastore.updateData {
+            it.toBuilder()
+                .setAccessToken(tokenResponse.requestToken)
+                .setExpiresAt(tokenResponse.expiresAt)
                 .build()
         }
     }
 
-    override suspend fun getCachedUser(context: Context): Flow<CachedUser> =
-        context.userDataStore.data
+    override suspend fun getCachedUser(context: Context): Flow<AppData> = context.datastore.data
 
-    override suspend fun updateUser(context: Context, user: CachedUser) {
-        context.userDataStore.updateData {
+    override suspend fun updateUser(
+        context: Context,
+        username: String,
+        password: String,
+        loggedIn: Boolean
+    ) {
+        context.datastore.updateData {
             it.toBuilder()
-                .setPassword(user.password)
-                .setUsername(user.username)
-                .setLoggedIn(user.loggedIn)
+                .setUsername(username)
+                .setPassword(password)
+                .setLoggedIn(loggedIn)
                 .build()
         }
     }

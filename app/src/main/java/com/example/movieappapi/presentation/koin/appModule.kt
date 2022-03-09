@@ -2,8 +2,8 @@ package com.example.movieappapi.presentation.koin
 
 import android.util.Log
 import com.example.movieappapi.data.repository.MovieRepositoryImpl
-import com.example.movieappapi.data.repository.dataSource.MovieRemoteDataSource
-import com.example.movieappapi.data.repository.dataSourceImpl.MovieRemoteDataSourceImpl
+import com.example.movieappapi.data.repository.dataSource.TMDBRemoteDataSource
+import com.example.movieappapi.data.repository.dataSourceImpl.TMDBRemoteDataSourceImpl
 import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.useCase.*
 import com.example.movieappapi.domain.utils.Constants
@@ -59,8 +59,8 @@ val viewModelsModule = module {
 
 }
 
-private fun Scope.provideMovieRemoteDataSource(): MovieRemoteDataSource =
-    MovieRemoteDataSourceImpl(get())
+private fun Scope.provideMovieRemoteDataSource(): TMDBRemoteDataSource =
+    TMDBRemoteDataSourceImpl(get())
 
 private fun Scope.provideMovieRepository(): MovieRepository = MovieRepositoryImpl(get())
 
