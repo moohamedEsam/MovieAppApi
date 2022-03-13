@@ -12,17 +12,26 @@ class LoginUseCase(
         username: String,
         password: String
     ): Resource<Boolean> {
-        val response = repository.getToken(context)
+        val response = repository.getSession(context, username, password)
         return when (response.data) {
             true -> {
-                val result = repository.login(context, username, password)
-                if (result.data == true)
-                    repository.createSession()
-                else
-                    return result
+                repository.getAccountDetails()
+                response
             }
-            else -> response
+            else -> login(context, username, password)
         }
 
+    }
+
+    suspend fun login(context: Context, username: String, password: String): Resource<Boolean> {
+        val response = repository.requestToken(context)
+        val result = repository.login(context, username, password)
+        return if (result.data == true) {
+            val sessionResponse = repository.createSession(context)
+            if (sessionResponse.data == true)
+                repository.getAccountDetails()
+            sessionResponse
+        } else
+            result
     }
 }

@@ -30,6 +30,7 @@ import coil.compose.rememberImagePainter
 import com.example.movieappapi.domain.model.AllSearchResponse
 import com.example.movieappapi.domain.model.Result
 import com.example.movieappapi.domain.utils.Url
+import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.example.movieappapi.presentation.screen.search.SearchViewModel
 import com.example.movieappapi.ui.theme.MovieAppApiTheme
 import org.koin.androidx.compose.getViewModel

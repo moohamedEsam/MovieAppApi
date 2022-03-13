@@ -47,12 +47,16 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
         }
 
     override suspend fun markAsFavorite(
-        mediaId: Int,
         accountId: Int,
-        mediaType: String
+        token: String,
+        mediaId: Int,
+        mediaType: String,
+        isFavorite: Boolean
     ): RateMediaResponse = client.post(Url.markAsFavorite(accountId)) {
-        parameter("media_type", mediaType)
-        parameter("media_id", mediaId)
+        parameter("session_id", token)
+        header("Content-Type", "application/json;charset=utf-8")
+        contentType(ContentType.Application.Json)
+        body = MarkMediaFavoriteRequestBody(mediaType, mediaId, isFavorite)
     }
 
     override suspend fun addToWatchList(
@@ -81,14 +85,33 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
 
     override suspend fun rateMovie(
         movieId: Int,
-        token: String
+        token: String,
+        value: Float
     ): RateMediaResponse = client.post(Url.rateMovie(movieId)) {
         parameter("session_id", token)
+        contentType(ContentType.Application.Json)
+        body = mapOf(
+            "value" to value
+        )
     }
 
-    override suspend fun rateTv(tvId: Int, token: String): RateMediaResponse =
+    override suspend fun deleteMovieRating(movieId: Int, token: String): RateMediaResponse =
+        client.delete(Url.deleteMovieRating(movieId)) {
+            parameter("session_id", token)
+        }
+
+    override suspend fun deleteTvRating(tvId: Int, token: String): RateMediaResponse =
+        client.delete(Url.deleteTvRating(tvId)) {
+            parameter("session_id", token)
+        }
+
+    override suspend fun rateTv(tvId: Int, token: String, value: Float): RateMediaResponse =
         client.post(Url.rateTv(tvId)) {
             parameter("session_id", token)
+            contentType(ContentType.Application.Json)
+            body = mapOf(
+                "value" to value
+            )
         }
 
     override suspend fun discoverTv(): TvShowsResponse = client.get(Url.DISCOVER_MOVIES)
@@ -99,12 +122,11 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
     override suspend fun login(token: String, username: String, password: String): TokenResponse =
         client.post(Url.LOGIN_USER) {
             contentType(ContentType.Application.Json)
-            val map = mapOf(
+            body = mapOf(
                 "request_token" to token,
                 "username" to username,
                 "password" to password
             )
-            body = map
         }
 
     override suspend fun createSession(token: String): SessionResponse =

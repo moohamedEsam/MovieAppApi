@@ -1,18 +1,27 @@
 package com.example.movieappapi.composables
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.SemanticContentDescription
+import com.example.movieappapi.presentation.screen.MainScreen
 import com.example.movieappapi.ui.theme.MovieAppApiTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
 
+@OptIn(
+    ExperimentalAnimationApi::class,
+    com.google.accompanist.pager.ExperimentalPagerApi::class,
+    kotlinx.serialization.ExperimentalSerializationApi::class,
+    coil.annotation.ExperimentalCoilApi::class
+)
 class LoginScreenTest {
 
     @get:Rule
@@ -23,7 +32,7 @@ class LoginScreenTest {
     fun loginWithBlankCredentials() {
         composeTestRule.setContent {
             MovieAppApiTheme {
-                MainScreen()
+                MainScreen(Screens.LOGIN)
             }
         }
         val usernameTextField =
@@ -42,10 +51,10 @@ class LoginScreenTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun loginWithValidButWrongCredentials() = runBlockingTest {
+    fun loginWithValidButWrongCredentials() = runTest {
         composeTestRule.setContent {
             MovieAppApiTheme {
-                MainScreen()
+                MainScreen(Screens.LOGIN)
             }
         }
         val usernameTextField =
@@ -67,7 +76,7 @@ class LoginScreenTest {
     fun loginWithValidCredentials() {
         composeTestRule.setContent {
             MovieAppApiTheme {
-                MainScreen()
+                MainScreen(Screens.LOGIN)
             }
         }
         val usernameTextField =

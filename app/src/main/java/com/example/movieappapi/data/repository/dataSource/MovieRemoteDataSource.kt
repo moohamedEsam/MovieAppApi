@@ -1,6 +1,7 @@
 package com.example.movieappapi.data.repository.dataSource
 
 import com.example.movieappapi.domain.model.MoviesResponse
+import com.example.movieappapi.domain.model.RateMediaResponse
 
 interface MovieRemoteDataSource {
 
@@ -25,4 +26,10 @@ interface MovieRemoteDataSource {
     suspend fun getSimilarMovies(movieId: Int): MoviesResponse
 
     suspend fun searchMovie(query: String): MoviesResponse
+
+    suspend fun rateMovie(movieId: Int, token: String, value: Float): RateMediaResponse
+
+    suspend fun deleteMovieRating(movieId: Int, token: String): RateMediaResponse
+
+
 }

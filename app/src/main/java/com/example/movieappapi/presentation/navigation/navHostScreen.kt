@@ -9,10 +9,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import coil.annotation.ExperimentalCoilApi
-import com.example.movieappapi.composables.*
+import com.example.movieappapi.composables.MainFeed
+import com.example.movieappapi.composables.SearchScreen
+import com.example.movieappapi.composables.SimilarMovieScreen
+import com.example.movieappapi.composables.UserListsScreen
 import com.example.movieappapi.domain.model.Movie
 import com.example.movieappapi.domain.utils.Screens
+import com.example.movieappapi.presentation.screen.account.AccountScreen
 import com.example.movieappapi.presentation.screen.login.LoginScreen
+import com.example.movieappapi.presentation.screen.movie.MovieDetails
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
@@ -44,7 +49,7 @@ fun NavHostScreen(navHostController: NavHostController, startDestination: String
             UserListsScreen(navHostController = navHostController)
         }
         composable(Screens.ACCOUNT) {
-
+            AccountScreen(navHostController = navHostController)
         }
         composable(
             "${Screens.MOVIE_DETAILS}/{movie}", arguments = listOf(
@@ -79,7 +84,12 @@ fun NavHostScreen(navHostController: NavHostController, startDestination: String
             )
         }
 
-
+        composable(Screens.ACCOUNT_Favorite_Movies) {}
+        composable(Screens.ACCOUNT_Favorite_Tv) {}
+        composable(Screens.ACCOUNT_Rated_Movies) {}
+        composable(Screens.ACCOUNT_Rated_Tv) {}
+        composable(Screens.ACCOUNT_Watchlist_Movies) {}
+        composable(Screens.ACCOUNT_Watchlist_TV) {}
     }
 
 }

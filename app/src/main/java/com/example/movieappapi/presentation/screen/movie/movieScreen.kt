@@ -1,4 +1,4 @@
-package com.example.movieappapi.composables
+package com.example.movieappapi.presentation.screen.movie
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -15,16 +15,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,13 +32,16 @@ import coil.compose.rememberImagePainter
 import com.example.movieappapi.domain.model.Movie
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
-import com.example.movieappapi.presentation.screen.movie.MovieViewModel
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
 fun MovieDetails(movie: Movie, navHostController: NavHostController) {
+    val viewModel: MovieViewModel = getViewModel()
+    LaunchedEffect(key1 = Unit) {
+        viewModel.setMovie(movie)
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = rememberImagePainter(data = Url.getImageUrl(movie.posterPath ?: "")),
@@ -56,11 +57,23 @@ fun MovieDetails(movie: Movie, navHostController: NavHostController) {
                 .align(Alignment.BottomStart),
             navHostController = navHostController
         )
-        LikeIcon(
-            movie = movie, modifier = Modifier
+        Column(
+            modifier = Modifier
                 .padding(8.dp)
                 .align(Alignment.TopEnd)
-        )
+        ) {
+            ActionIcon(
+                modifier = Modifier,
+                icon = Icons.Outlined.Favorite
+            ) {
+                viewModel.markFavorite()
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            ActionIcon(modifier = Modifier, icon = Icons.Default.StarRate) {
+                viewModel.rate(10f)
+            }
+        }
+
     }
 }
 
@@ -149,44 +162,20 @@ fun GenreChipsList(genres: List<String>) {
 }
 
 @Composable
-fun LikeIcon(movie: Movie, modifier: Modifier) {
-    val viewModel: MovieViewModel = getViewModel()
-    val isLiked by viewModel.isLiked
-    LaunchedEffect(key1 = Unit) {
-
+fun ActionIcon(modifier: Modifier, icon: ImageVector, onClick: () -> Unit) {
+    IconButton(
+        onClick = {
+            onClick()
+        },
+        modifier = modifier
+    ) {
+        Icon(imageVector = icon, contentDescription = null)
     }
-    if (isLiked)
-        IconButton(
-            onClick = {
-
-            },
-            modifier = modifier
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Favorite,
-                contentDescription = null,
-                tint = Color.Red
-            )
-        }
-    else
-        IconButton(
-            onClick = {
-
-            },
-            modifier = modifier
-        ) {
-            Icon(imageVector = Icons.Outlined.Favorite, contentDescription = null)
-        }
-
 }
+
 
 @Composable
 fun CreateVerticalSpacer(dp: Dp = 8.dp) {
     Spacer(modifier = Modifier.height(dp))
 }
 
-@Preview
-@Composable
-fun ChipsPreview() {
-    GenreChipsList(genres = listOf("action", "drama", "horror"))
-}

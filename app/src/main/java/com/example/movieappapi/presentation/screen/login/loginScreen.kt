@@ -24,13 +24,10 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -56,25 +53,20 @@ fun LoginScreen(navHostController: NavHostController) {
             navHostController = navHostController
         )
         SignUpText(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .clickable {
-
-                }
+            modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
 }
 
 @Composable
 fun SignUpText(modifier: Modifier) {
+    val viewModel: LoginViewModel = getViewModel()
     Text(
-        text = buildAnnotatedString {
-            append("don't have account? ")
-            withStyle(SpanStyle(color = MaterialTheme.colors.primary)) {
-                append("sign up")
-            }
-        },
-        modifier = modifier
+        text = "Continue as Guest",
+        color = MaterialTheme.colors.primary,
+        modifier = modifier.clickable {
+            viewModel.loginAsGuest()
+        }
     )
 }
 
@@ -136,9 +128,8 @@ fun LoginButton(
         }
         viewModel.userState.value.HandleResourceChange(
             onLoading = {},
-            onError = { isVisible.targetState = true }) {
-
-        }
+            onError = { isVisible.targetState = true }
+        ) {}
     }
 
 }

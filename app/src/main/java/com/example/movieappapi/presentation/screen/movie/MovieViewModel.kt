@@ -1,21 +1,30 @@
 package com.example.movieappapi.presentation.screen.movie
 
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieappapi.domain.model.GenreResponse
+import com.example.movieappapi.domain.model.Movie
 import com.example.movieappapi.domain.useCase.GetGenresUseCase
+import com.example.movieappapi.domain.useCase.MarkAsFavoriteMovieUseCase
+import com.example.movieappapi.domain.useCase.RateMovieUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class MovieViewModel(
-    private val genresUseCase: GetGenresUseCase
+    private val genresUseCase: GetGenresUseCase,
+    private val rateMovieUseCase: RateMovieUseCase,
+    private val markAsFavoriteMovieUseCase: MarkAsFavoriteMovieUseCase
 ) : ViewModel() {
     private val _genres = mutableStateOf<GenreResponse?>(null)
-    private val _isLiked = mutableStateOf<Boolean>(false)
-    val isLiked: State<Boolean> = _isLiked
+    private var movie = Movie()
+
+
+    fun setMovie(value: Movie) = viewModelScope.launch {
+        movie = value
+    }
+
 
     init {
         setGenres()
@@ -36,7 +45,11 @@ class MovieViewModel(
         emit(genres.toList())
     }
 
+    fun rate(value: Float) = viewModelScope.launch {
+        rateMovieUseCase(movie.id ?: 1, value)
+    }
 
-
-
+    fun markFavorite() = viewModelScope.launch {
+        val response = markAsFavoriteMovieUseCase(movie.id ?: 1)
+    }
 }

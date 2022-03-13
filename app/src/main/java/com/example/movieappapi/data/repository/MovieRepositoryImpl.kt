@@ -17,22 +17,32 @@ import java.util.*
 class MovieRepositoryImpl(
     private val remote: TMDBRemoteDataSource
 ) : MovieRepository {
-
+    private var isUserGuest = false
     private var tokenResponse = TokenResponse()
     private var sessionResponse = SessionResponse()
+    private var guestSessionResponse = GuestSessionResponse()
     private var genreResponse = GenreResponse()
+    private var accountDetailsResponse = AccountDetailsResponse()
 
-    private suspend fun getTokenIfNull(context: Context) {
-        if (tokenResponse.requestToken.isNullOrBlank())
-            requestToken(context)
+    override suspend fun getAccountDetails() {
+        try {
+            Log.i("MovieRepositoryImpl", "getAccountDetails: called")
+            accountDetailsResponse = remote.getAccountDetails(getActiveToken() ?: "")
+            Log.i("MovieRepositoryImpl", "getAccountDetails: ${accountDetailsResponse.id}")
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getAccountDetails: ${exception.message}")
+        }
     }
 
-    override suspend fun getToken(context: Context): Resource<Boolean> {
+    override suspend fun getSession(
+        context: Context,
+        username: String,
+        password: String
+    ): Resource<Boolean> {
         return try {
-            assignCachedToken(context)
-            if (tokenResponse.success != true)
-                return requestToken(context)
-            Resource.Success(true)
+            if (isSameCachedUser(context, username, password))
+                assignCachedSession(context)
+            Resource.Success(sessionResponse.success == true)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getToken: ${exception.message}")
             Resource.Error(exception.localizedMessage)
@@ -40,10 +50,13 @@ class MovieRepositoryImpl(
 
     }
 
+    override suspend fun isCurrentUserGuest(): Boolean = isUserGuest
+
+    override suspend fun getSession(): SessionResponse = sessionResponse
+
     override suspend fun requestToken(context: Context): Resource<Boolean> {
         return try {
             tokenResponse = remote.requestToken()
-            updateToken(context, tokenResponse.requestToken ?: "", tokenResponse.expiresAt ?: "")
             Resource.Success(tokenResponse.success ?: false)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "requestToken: ${exception.message}")
@@ -58,7 +71,6 @@ class MovieRepositoryImpl(
         password: String
     ): Resource<Boolean> {
         return try {
-            getTokenIfNull(context)
             tokenResponse = remote.login(tokenResponse.requestToken ?: "", username, password)
             Resource.Success(tokenResponse.success ?: false)
         } catch (exception: Exception) {
@@ -67,9 +79,20 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun createSession(): Resource<Boolean> {
+    private suspend fun isSameCachedUser(
+        context: Context,
+        username: String,
+        password: String
+    ): Boolean {
+        val data = context.datastore.data.take(1).toList()[0]
+        return data.username == username && data.password == password
+    }
+
+    override suspend fun createSession(context: Context): Resource<Boolean> {
         return try {
+            isUserGuest = false
             sessionResponse = remote.createSession(tokenResponse.requestToken ?: "")
+            updateSession(context, sessionResponse.sessionId ?: "", tokenResponse.expiresAt ?: "")
             Resource.Success(sessionResponse.success ?: false)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "createSession: ${exception.message}")
@@ -178,28 +201,233 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun assignCachedToken(context: Context) {
+    override suspend fun assignCachedSession(context: Context) {
         val data = context.datastore.data.take(1).toList()[0]
         assignTokenFromDatastore(data)
     }
 
+    override suspend fun resetRepository() {
+        sessionResponse = SessionResponse()
+        tokenResponse = TokenResponse()
+        accountDetailsResponse = AccountDetailsResponse()
+        isUserGuest = false
+        guestSessionResponse = GuestSessionResponse()
+    }
+
     private fun assignTokenFromDatastore(it: AppData) {
         try {
-            tokenResponse.requestToken = it.accessToken
+            sessionResponse.sessionId = it.sessionId
             tokenResponse.expiresAt = it.expiresAt
-            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            val date = format.parse(it.expiresAt.substring(0, it.expiresAt.lastIndex - 2))
-            tokenResponse.success = date?.after(Date())
+            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ")
+            val date = format.parse(it.expiresAt)
+            sessionResponse.success = date?.after(Date())
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "assignTokenFromDatastore: ${exception.message}")
         }
     }
 
-    override suspend fun updateToken(context: Context, accessToken: String, expiresAt: String) {
+    override suspend fun createGuestSession(): Resource<Boolean> {
+        return try {
+            guestSessionResponse = remote.createGuestSession()
+            isUserGuest = true
+            Resource.Success(guestSessionResponse.success ?: false)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "createGuestSession: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun discoverMovies(): Resource<MoviesResponse> {
+        return try {
+            val response = remote.discoverMovies()
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "discoverMovies: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun getUserFavoriteMovies(): Resource<MoviesResponse> {
+        return try {
+            val response =
+                remote.getUserFavoriteMovies(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getUserFavoriteMovies: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    private fun getActiveToken() =
+        if (isUserGuest)
+            guestSessionResponse.guestSessionId
+        else
+            sessionResponse.sessionId
+
+    override suspend fun getUserMovieWatchList(): Resource<MoviesResponse> {
+        return try {
+            val response =
+                remote.getUserMovieWatchList(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getUserMovieWatchList: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun getUserRatedMovies(): Resource<MoviesResponse> {
+        return try {
+            val response =
+                remote.getUserRatedMovies(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getUserRatedMovies: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun getUserCreatedList(): Resource<UserListsResponse> {
+        return try {
+            val response =
+                remote.getUserCreatedList(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getUserCreatedList: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun markAsFavorite(
+        mediaId: Int,
+        mediaType: String,
+        isFavorite: Boolean
+    ): Resource<RateMediaResponse> {
+        return try {
+            val response = remote.markAsFavorite(
+                accountDetailsResponse.id ?: 1,
+                token = getActiveToken() ?: "",
+                mediaId = mediaId,
+                mediaType = mediaType,
+                isFavorite = isFavorite
+            )
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "markAsFavorite: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun addToWatchList(
+        mediaId: Int,
+        mediaType: String
+    ): Resource<RateMediaResponse> {
+        return try {
+            val response = remote.addToWatchList(mediaId, accountDetailsResponse.id ?: 1, mediaType)
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "addToWatchList: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun rateMovie(
+        movieId: Int,
+        value: Float
+    ): Resource<RateMediaResponse> {
+        return try {
+            val response = remote.rateMovie(movieId, getActiveToken() ?: "", value)
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "rateMovie: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun rateTv(
+        tvId: Int,
+        value: Float
+    ): Resource<RateMediaResponse> {
+        return try {
+            val response = remote.rateTv(tvId, getActiveToken() ?: "", value)
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "rateTv: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun getPopularTv(): Resource<TvShowsResponse> {
+        return try {
+            val response = remote.getPopularTv()
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getPopularTv: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun getUserFavoriteTv(): Resource<TvShowsResponse> {
+        return try {
+            val response =
+                remote.getUserFavoriteTv(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getUserFavoriteTv: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun getUserRatedTv(): Resource<TvShowsResponse> {
+        return try {
+            val response =
+                remote.getUserRatedTv(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getUserRatedTv: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun getUserRatedTvEpisodes(): Resource<TvShowsResponse> {
+        return try {
+            val response = remote.getUserRatedTvEpisodes(
+                accountDetailsResponse.id ?: 1,
+                getActiveToken() ?: ""
+            )
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getUserRatedTvEpisodes: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun getUserTvWatchList(): Resource<TvShowsResponse> {
+        return try {
+            val response =
+                remote.getUserTvWatchList(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getUserTvWatchList: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun discoverTv(): Resource<TvShowsResponse> {
+        return try {
+            val response = remote.discoverTv()
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "discoverTv: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun updateSession(context: Context, sessionId: String, expiresAt: String) {
         context.datastore.updateData {
+            Log.i("MovieRepositoryImpl", "updateToken: $expiresAt")
             it.toBuilder()
-                .setAccessToken(tokenResponse.requestToken)
-                .setExpiresAt(tokenResponse.expiresAt)
+                .setSessionId(sessionId)
+                .setExpiresAt(expiresAt)
                 .build()
         }
     }

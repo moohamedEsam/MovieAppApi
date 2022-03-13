@@ -13,5 +13,7 @@ class UpdateCachedUser(
         loggedIn: Boolean
     ) {
         repository.updateUser(context, username, password, loggedIn)
+        if (!loggedIn)
+            repository.resetRepository()
     }
 }

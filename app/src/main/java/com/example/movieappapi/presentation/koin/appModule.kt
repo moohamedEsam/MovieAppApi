@@ -7,6 +7,7 @@ import com.example.movieappapi.data.repository.dataSourceImpl.TMDBRemoteDataSour
 import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.useCase.*
 import com.example.movieappapi.domain.utils.Constants
+import com.example.movieappapi.presentation.screen.account.AccountViewModel
 import com.example.movieappapi.presentation.screen.home.MainFeedViewModel
 import com.example.movieappapi.presentation.screen.login.LoginViewModel
 import com.example.movieappapi.presentation.screen.movie.MovieViewModel
@@ -39,23 +40,26 @@ val useCaseModule = module {
     single { GetGenresUseCase(get()) }
     single { GetUserUseCase(get()) }
     single { UpdateCachedUser(get()) }
+    single { LoginAsGuestUseCase(get()) }
+    single { MarkAsFavoriteMovieUseCase(get()) }
+    single { RateMovieUseCase(get()) }
 }
 
 val repositoryModule = module {
     single { provideJson() }
     single { provideHttpClient(get()) }
-
     single { provideMovieRemoteDataSource() }
     single { provideMovieRepository() }
 }
 
 val viewModelsModule = module {
-    viewModel { LoginViewModel(get(), get(), get()) }
+    viewModel { LoginViewModel(get(), get(), get(), get()) }
     viewModel { MainFeedViewModel(get(), get(), get()) }
     viewModel { MovieRecommendationsViewModel(get(), get()) }
     viewModel { UserListsViewModel() }
-    viewModel { MovieViewModel(get()) }
+    viewModel { MovieViewModel(get(), get(), get()) }
     viewModel { SearchViewModel(get(), get(), get(), get()) }
+    viewModel { AccountViewModel(get()) }
 
 }
 

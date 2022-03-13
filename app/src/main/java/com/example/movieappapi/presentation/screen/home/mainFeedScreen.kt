@@ -35,6 +35,7 @@ import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
 import com.example.movieappapi.presentation.screen.home.MainFeedViewModel
+import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
