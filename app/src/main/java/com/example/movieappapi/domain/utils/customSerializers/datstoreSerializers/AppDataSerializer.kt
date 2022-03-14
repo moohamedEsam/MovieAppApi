@@ -1,4 +1,4 @@
-package com.example.movieappapi.domain.utils.datstoreSerializers
+package com.example.movieappapi.domain.utils.customSerializers.datstoreSerializers
 
 import android.util.Log
 import androidx.datastore.core.Serializer

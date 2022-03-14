@@ -1,6 +1,5 @@
 package com.example.movieappapi.domain.repository
 
-import UserRatedTvEpisodesResponse
 import android.content.Context
 import com.example.movieappapi.AppData
 import com.example.movieappapi.domain.model.*
@@ -23,6 +22,8 @@ interface MovieRepository {
     suspend fun createSession(context: Context): Resource<Boolean>
 
     suspend fun createGuestSession(): Resource<Boolean>
+
+    suspend fun getMovieDetails(movieId: Int): Resource<MovieDetailsResponse>
 
     suspend fun getPopularMovies(): Resource<MoviesResponse>
 

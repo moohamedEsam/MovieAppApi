@@ -20,6 +20,7 @@ object Url {
     const val SEARCH_TV = "${BASE_URL}search/tv"
     const val GENRES = "${BASE_URL}genre/movie/list"
     fun getImageUrl(path: String) = "${BASE_IMAGE_URL}original/$path"
+    fun getMovieDetails(movieId: Int) = "${BASE_URL}movie/$movieId"
     fun getRecommendations(movieId: Int) = "${BASE_URL}movie/$movieId/recommendations"
     fun getSimilarMovies(movieId: Int) = "${BASE_URL}movie/$movieId/similar"
     fun rateMovie(movieId: Int) = "${BASE_URL}/movie/${movieId}/rating"

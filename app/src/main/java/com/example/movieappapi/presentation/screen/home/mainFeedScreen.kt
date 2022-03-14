@@ -35,8 +35,6 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.delay
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -166,7 +164,7 @@ fun PagerMovieItem(movie: Movie, navHostController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .clickable {
-                navigateToMovieDetail(movie, navHostController)
+                navigateToMovieDetail(movie.id ?: 0, navHostController)
             },
         contentScale = ContentScale.FillBounds
     )
@@ -174,13 +172,9 @@ fun PagerMovieItem(movie: Movie, navHostController: NavHostController) {
 
 
 fun navigateToMovieDetail(
-    movie: Movie,
+    movieId: Int,
     navHostController: NavHostController
 ) {
-    val json = Json { isLenient = true }
-    val movieString = json
-        .encodeToString(movie)
-        .replace("/", "*")
-    navHostController.navigate("${Screens.MOVIE_DETAILS}/$movieString")
+    navHostController.navigate("${Screens.MOVIE_DETAILS}/$movieId")
 }
 

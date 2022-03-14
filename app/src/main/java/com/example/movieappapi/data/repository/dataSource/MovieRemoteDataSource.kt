@@ -1,9 +1,12 @@
 package com.example.movieappapi.data.repository.dataSource
 
+import com.example.movieappapi.domain.model.MovieDetailsResponse
 import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.model.RateMediaResponse
 
 interface MovieRemoteDataSource {
+
+    suspend fun getMovieDetails(movieId: Int, sessionId: String): MovieDetailsResponse
 
     suspend fun getPopularMovies(): MoviesResponse
 

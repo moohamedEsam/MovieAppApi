@@ -1,13 +1,16 @@
 package com.example.movieappapi.presentation.screen.movie
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieappapi.domain.model.GenreResponse
-import com.example.movieappapi.domain.model.Movie
+import com.example.movieappapi.domain.model.MovieDetailsResponse
 import com.example.movieappapi.domain.useCase.GetGenresUseCase
+import com.example.movieappapi.domain.useCase.GetMovieDetailsUseCase
 import com.example.movieappapi.domain.useCase.MarkAsFavoriteMovieUseCase
 import com.example.movieappapi.domain.useCase.RateMovieUseCase
+import com.example.movieappapi.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -15,14 +18,18 @@ import kotlinx.coroutines.launch
 class MovieViewModel(
     private val genresUseCase: GetGenresUseCase,
     private val rateMovieUseCase: RateMovieUseCase,
-    private val markAsFavoriteMovieUseCase: MarkAsFavoriteMovieUseCase
+    private val markAsFavoriteMovieUseCase: MarkAsFavoriteMovieUseCase,
+    private val movieDetailsUseCase: GetMovieDetailsUseCase
 ) : ViewModel() {
     private val _genres = mutableStateOf<GenreResponse?>(null)
-    private var movie = Movie()
+
+    private val _movie = mutableStateOf<Resource<MovieDetailsResponse>>(Resource.Initialized())
+    val movie: State<Resource<MovieDetailsResponse>> = _movie
 
 
-    fun setMovie(value: Movie) = viewModelScope.launch {
-        movie = value
+    fun setMovie(movieId: Int) = viewModelScope.launch {
+        _movie.value = Resource.Loading()
+        _movie.value = movieDetailsUseCase(movieId)
     }
 
 
@@ -45,11 +52,4 @@ class MovieViewModel(
         emit(genres.toList())
     }
 
-    fun rate(value: Float) = viewModelScope.launch {
-        rateMovieUseCase(movie.id ?: 1, value)
-    }
-
-    fun markFavorite() = viewModelScope.launch {
-        val response = markAsFavoriteMovieUseCase(movie.id ?: 1)
-    }
 }

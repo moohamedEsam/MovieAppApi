@@ -45,7 +45,10 @@ fun HorizontalListMovieItem(movie: Movie, navHostController: NavHostController) 
             Card(modifier = Modifier
                 .size(90.dp, 120.dp)
                 .clickable {
-                    navigateToMovieDetail(movie = movie, navHostController = navHostController)
+                    navigateToMovieDetail(
+                        movieId = movie.id ?: 0,
+                        navHostController = navHostController
+                    )
                 }
             ) {
                 Image(

@@ -1,6 +1,5 @@
 package com.example.movieappapi.data.repository.dataSource
 
-import UserRatedTvEpisodesResponse
 import com.example.movieappapi.domain.model.*
 
 interface TMDBRemoteDataSource : MovieRemoteDataSource, TVRemoteDataSource {

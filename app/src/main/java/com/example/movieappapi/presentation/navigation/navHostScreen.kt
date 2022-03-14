@@ -13,7 +13,6 @@ import com.example.movieappapi.composables.MainFeed
 import com.example.movieappapi.composables.SearchScreen
 import com.example.movieappapi.composables.SimilarMovieScreen
 import com.example.movieappapi.composables.UserListsScreen
-import com.example.movieappapi.domain.model.Movie
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.UserMovieList
 import com.example.movieappapi.presentation.screen.account.AccountScreen
@@ -22,8 +21,6 @@ import com.example.movieappapi.presentation.screen.movie.MovieDetails
 import com.example.movieappapi.presentation.screen.userMoviesList.UserMovieListScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
 @ExperimentalAnimationApi
 @ExperimentalSerializationApi
@@ -54,13 +51,13 @@ fun NavHostScreen(navHostController: NavHostController, startDestination: String
             AccountScreen(navHostController = navHostController)
         }
         composable(
-            "${Screens.MOVIE_DETAILS}/{movie}", arguments = listOf(
-                navArgument("movie") {
-                    type = NavType.StringType
+            "${Screens.MOVIE_DETAILS}/{movieId}", arguments = listOf(
+                navArgument("movieId") {
+                    type = NavType.IntType
                 }
             )) {
-            val movie: Movie = getMovieFromStack(it)
-            MovieDetails(movie = movie, navHostController = navHostController)
+            val movieId = getMovieFromStack(it)
+            MovieDetails(movieId = movieId, navHostController = navHostController)
         }
         composable(
             "${Screens.SIMILAR_MOVIES_SCREEN}/{movieId}/{posterPath}",
@@ -112,12 +109,4 @@ fun NavHostScreen(navHostController: NavHostController, startDestination: String
 }
 
 @Composable
-fun getMovieFromStack(it: NavBackStackEntry): Movie {
-    var movieString = it.arguments?.getString("movie", "") ?: ""
-    movieString = movieString.replace("*", "/")
-    val json = Json {
-        isLenient = true
-        ignoreUnknownKeys = true
-    }
-    return json.decodeFromString(movieString)
-}
+fun getMovieFromStack(it: NavBackStackEntry): Int = it.arguments?.getInt("movieId", 0) ?: 0

@@ -1,6 +1,5 @@
 package com.example.movieappapi.data.repository
 
-import UserRatedTvEpisodesResponse
 import android.content.Context
 import android.util.Log
 import com.example.movieappapi.AppData
@@ -256,6 +255,16 @@ class MovieRepositoryImpl(
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getUserFavoriteMovies: ${exception.message}")
             Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun getMovieDetails(movieId: Int): Resource<MovieDetailsResponse> {
+        return try {
+            val response = remote.getMovieDetails(movieId, sessionResponse.sessionId ?: "")
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getMovieDetails: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
         }
     }
 

@@ -1,6 +1,5 @@
 package com.example.movieappapi.data.repository.dataSourceImpl
 
-import UserRatedTvEpisodesResponse
 import com.example.movieappapi.data.repository.dataSource.TMDBRemoteDataSource
 import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.utils.Url
@@ -30,6 +29,12 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
     override suspend fun getUserFavoriteMovies(accountId: Int, token: String): MoviesResponse =
         client.get(Url.getUserFavoriteMovies(accountId)) {
             parameter("session_id", token)
+        }
+
+    override suspend fun getMovieDetails(movieId: Int, sessionId: String): MovieDetailsResponse =
+        client.get(Url.getMovieDetails(movieId)) {
+            parameter("session_id", sessionId)
+            parameter("append_to_response", "account_states")
         }
 
     override suspend fun getUserFavoriteTv(accountId: Int, token: String): TvShowsResponse =

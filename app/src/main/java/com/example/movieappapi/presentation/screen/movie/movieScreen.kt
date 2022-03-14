@@ -15,12 +15,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -29,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import com.example.movieappapi.domain.model.Movie
+import com.example.movieappapi.domain.model.MovieDetailsResponse
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
 import org.koin.androidx.compose.getViewModel
@@ -37,50 +41,84 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
-fun MovieDetails(movie: Movie, navHostController: NavHostController) {
+fun MovieDetails(movieId: Int, navHostController: NavHostController) {
     val viewModel: MovieViewModel = getViewModel()
+    val movie by viewModel.movie
     LaunchedEffect(key1 = Unit) {
-        viewModel.setMovie(movie)
+        viewModel.setMovie(movieId)
     }
+
     Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = rememberImagePainter(data = Url.getImageUrl(movie.posterPath ?: "")),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
-        MovieDescription(
-            movie = movie,
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.4f)
-                .align(Alignment.BottomStart),
-            navHostController = navHostController
-        )
-        Column(
-            modifier = Modifier
-                .padding(8.dp)
-                .align(Alignment.TopEnd)
-        ) {
-            ActionIcon(
-                modifier = Modifier,
-                icon = Icons.Outlined.Favorite
-            ) {
-                viewModel.markFavorite()
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            ActionIcon(modifier = Modifier, icon = Icons.Default.StarRate) {
-                viewModel.rate(10f)
-            }
+        movie.HandleResourceChange {
+            movie.data?.let { data -> MovieUi(data, navHostController) }
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class, coil.annotation.ExperimentalCoilApi::class)
+@Composable
+private fun BoxScope.MovieUi(
+    movie: MovieDetailsResponse,
+    navHostController: NavHostController
+) {
+
+    Image(
+        painter = rememberImagePainter(data = Url.getImageUrl(movie.posterPath ?: "")),
+        contentDescription = null,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.FillBounds
+    )
+    MovieDescription(
+        movie = movie,
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.4f)
+            .align(Alignment.BottomStart),
+        navHostController = navHostController
+    )
+    MovieActionIconsColumn(movie, Modifier.align(Alignment.TopEnd))
+
+}
+
+@Composable
+private fun MovieActionIconsColumn(movie: MovieDetailsResponse, modifier: Modifier) {
+    Column(
+        modifier = modifier.padding(8.dp)
+    ) {
+        val favorite = movie.accountStatesResponse?.favorite ?: false
+        val rated = movie.accountStatesResponse?.rated?.isRated ?: false
+        IconButton(onClick = { }) {
+            Icon(
+                imageVector = if (favorite)
+                    Icons.Filled.Favorite
+                else
+                    Icons.Outlined.Favorite, contentDescription = null,
+                tint = if (favorite)
+                    Color.Red
+                else
+                    Color.White
+            )
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        IconButton(onClick = { }) {
+            Icon(
+                imageVector = Icons.Filled.StarRate,
+                contentDescription = null,
+                tint = if (rated)
+                    Color.Yellow
+                else
+                    Color.White
+            )
+        }
     }
 }
 
 @ExperimentalAnimationApi
 @Composable
 private fun MovieDescription(
-    movie: Movie,
+    movie: MovieDetailsResponse,
     modifier: Modifier,
     navHostController: NavHostController
 ) {
@@ -88,8 +126,6 @@ private fun MovieDescription(
         MutableTransitionState(false).apply { targetState = true }
     }
     val viewModel: MovieViewModel = getViewModel()
-    val genres by viewModel.getMovieGenres(movie.genreIds ?: emptyList())
-        .collectAsState(emptyList())
     AnimatedVisibility(
         visibleState = isVisible,
         enter = expandVertically(expandFrom = Alignment.Top, animationSpec = tween(2000)) + fadeIn(
@@ -123,7 +159,7 @@ private fun MovieDescription(
                     }
                 }
                 CreateVerticalSpacer(4.dp)
-                GenreChipsList(genres = genres)
+                GenreChipsList(genres = movie.genres?.mapNotNull { it.name } ?: emptyList())
                 CreateVerticalSpacer(dp = 4.dp)
                 Text(text = movie.overview ?: "")
                 CreateVerticalSpacer(4.dp)
@@ -158,18 +194,6 @@ fun GenreChipsList(genres: List<String>) {
                 color = MaterialTheme.colors.onSecondary
             )
         }
-    }
-}
-
-@Composable
-fun ActionIcon(modifier: Modifier, icon: ImageVector, onClick: () -> Unit) {
-    IconButton(
-        onClick = {
-            onClick()
-        },
-        modifier = modifier
-    ) {
-        Icon(imageVector = icon, contentDescription = null)
     }
 }
 
