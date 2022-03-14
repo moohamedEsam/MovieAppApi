@@ -15,9 +15,11 @@ import com.example.movieappapi.composables.SimilarMovieScreen
 import com.example.movieappapi.composables.UserListsScreen
 import com.example.movieappapi.domain.model.Movie
 import com.example.movieappapi.domain.utils.Screens
+import com.example.movieappapi.domain.utils.UserMovieList
 import com.example.movieappapi.presentation.screen.account.AccountScreen
 import com.example.movieappapi.presentation.screen.login.LoginScreen
 import com.example.movieappapi.presentation.screen.movie.MovieDetails
+import com.example.movieappapi.presentation.screen.userMoviesList.UserMovieListScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
@@ -84,11 +86,26 @@ fun NavHostScreen(navHostController: NavHostController, startDestination: String
             )
         }
 
-        composable(Screens.ACCOUNT_Favorite_Movies) {}
+        composable(Screens.ACCOUNT_Favorite_Movies) {
+            UserMovieListScreen(
+                navHostController = navHostController,
+                listType = UserMovieList.FavoriteMovies
+            )
+        }
         composable(Screens.ACCOUNT_Favorite_Tv) {}
-        composable(Screens.ACCOUNT_Rated_Movies) {}
+        composable(Screens.ACCOUNT_Rated_Movies) {
+            UserMovieListScreen(
+                navHostController = navHostController,
+                listType = UserMovieList.RatedMovies
+            )
+        }
         composable(Screens.ACCOUNT_Rated_Tv) {}
-        composable(Screens.ACCOUNT_Watchlist_Movies) {}
+        composable(Screens.ACCOUNT_Watchlist_Movies) {
+            UserMovieListScreen(
+                navHostController = navHostController,
+                listType = UserMovieList.MoviesWatchlist
+            )
+        }
         composable(Screens.ACCOUNT_Watchlist_TV) {}
     }
 

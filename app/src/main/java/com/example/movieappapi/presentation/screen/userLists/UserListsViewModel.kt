@@ -9,7 +9,9 @@ import com.example.movieappapi.domain.model.UserListsResponse
 import com.example.movieappapi.domain.utils.Resource
 import kotlinx.coroutines.launch
 
-class UserListsViewModel : ViewModel() {
+class UserListsViewModel : ViewModel(
+
+) {
     private val _userLists = mutableStateOf<Resource<UserListsResponse>>(Resource.Initialized())
     val userLists: State<Resource<UserListsResponse>> = _userLists
 

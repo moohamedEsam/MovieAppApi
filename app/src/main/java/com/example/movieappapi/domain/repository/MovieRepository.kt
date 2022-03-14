@@ -1,5 +1,6 @@
 package com.example.movieappapi.domain.repository
 
+import UserRatedTvEpisodesResponse
 import android.content.Context
 import com.example.movieappapi.AppData
 import com.example.movieappapi.domain.model.*
@@ -43,7 +44,6 @@ interface MovieRepository {
 
     suspend fun getUserRatedMovies(): Resource<MoviesResponse>
 
-
     suspend fun searchAll(query: String): Resource<AllSearchResponse>
 
     suspend fun searchMovie(query: String): Resource<MoviesResponse>
@@ -81,7 +81,7 @@ interface MovieRepository {
 
     suspend fun getUserRatedTv(): Resource<TvShowsResponse>
 
-    suspend fun getUserRatedTvEpisodes(): Resource<TvShowsResponse>
+    suspend fun getUserRatedTvEpisodes(): Resource<UserRatedTvEpisodesResponse>
 
     suspend fun getUserTvWatchList(): Resource<TvShowsResponse>
 

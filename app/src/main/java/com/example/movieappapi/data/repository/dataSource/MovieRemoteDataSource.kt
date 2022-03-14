@@ -13,12 +13,6 @@ interface MovieRemoteDataSource {
 
     suspend fun getNowPlayingMovies(): MoviesResponse
 
-    suspend fun getUserFavoriteMovies(accountId: Int, token: String): MoviesResponse
-
-    suspend fun getUserMovieWatchList(accountId: Int, token: String): MoviesResponse
-
-    suspend fun getUserRatedMovies(accountId: Int, token: String): MoviesResponse
-
     suspend fun getUpcomingMovies(): MoviesResponse
 
     suspend fun getRecommendations(movieId: Int): MoviesResponse

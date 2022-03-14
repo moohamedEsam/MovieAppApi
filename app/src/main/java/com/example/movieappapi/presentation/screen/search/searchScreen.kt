@@ -1,11 +1,7 @@
 package com.example.movieappapi.composables
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,17 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
 import com.example.movieappapi.domain.model.AllSearchResponse
 import com.example.movieappapi.domain.model.Result
-import com.example.movieappapi.domain.utils.Url
+import com.example.movieappapi.presentation.components.SearchItem
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.example.movieappapi.presentation.screen.search.SearchViewModel
 import com.example.movieappapi.ui.theme.MovieAppApiTheme
@@ -98,50 +90,11 @@ private fun ShowSearchResults(results: AllSearchResponse) {
 private fun ShowResults(items: List<Result>) {
     LazyColumn {
         items(items) { item ->
-            SearchListItem(result = item)
+            SearchItem(result = item)
         }
     }
 }
 
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@Composable
-fun SearchListItem(result: Result) {
-    val isVisible = remember {
-        MutableTransitionState(false).apply { targetState = true }
-    }
-    AnimatedVisibility(
-        visibleState = isVisible,
-        enter = fadeIn(animationSpec = tween(1000)),
-        exit = slideOutHorizontally(animationSpec = tween(1000))
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(BorderStroke(4.dp, Color.Black))
-                .padding(8.dp)
-        ) {
-            Row {
-                Image(
-                    painter = rememberImagePainter(
-                        data = Url.getImageUrl(
-                            result.posterPath ?: result.profilePath ?: ""
-                        )
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier.size(120.dp, 120.dp),
-                    contentScale = ContentScale.FillBounds
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = result.originalTitle ?: result.name ?: "",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun FilterBox() {

@@ -1,5 +1,6 @@
 package com.example.movieappapi.data.repository
 
+import UserRatedTvEpisodesResponse
 import android.content.Context
 import android.util.Log
 import com.example.movieappapi.AppData
@@ -388,7 +389,7 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getUserRatedTvEpisodes(): Resource<TvShowsResponse> {
+    override suspend fun getUserRatedTvEpisodes(): Resource<UserRatedTvEpisodesResponse> {
         return try {
             val response = remote.getUserRatedTvEpisodes(
                 accountDetailsResponse.id ?: 1,

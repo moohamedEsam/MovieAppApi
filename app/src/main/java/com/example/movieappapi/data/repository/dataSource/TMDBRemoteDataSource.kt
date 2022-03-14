@@ -1,5 +1,6 @@
 package com.example.movieappapi.data.repository.dataSource
 
+import UserRatedTvEpisodesResponse
 import com.example.movieappapi.domain.model.*
 
 interface TMDBRemoteDataSource : MovieRemoteDataSource, TVRemoteDataSource {
@@ -15,6 +16,21 @@ interface TMDBRemoteDataSource : MovieRemoteDataSource, TVRemoteDataSource {
     suspend fun createGuestSession(): GuestSessionResponse
 
     suspend fun getUserCreatedList(accountId: Int, token: String): UserListsResponse
+
+    suspend fun getUserFavoriteMovies(accountId: Int, token: String): MoviesResponse
+
+    suspend fun getUserMovieWatchList(accountId: Int, token: String): MoviesResponse
+
+    suspend fun getUserRatedMovies(accountId: Int, token: String): MoviesResponse
+
+    suspend fun getUserFavoriteTv(accountId: Int, token: String): TvShowsResponse
+
+    suspend fun getUserTvWatchList(accountId: Int, token: String): TvShowsResponse
+
+    suspend fun getUserRatedTv(accountId: Int, token: String): TvShowsResponse
+
+    suspend fun getUserRatedTvEpisodes(accountId: Int, token: String): UserRatedTvEpisodesResponse
+
 
     suspend fun markAsFavorite(
         accountId: Int,

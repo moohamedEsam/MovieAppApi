@@ -1,12 +1,7 @@
 package com.example.movieappapi.composables
 
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,12 +9,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +27,7 @@ import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
+import com.example.movieappapi.presentation.components.HorizontalListMovieItem
 import com.example.movieappapi.presentation.screen.home.MainFeedViewModel
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -158,42 +152,6 @@ fun HorizontalMovieList(movies: List<Movie>, navHostController: NavHostControlle
     LazyRow(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(horizontal = 8.dp)) {
         items(movies) {
             HorizontalListMovieItem(movie = it, navHostController = navHostController)
-        }
-    }
-}
-
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@Composable
-fun HorizontalListMovieItem(movie: Movie, navHostController: NavHostController) {
-    val isVisible = remember {
-        MutableTransitionState(false).apply { targetState = true }
-    }
-    AnimatedVisibility(
-        visibleState = isVisible,
-        enter = fadeIn(animationSpec = tween(1000)),
-        exit = slideOutVertically()
-    ) {
-        Column(
-            modifier = Modifier
-                .width(90.dp)
-                .padding(horizontal = 4.dp)
-        ) {
-            Card(modifier = Modifier
-                .size(90.dp, 120.dp)
-                .clickable {
-                    navigateToMovieDetail(movie = movie, navHostController = navHostController)
-                }
-            ) {
-                Image(
-                    painter = rememberImagePainter(data = Url.getImageUrl(movie.posterPath ?: "")),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.FillBounds
-                )
-            }
-            CreateVerticalSpacer(2.dp)
-            Text(text = movie.title ?: "", maxLines = 2, fontWeight = FontWeight.Bold)
         }
     }
 }
