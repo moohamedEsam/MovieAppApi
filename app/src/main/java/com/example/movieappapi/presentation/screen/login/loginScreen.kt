@@ -52,14 +52,14 @@ fun LoginScreen(navHostController: NavHostController) {
                 .align(Alignment.Center),
             navHostController = navHostController
         )
-        SignUpText(
+        ContinueAsGuest(
             modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
 }
 
 @Composable
-fun SignUpText(modifier: Modifier) {
+fun ContinueAsGuest(modifier: Modifier) {
     val viewModel: LoginViewModel = getViewModel()
     Text(
         text = "Continue as Guest",
@@ -119,7 +119,6 @@ fun LoginButton(
         Button(
             onClick = {
                 viewModel.login(context)
-                isVisible.targetState = false
             },
             modifier = modifier,
             enabled = isVisible.currentState,

@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.movieappapi.AppData
 import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.utils.Resource
+import com.example.movieappapi.domain.utils.UserStatus
 import kotlinx.coroutines.flow.Flow
 
 
@@ -17,6 +18,8 @@ interface MovieRepository {
 
     suspend fun getAccountDetails()
 
+    suspend fun getAccountStatus(): UserStatus
+
     suspend fun resetRepository()
 
     suspend fun createSession(context: Context): Resource<Boolean>
@@ -25,19 +28,19 @@ interface MovieRepository {
 
     suspend fun getMovieDetails(movieId: Int): Resource<MovieDetailsResponse>
 
-    suspend fun getPopularMovies(): Resource<MoviesResponse>
+    suspend fun getPopularMovies(page: Int = 0): Resource<MoviesResponse>
 
-    suspend fun getTopRatedMovies(): Resource<MoviesResponse>
+    suspend fun getTopRatedMovies(page: Int = 0): Resource<MoviesResponse>
 
-    suspend fun getNowPlayingMovies(): Resource<MoviesResponse>
+    suspend fun getNowPlayingMovies(page: Int = 0): Resource<MoviesResponse>
 
-    suspend fun getUpcomingMovies(): Resource<MoviesResponse>
+    suspend fun getUpcomingMovies(page: Int = 0): Resource<MoviesResponse>
 
-    suspend fun getRecommendations(movieId: Int): Resource<MoviesResponse>
+    suspend fun getRecommendations(movieId: Int, page: Int = 0): Resource<MoviesResponse>
 
-    suspend fun getSimilarMovies(movieId: Int): Resource<MoviesResponse>
+    suspend fun getSimilarMovies(movieId: Int, page: Int = 0): Resource<MoviesResponse>
 
-    suspend fun discoverMovies(): Resource<MoviesResponse>
+    suspend fun discoverMovies(page: Int = 0): Resource<MoviesResponse>
 
     suspend fun getUserFavoriteMovies(): Resource<MoviesResponse>
 
@@ -47,7 +50,7 @@ interface MovieRepository {
 
     suspend fun searchAll(query: String): Resource<AllSearchResponse>
 
-    suspend fun searchMovie(query: String): Resource<MoviesResponse>
+    suspend fun searchMovie(query: String, page: Int = 0): Resource<MoviesResponse>
 
     suspend fun searchTv(query: String): Resource<TvShowsResponse>
 
@@ -71,10 +74,14 @@ interface MovieRepository {
         value: Float
     ): Resource<RateMediaResponse>
 
+    suspend fun deleteRateMovie(movieId: Int): Resource<RateMediaResponse>
+
     suspend fun rateTv(
         tvId: Int,
         value: Float
     ): Resource<RateMediaResponse>
+
+    suspend fun deleteRateTv(tvId: Int): Resource<RateMediaResponse>
 
     suspend fun getPopularTv(): Resource<TvShowsResponse>
 

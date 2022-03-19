@@ -9,7 +9,7 @@ data class AllSearchResponse(
     @SerialName("page")
     var page: Int? = null,
     @SerialName("results")
-    var results: List<Result>? = null,
+    var searchResults: List<SearchResult>? = null,
     @SerialName("total_pages")
     var totalPages: Int? = null,
     @SerialName("total_results")

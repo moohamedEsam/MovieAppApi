@@ -1,13 +1,10 @@
 package com.example.movieappapi.domain.model
 
-
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Avatar(
-    @SerialName("gravatar")
-    var gravatar: Gravatar? = null,
-    @SerialName("tmdb")
-    var tmdb: Tmdb? = null
-)
+class Tmdb {
+    @SerialName("avatar_path")
+    var avatarPath: String? = null
+}

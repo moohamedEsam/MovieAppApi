@@ -8,25 +8,24 @@ interface MovieRemoteDataSource {
 
     suspend fun getMovieDetails(movieId: Int, sessionId: String): MovieDetailsResponse
 
-    suspend fun getPopularMovies(): MoviesResponse
+    suspend fun getPopularMovies(page: Int = 0): MoviesResponse
 
-    suspend fun discoverMovies(): MoviesResponse
+    suspend fun discoverMovies(page: Int = 0): MoviesResponse
 
-    suspend fun getTopRatedMovies(): MoviesResponse
+    suspend fun getTopRatedMovies(page: Int = 0): MoviesResponse
 
-    suspend fun getNowPlayingMovies(): MoviesResponse
+    suspend fun getNowPlayingMovies(page: Int = 0): MoviesResponse
 
-    suspend fun getUpcomingMovies(): MoviesResponse
+    suspend fun getUpcomingMovies(page: Int = 0): MoviesResponse
 
-    suspend fun getRecommendations(movieId: Int): MoviesResponse
+    suspend fun getRecommendations(movieId: Int, page: Int = 0): MoviesResponse
 
-    suspend fun getSimilarMovies(movieId: Int): MoviesResponse
+    suspend fun getSimilarMovies(movieId: Int, page: Int = 0): MoviesResponse
 
-    suspend fun searchMovie(query: String): MoviesResponse
+    suspend fun searchMovie(query: String, page: Int = 0): MoviesResponse
 
     suspend fun rateMovie(movieId: Int, token: String, value: Float): RateMediaResponse
 
     suspend fun deleteMovieRating(movieId: Int, token: String): RateMediaResponse
-
 
 }

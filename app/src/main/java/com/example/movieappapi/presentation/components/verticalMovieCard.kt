@@ -23,49 +23,7 @@ import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.movieappapi.domain.model.Movie
-import com.example.movieappapi.domain.model.Result
 import com.example.movieappapi.domain.utils.Url
-
-
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@Composable
-fun SearchItem(result: Result) {
-    val isVisible = remember {
-        MutableTransitionState(false).apply { targetState = true }
-    }
-    AnimatedVisibility(
-        visibleState = isVisible,
-        enter = fadeIn(animationSpec = tween(1000)),
-        exit = slideOutHorizontally(animationSpec = tween(1000))
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(BorderStroke(4.dp, Color.Black))
-                .padding(8.dp)
-        ) {
-            Row {
-                Image(
-                    painter = rememberImagePainter(
-                        data = Url.getImageUrl(
-                            result.posterPath ?: result.profilePath ?: ""
-                        )
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier.size(120.dp, 120.dp),
-                    contentScale = ContentScale.FillBounds
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = result.originalTitle ?: result.name ?: "",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
 
 
 @ExperimentalAnimationApi

@@ -28,7 +28,7 @@ fun TextFieldSetup(
     colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors()
 ) {
     var isError by remember {
-        mutableStateOf(error(text))
+        mutableStateOf(false)
     }
     OutlinedTextField(
         value = text,

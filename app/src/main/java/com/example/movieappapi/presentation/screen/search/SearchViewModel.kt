@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieappapi.domain.model.AllSearchResponse
 import com.example.movieappapi.domain.model.GenreResponse
-import com.example.movieappapi.domain.model.Result
+import com.example.movieappapi.domain.model.SearchResult
 import com.example.movieappapi.domain.useCase.GetGenresUseCase
 import com.example.movieappapi.domain.useCase.SearchAllUseCase
 import com.example.movieappapi.domain.useCase.SearchMoviesUseCase
@@ -42,8 +42,8 @@ class SearchViewModel(
     private val _genreFilter = mutableStateOf<String>("all")
     val genreFilter: State<String> = _genreFilter
 
-    private val _filteredItems = mutableStateOf<List<Result>>(emptyList())
-    val filteredItems: State<List<Result>> = _filteredItems
+    private val _filteredItems = mutableStateOf<List<SearchResult>>(emptyList())
+    val filteredItems: State<List<SearchResult>> = _filteredItems
 
     fun setGenreFilter(value: String) = viewModelScope.launch {
         _genreFilter.value = value
@@ -72,21 +72,21 @@ class SearchViewModel(
     }
 
     private fun filterResultsByQuery(query: String) =
-        _searchResults.value.data?.results?.filter {
+        _searchResults.value.data?.searchResults?.filter {
             it.originalName?.contains(query) == true
                     || it.originalTitle?.contains(query) == true
         }
 
-    private fun setSearchResults(results: List<Result>) {
+    private fun setSearchResults(searchResults: List<SearchResult>) {
         _filterMode.value = false
         _searchResults.value = Resource.Loading()
-        _searchResults.value.data?.results = results
+        _searchResults.value.data?.searchResults = searchResults
     }
 
     fun filterResults(dispatcher: CoroutineDispatcher = Dispatchers.Default) =
         viewModelScope.launch(context = dispatcher) {
             _filterMode.value = true
-            _filteredItems.value = _searchResults.value.data?.results ?: emptyList()
+            _filteredItems.value = _searchResults.value.data?.searchResults ?: emptyList()
             filterByType()
             filterByGenre()
             sortResults()

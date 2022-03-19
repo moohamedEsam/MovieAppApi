@@ -15,11 +15,12 @@ class UserListsViewModel : ViewModel(
     private val _userLists = mutableStateOf<Resource<UserListsResponse>>(Resource.Initialized())
     val userLists: State<Resource<UserListsResponse>> = _userLists
 
+
     init {
         setUserLists()
     }
 
-    fun setUserLists() = viewModelScope.launch {
+    private fun setUserLists() = viewModelScope.launch {
         _userLists.value = Resource.Loading()
         //_userLists.value = repository.getUserFavouriteLists()
         if (_userLists.value is Resource.Success)

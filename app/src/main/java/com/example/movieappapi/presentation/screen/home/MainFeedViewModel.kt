@@ -21,12 +21,15 @@ class MainFeedViewModel(
 
     private val _popularMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
     val popularMovies: State<Resource<MoviesResponse>> = _popularMovies
+    private var popularPage = 0
 
     private val _topRatedMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
     val topRatedMovies: State<Resource<MoviesResponse>> = _topRatedMovies
+    private var topPage = 0
 
     private val _nowPlayingMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
     val nowPlayingMovies: State<Resource<MoviesResponse>> = _nowPlayingMovies
+    private var nowPlayingPage = 0
 
     init {
         setPopularMovies()
@@ -34,20 +37,42 @@ class MainFeedViewModel(
         setTopRatedMovies()
     }
 
-    private fun setNowPlayingMovies() = viewModelScope.launch {
+    fun setNowPlayingMovies() = viewModelScope.launch {
+        if (nowPlayingPage++ > nowPlayingMovies.value.data?.totalPages ?: 0) return@launch
+        var movies = _nowPlayingMovies.value.data?.results
         _nowPlayingMovies.value = Resource.Loading()
-        _nowPlayingMovies.value = nowPlayingMoviesUseCase()
+        val response = nowPlayingMoviesUseCase(nowPlayingPage)
+        if (response is Resource.Success) {
+            movies = movies?.plus(response.data?.results ?: emptyList())
+            response.data?.results = movies
+            _nowPlayingMovies.value = response
+        }
     }
 
 
-    private fun setTopRatedMovies() = viewModelScope.launch {
+    fun setTopRatedMovies() = viewModelScope.launch {
+        if (topPage++ > topRatedMovies.value.data?.totalPages ?: 0) return@launch
+        var movies = _topRatedMovies.value.data?.results
         _topRatedMovies.value = Resource.Loading()
-        _topRatedMovies.value = topRatedUseCase()
+        val response = topRatedUseCase(topPage)
+        if (response is Resource.Success) {
+            movies = movies?.plus(response.data?.results ?: emptyList())
+            response.data?.results = movies
+            _topRatedMovies.value = response
+        }
     }
 
 
-    private fun setPopularMovies() = viewModelScope.launch {
+    fun setPopularMovies() = viewModelScope.launch {
+        if (popularPage++ > popularMovies.value.data?.totalPages ?: 0) return@launch
+        var movies = _popularMovies.value.data?.results
         _popularMovies.value = Resource.Loading()
-        _popularMovies.value = popularMoviesUseCase()
+        val response = popularMoviesUseCase(popularPage)
+        if (response is Resource.Success) {
+            movies = movies?.plus(response.data?.results ?: emptyList())
+            response.data?.results = movies
+            _popularMovies.value = response
+        }
+
     }
 }

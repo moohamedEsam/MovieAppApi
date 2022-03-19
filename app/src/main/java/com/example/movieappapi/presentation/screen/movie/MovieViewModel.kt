@@ -6,10 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieappapi.domain.model.GenreResponse
 import com.example.movieappapi.domain.model.MovieDetailsResponse
-import com.example.movieappapi.domain.useCase.GetGenresUseCase
-import com.example.movieappapi.domain.useCase.GetMovieDetailsUseCase
-import com.example.movieappapi.domain.useCase.MarkAsFavoriteMovieUseCase
-import com.example.movieappapi.domain.useCase.RateMovieUseCase
+import com.example.movieappapi.domain.useCase.*
 import com.example.movieappapi.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -19,7 +16,8 @@ class MovieViewModel(
     private val genresUseCase: GetGenresUseCase,
     private val rateMovieUseCase: RateMovieUseCase,
     private val markAsFavoriteMovieUseCase: MarkAsFavoriteMovieUseCase,
-    private val movieDetailsUseCase: GetMovieDetailsUseCase
+    private val movieDetailsUseCase: GetMovieDetailsUseCase,
+    private val deleteMovieRateUseCase: DeleteMovieRateUseCase
 ) : ViewModel() {
     private val _genres = mutableStateOf<GenreResponse?>(null)
 
@@ -52,4 +50,27 @@ class MovieViewModel(
         emit(genres.toList())
     }
 
+    fun markAsFavorite() = viewModelScope.launch {
+        val accountStates = _movie.value.data?.accountStatesResponse
+        accountStates?.favorite = accountStates?.favorite?.not()
+        _movie.value.onSuccess {
+            it.accountStatesResponse = accountStates
+            markAsFavoriteMovieUseCase(
+                it.id ?: 1,
+                accountStates?.favorite ?: true
+            )
+        }
+    }
+
+    fun rateMovie(value: Float) = viewModelScope.launch {
+        _movie.value.onSuccess {
+            rateMovieUseCase(it.id ?: 1, value)
+        }
+    }
+
+    fun removeRate() = viewModelScope.launch {
+        _movie.value.onSuccess {
+            deleteMovieRateUseCase(it.id ?: 1)
+        }
+    }
 }

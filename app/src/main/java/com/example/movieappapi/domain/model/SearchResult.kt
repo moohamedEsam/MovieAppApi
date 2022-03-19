@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Result(
+data class SearchResult(
     @SerialName("adult")
     var adult: Boolean? = null,
     @SerialName("backdrop_path")

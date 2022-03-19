@@ -5,5 +5,5 @@ import com.example.movieappapi.domain.repository.MovieRepository
 class GetPopularMoviesUseCase(
     private val repository: MovieRepository
 ) {
-    suspend operator fun invoke() = repository.getPopularMovies()
+    suspend operator fun invoke(page: Int) = repository.getPopularMovies(page)
 }

@@ -1,0 +1,61 @@
+{
+  ConstraintSets: {
+    start: {
+      star: {
+        width: 50,
+        height: 50,
+        start: [
+          'parent',
+          'start'
+        ],
+        end: [
+          'parent',
+          'end'
+        ],
+        bottom: [
+          'parent',
+          'bottom'
+        ],
+        top: [
+          'parent',
+          'top',
+          16
+        ],
+        custom: {
+          background: '#FFFFFF'
+        }
+      }
+    },
+    end: {
+      star: {
+        width: 100,
+        height: 100,
+        start: [
+          'parent',
+          'start'
+        ],
+        bottom: [
+          'parent',
+          'bottom'
+        ],
+        end: [
+          'parent',
+          'end'
+        ],
+        top: [
+          'parent',
+          'top'
+        ],
+        custom: {
+          background: '#FFD700'
+        }
+      },
+    }
+  },
+  Transitions: {
+    default: {
+      from: 'start',
+      to: 'end',
+    }
+  }
+}

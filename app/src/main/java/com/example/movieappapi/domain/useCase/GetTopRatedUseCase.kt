@@ -6,5 +6,5 @@ class GetTopRatedUseCase(
     private val repository: MovieRepository
 ) {
 
-    suspend operator fun invoke() = repository.getTopRatedMovies()
+    suspend operator fun invoke(page: Int) = repository.getTopRatedMovies(page)
 }

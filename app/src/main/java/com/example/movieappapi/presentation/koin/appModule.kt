@@ -46,6 +46,9 @@ val useCaseModule = module {
     single { RateMovieUseCase(get()) }
     single { GetUserMovieListUseCase(get()) }
     single { GetMovieDetailsUseCase(get()) }
+    single { DeleteMovieRateUseCase(get()) }
+    single { DeleteTvRateUseCase(get()) }
+    single { GetAccountStatusUseCase(get()) }
 }
 
 val repositoryModule = module {
@@ -60,9 +63,9 @@ val viewModelsModule = module {
     viewModel { MainFeedViewModel(get(), get(), get()) }
     viewModel { MovieRecommendationsViewModel(get(), get()) }
     viewModel { UserListsViewModel() }
-    viewModel { MovieViewModel(get(), get(), get(), get()) }
+    viewModel { MovieViewModel(get(), get(), get(), get(), get()) }
     viewModel { SearchViewModel(get(), get(), get(), get()) }
-    viewModel { AccountViewModel(get()) }
+    viewModel { AccountViewModel(get(), get()) }
     viewModel { UserMoviesListViewModel(get()) }
 
 }

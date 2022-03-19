@@ -1,12 +1,11 @@
-package com.example.movieappapi.composables
+package com.example.movieappapi.presentation.screen.home
 
-import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -28,7 +27,6 @@ import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
 import com.example.movieappapi.presentation.components.HorizontalListMovieItem
-import com.example.movieappapi.presentation.screen.home.MainFeedViewModel
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -55,7 +53,6 @@ fun MainFeed(navHostController: NavHostController) {
                 .verticalScroll(rememberScrollState())
         ) {
             popularMovies.HandleResourceChange { moviesResponse ->
-                Log.d("mainFeedScreen", "MainFeed: called")
                 moviesResponse.results?.let {
                     PopularMovieViewPager(
                         movies = it,
@@ -65,9 +62,13 @@ fun MainFeed(navHostController: NavHostController) {
                 }
             }
             CreateVerticalSpacer(dp = 4.dp)
-            TopRatedMovieList(topRatedMovies, navHostController)
+            TopRatedMovieList(topRatedMovies, navHostController) {
+                viewModel.setTopRatedMovies()
+            }
             CreateVerticalSpacer()
-            NowPlayingMoviesList(nowPlayingMovies, navHostController)
+            NowPlayingMoviesList(nowPlayingMovies, navHostController) {
+                viewModel.setNowPlayingMovies()
+            }
         }
     }
 }
@@ -77,7 +78,8 @@ fun MainFeed(navHostController: NavHostController) {
 @Composable
 private fun NowPlayingMoviesList(
     nowPlayingMovies: Resource<MoviesResponse>,
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    paginate: () -> Unit
 ) {
     Text(
         text = "now playing",
@@ -88,7 +90,9 @@ private fun NowPlayingMoviesList(
     CreateVerticalSpacer(4.dp)
     nowPlayingMovies.HandleResourceChange { moviesResponse ->
         moviesResponse.results?.let {
-            HorizontalMovieList(movies = it, navHostController = navHostController)
+            HorizontalMovieList(movies = it, navHostController = navHostController) {
+                paginate()
+            }
         }
     }
 }
@@ -98,7 +102,8 @@ private fun NowPlayingMoviesList(
 @Composable
 private fun TopRatedMovieList(
     topRatedMovies: Resource<MoviesResponse>,
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    paginate: () -> Unit
 ) {
     Text(
         text = "top rated",
@@ -109,7 +114,9 @@ private fun TopRatedMovieList(
     CreateVerticalSpacer(dp = 4.dp)
     topRatedMovies.HandleResourceChange { moviesResponse ->
         moviesResponse.results?.let {
-            HorizontalMovieList(movies = it, navHostController = navHostController)
+            HorizontalMovieList(movies = it, navHostController = navHostController) {
+                paginate()
+            }
         }
     }
 }
@@ -146,10 +153,16 @@ fun PopularMovieViewPager(
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
-fun HorizontalMovieList(movies: List<Movie>, navHostController: NavHostController) {
+fun HorizontalMovieList(
+    movies: List<Movie>,
+    navHostController: NavHostController,
+    paginate: () -> Unit = {}
+) {
     LazyRow(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(horizontal = 8.dp)) {
-        items(movies) {
-            HorizontalListMovieItem(movie = it, navHostController = navHostController)
+        itemsIndexed(movies) { index, movie ->
+            if (index == movies.lastIndex)
+                paginate()
+            HorizontalListMovieItem(movie = movie, navHostController = navHostController)
         }
     }
 }

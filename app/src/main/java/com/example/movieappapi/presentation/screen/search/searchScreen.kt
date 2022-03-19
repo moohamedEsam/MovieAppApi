@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.domain.model.AllSearchResponse
-import com.example.movieappapi.domain.model.Result
+import com.example.movieappapi.domain.model.SearchResult
 import com.example.movieappapi.presentation.components.SearchItem
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.example.movieappapi.presentation.screen.search.SearchViewModel
@@ -67,7 +67,7 @@ fun ResultList() {
 private fun ShowItems(
     searchMode: Boolean,
     searchItems: AllSearchResponse,
-    filteredItems: List<Result>
+    filteredItems: List<SearchResult>
 ) {
     if (!searchMode)
         ShowSearchResults(searchItems)
@@ -79,7 +79,7 @@ private fun ShowItems(
 @ExperimentalAnimationApi
 @Composable
 private fun ShowSearchResults(results: AllSearchResponse) {
-    results.results?.let { searchResults ->
+    results.searchResults?.let { searchResults ->
         ShowResults(searchResults)
     }
 }
@@ -87,10 +87,10 @@ private fun ShowSearchResults(results: AllSearchResponse) {
 @ExperimentalCoilApi
 @ExperimentalAnimationApi
 @Composable
-private fun ShowResults(items: List<Result>) {
+private fun ShowResults(items: List<SearchResult>) {
     LazyColumn {
         items(items) { item ->
-            SearchItem(result = item)
+            SearchItem(searchResult = item)
         }
     }
 }

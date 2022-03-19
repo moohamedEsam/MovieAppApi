@@ -18,10 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +33,7 @@ import coil.compose.rememberImagePainter
 import com.example.movieappapi.domain.model.MovieDetailsResponse
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
+import com.example.movieappapi.presentation.components.RateMotionLayout
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -85,9 +83,16 @@ private fun MovieActionIconsColumn(movie: MovieDetailsResponse, modifier: Modifi
     Column(
         modifier = modifier.padding(8.dp)
     ) {
-        val favorite = movie.accountStatesResponse?.favorite ?: false
+        val viewModel: MovieViewModel = getViewModel()
+        var favorite by remember {
+            mutableStateOf(movie.accountStatesResponse?.favorite ?: false)
+        }
+
         val rated = movie.accountStatesResponse?.rated?.isRated ?: false
-        IconButton(onClick = { }) {
+        IconButton(onClick = {
+            viewModel.markAsFavorite()
+            favorite = favorite.not()
+        }) {
             Icon(
                 imageVector = if (favorite)
                     Icons.Filled.Favorite
@@ -102,16 +107,40 @@ private fun MovieActionIconsColumn(movie: MovieDetailsResponse, modifier: Modifi
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        IconButton(onClick = { }) {
-            Icon(
-                imageVector = Icons.Filled.StarRate,
-                contentDescription = null,
-                tint = if (rated)
-                    Color.Yellow
-                else
-                    Color.White
-            )
-        }
+        RateAction(rated)
+    }
+}
+
+@Composable
+private fun RateAction(rated: Boolean, value: Float? = null) {
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+    val viewModel: MovieViewModel = getViewModel()
+    if (showDialog)
+        RateMotionLayout(
+            onDismissRequest = {
+                showDialog = false
+            },
+            onRemoveRate = {
+                viewModel.removeRate()
+
+            },
+            onRate = {
+                viewModel.rateMovie(it)
+            }
+        )
+    IconButton(onClick = {
+        showDialog = true
+    }) {
+        Icon(
+            imageVector = Icons.Filled.StarRate,
+            contentDescription = null,
+            tint = if (rated)
+                Color.Yellow
+            else
+                Color.White
+        )
     }
 }
 

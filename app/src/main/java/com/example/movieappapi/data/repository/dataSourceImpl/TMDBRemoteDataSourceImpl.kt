@@ -19,7 +19,10 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
 
     override suspend fun createGuestSession(): GuestSessionResponse = client.post(Url.GUEST_LOGIN)
 
-    override suspend fun discoverMovies(): MoviesResponse = client.get(Url.DISCOVER_MOVIES)
+    override suspend fun discoverMovies(page: Int): MoviesResponse =
+        client.get(Url.DISCOVER_MOVIES) {
+            parameter("page", page)
+        }
 
     override suspend fun getUserCreatedList(accountId: Int, token: String): UserListsResponse =
         client.get(Url.getUserLists(accountId)) {
@@ -145,19 +148,35 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
             }
         }
 
-    override suspend fun getPopularMovies(): MoviesResponse = client.get(Url.POPULAR_MOVIES)
+    override suspend fun getPopularMovies(page: Int): MoviesResponse =
+        client.get(Url.POPULAR_MOVIES) {
+            parameter("page", page)
+        }
 
-    override suspend fun getTopRatedMovies(): MoviesResponse = client.get(Url.TOP_RATED_MOVIES)
+    override suspend fun getTopRatedMovies(page: Int): MoviesResponse =
+        client.get(Url.TOP_RATED_MOVIES) {
+            parameter("page", page)
+        }
 
-    override suspend fun getNowPlayingMovies(): MoviesResponse = client.get(Url.NOW_PLAYING_MOVIES)
+    override suspend fun getNowPlayingMovies(page: Int): MoviesResponse =
+        client.get(Url.NOW_PLAYING_MOVIES) {
+            parameter("page", page)
+        }
 
-    override suspend fun getUpcomingMovies(): MoviesResponse = client.get(Url.UPCOMING_MOVIES)
+    override suspend fun getUpcomingMovies(page: Int): MoviesResponse =
+        client.get(Url.UPCOMING_MOVIES) {
+            parameter("page", page)
+        }
 
-    override suspend fun getRecommendations(movieId: Int): MoviesResponse =
-        client.get(Url.getRecommendations(movieId))
+    override suspend fun getRecommendations(movieId: Int, page: Int): MoviesResponse =
+        client.get(Url.getRecommendations(movieId)) {
+            parameter("page", page)
+        }
 
-    override suspend fun getSimilarMovies(movieId: Int): MoviesResponse =
-        client.get(Url.getSimilarMovies(movieId))
+    override suspend fun getSimilarMovies(movieId: Int, page: Int): MoviesResponse =
+        client.get(Url.getSimilarMovies(movieId)) {
+            parameter("page", page)
+        }
 
     override suspend fun searchAll(query: String): AllSearchResponse = client.get(Url.SEARCH_ALL) {
         url {
@@ -165,11 +184,11 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
         }
     }
 
-    override suspend fun searchMovie(query: String): MoviesResponse = client.get(Url.SEARCH_MOVIE) {
-        url {
+    override suspend fun searchMovie(query: String, page: Int): MoviesResponse =
+        client.get(Url.SEARCH_MOVIE) {
             parameter("query", query)
+            parameter("page", page)
         }
-    }
 
     override suspend fun searchTv(query: String): TvShowsResponse = client.get(Url.SEARCH_TV) {
         url {

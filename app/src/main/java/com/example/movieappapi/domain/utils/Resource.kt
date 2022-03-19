@@ -1,8 +1,5 @@
 package com.example.movieappapi.domain.utils
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -14,6 +11,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 
 sealed class Resource<T>(var data: T? = null, var message: String? = null) {
+
+    class Success<T>(data: T, message: String? = null) : Resource<T>(data, message)
+
+    class Error<T>(message: String?, data: T? = null) : Resource<T>(data, message)
+
+    class Loading<T> : Resource<T>()
+
+    class Initialized<T> : Resource<T>()
 
     @Composable
     fun HandleResourceChange(
@@ -32,31 +37,26 @@ sealed class Resource<T>(var data: T? = null, var message: String? = null) {
     }
 
     @Composable
-    fun ErrorStateComposable() {
+    fun ErrorStateComposable(modifier: Modifier = Modifier) {
         Text(
             text = message ?: "",
             color = Color.Red,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.semantics {
+            modifier = modifier.semantics {
                 contentDescription = SemanticContentDescription.ERROR_RESOURCE_TEXT
             }
         )
     }
 
     @Composable
-    fun LoadingStateComposable() {
-        Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-            CircularProgressIndicator(color = MaterialTheme.colors.primary)
-        }
+    private fun LoadingStateComposable(modifier: Modifier = Modifier) {
+        CircularProgressIndicator(color = MaterialTheme.colors.primary, modifier = modifier)
     }
 
-    class Success<T>(data: T, message: String? = null) : Resource<T>(data, message)
-
-    class Error<T>(message: String?, data: T? = null) : Resource<T>(data, message)
-
-    class Loading<T> : Resource<T>()
-
-    class Initialized<T> : Resource<T>()
+    suspend fun onSuccess(perform: suspend (T) -> Unit) {
+        if (this is Success && data != null)
+            perform(data!!)
+    }
 }
 
 

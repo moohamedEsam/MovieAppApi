@@ -7,6 +7,7 @@ import com.example.movieappapi.data.repository.dataSource.TMDBRemoteDataSource
 import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.utils.Resource
+import com.example.movieappapi.domain.utils.UserStatus
 import com.example.movieappapi.domain.utils.datastore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.take
@@ -100,9 +101,9 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getPopularMovies(): Resource<MoviesResponse> {
+    override suspend fun getPopularMovies(page: Int): Resource<MoviesResponse> {
         return try {
-            val response: MoviesResponse = remote.getPopularMovies()
+            val response: MoviesResponse = remote.getPopularMovies(page)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "getPopularMovies: ${exception.localizedMessage}")
@@ -110,9 +111,9 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getTopRatedMovies(): Resource<MoviesResponse> {
+    override suspend fun getTopRatedMovies(page: Int): Resource<MoviesResponse> {
         return try {
-            val response: MoviesResponse = remote.getTopRatedMovies()
+            val response: MoviesResponse = remote.getTopRatedMovies(page)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "getTopRatedMovies: ${exception.localizedMessage}")
@@ -120,9 +121,9 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getNowPlayingMovies(): Resource<MoviesResponse> {
+    override suspend fun getNowPlayingMovies(page: Int): Resource<MoviesResponse> {
         return try {
-            val response: MoviesResponse = remote.getNowPlayingMovies()
+            val response: MoviesResponse = remote.getNowPlayingMovies(page)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "getNowPlayingMovies: ${exception.localizedMessage}")
@@ -130,9 +131,9 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getUpcomingMovies(): Resource<MoviesResponse> {
+    override suspend fun getUpcomingMovies(page: Int): Resource<MoviesResponse> {
         return try {
-            val response: MoviesResponse = remote.getUpcomingMovies()
+            val response: MoviesResponse = remote.getUpcomingMovies(page)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "getUpcomingMovies: ${exception.localizedMessage}")
@@ -140,9 +141,9 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getRecommendations(movieId: Int): Resource<MoviesResponse> {
+    override suspend fun getRecommendations(movieId: Int, page: Int): Resource<MoviesResponse> {
         return try {
-            val response: MoviesResponse = remote.getRecommendations(movieId)
+            val response: MoviesResponse = remote.getRecommendations(movieId, page)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "getRecommendations: ${exception.localizedMessage}")
@@ -150,9 +151,9 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getSimilarMovies(movieId: Int): Resource<MoviesResponse> {
+    override suspend fun getSimilarMovies(movieId: Int, page: Int): Resource<MoviesResponse> {
         return try {
-            val response: MoviesResponse = remote.getSimilarMovies(movieId)
+            val response: MoviesResponse = remote.getSimilarMovies(movieId, page)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "getSimilarMovies: ${exception.localizedMessage}")
@@ -170,9 +171,9 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun searchMovie(query: String): Resource<MoviesResponse> {
+    override suspend fun searchMovie(query: String, page: Int): Resource<MoviesResponse> {
         return try {
-            val response: MoviesResponse = remote.searchMovie(query)
+            val response: MoviesResponse = remote.searchMovie(query, page)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "searchMovie: ${exception.localizedMessage}")
@@ -237,9 +238,9 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun discoverMovies(): Resource<MoviesResponse> {
+    override suspend fun discoverMovies(page: Int): Resource<MoviesResponse> {
         return try {
-            val response = remote.discoverMovies()
+            val response = remote.discoverMovies(page)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "discoverMovies: ${exception.message}")
@@ -340,6 +341,15 @@ class MovieRepositoryImpl(
         }
     }
 
+    override suspend fun getAccountStatus(): UserStatus {
+        return if (isUserGuest && accountDetailsResponse.id == null)
+            UserStatus.Guest
+        else if (accountDetailsResponse.id != null)
+            UserStatus.LoggedIn(accountDetailsResponse)
+        else
+            UserStatus.LoggedOut
+    }
+
     override suspend fun rateMovie(
         movieId: Int,
         value: Float
@@ -349,6 +359,26 @@ class MovieRepositoryImpl(
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "rateMovie: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun deleteRateMovie(movieId: Int): Resource<RateMediaResponse> {
+        return try {
+            val response = remote.deleteMovieRating(movieId, getActiveToken() ?: "")
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "deleteRateMovie: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun deleteRateTv(tvId: Int): Resource<RateMediaResponse> {
+        return try {
+            val response = remote.deleteTvRating(tvId, getActiveToken() ?: "")
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "deleteRateTv: ${exception.message}")
             Resource.Error(exception.message)
         }
     }

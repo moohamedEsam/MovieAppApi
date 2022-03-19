@@ -5,13 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import com.example.movieappapi.domain.utils.Screens
+import com.example.movieappapi.domain.utils.UserStatus
 import org.koin.androidx.compose.getViewModel
 
 @Composable
@@ -28,14 +28,12 @@ fun AccountScreen(
         Text(text = "Log Out", modifier = Modifier.clickable {
             viewModel.logOut(context)
         })
-        userStatus.HandleResourceChange {
-            LaunchedEffect(key1 = Unit) {
-                navHostController.navigate(Screens.LOGIN) {
-                    popUpTo(Screens.MAIN) {
-                        inclusive = true
-                    }
+        if (userStatus is UserStatus.LoggedOut)
+            navHostController.navigate(Screens.LOGIN) {
+                popUpTo(Screens.MAIN) {
+                    inclusive = true
                 }
             }
-        }
+
     }
 }

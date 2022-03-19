@@ -20,6 +20,7 @@ import coil.compose.rememberImagePainter
 import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Url
+import com.example.movieappapi.presentation.screen.home.HorizontalMovieList
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.example.movieappapi.presentation.screen.recommendation.MovieRecommendationsViewModel
 import org.koin.androidx.compose.getViewModel
