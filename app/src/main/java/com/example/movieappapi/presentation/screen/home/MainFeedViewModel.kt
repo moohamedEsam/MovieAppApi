@@ -43,7 +43,7 @@ class MainFeedViewModel(
         _nowPlayingMovies.value = Resource.Loading()
         val response = nowPlayingMoviesUseCase(nowPlayingPage)
         if (response is Resource.Success) {
-            movies = movies?.plus(response.data?.results ?: emptyList())
+            movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
             response.data?.results = movies
             _nowPlayingMovies.value = response
         }
@@ -56,7 +56,7 @@ class MainFeedViewModel(
         _topRatedMovies.value = Resource.Loading()
         val response = topRatedUseCase(topPage)
         if (response is Resource.Success) {
-            movies = movies?.plus(response.data?.results ?: emptyList())
+            movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
             response.data?.results = movies
             _topRatedMovies.value = response
         }
@@ -69,7 +69,7 @@ class MainFeedViewModel(
         _popularMovies.value = Resource.Loading()
         val response = popularMoviesUseCase(popularPage)
         if (response is Resource.Success) {
-            movies = movies?.plus(response.data?.results ?: emptyList())
+            movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
             response.data?.results = movies
             _popularMovies.value = response
         }

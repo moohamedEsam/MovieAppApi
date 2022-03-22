@@ -1,35 +1,40 @@
 package com.example.movieappapi.domain.useCase
 
-import android.content.Context
+import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.utils.Resource
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class LoginUseCase(
     private val repository: MovieRepository
 ) {
     suspend operator fun invoke(
-        context: Context,
-        username: String,
-        password: String
+        userEntity: UserEntity
     ): Resource<Boolean> {
-        val response = repository.getSession(context, username, password)
+        val response = repository.getSession(userEntity)
         return when (response.data) {
             true -> {
                 repository.getAccountDetails()
                 response
             }
-            else -> login(context, username, password)
+            else -> login(userEntity)
         }
 
     }
 
-    suspend fun login(context: Context, username: String, password: String): Resource<Boolean> {
-        val response = repository.requestToken(context)
-        val result = repository.login(context, username, password)
+    suspend fun login(userEntity: UserEntity): Resource<Boolean> {
+        val response = repository.requestToken()
+        val result = repository.login(userEntity)
         return if (result.data == true) {
-            val sessionResponse = repository.createSession(context)
-            if (sessionResponse.data == true)
+            val sessionResponse = repository.createSession()
+            CoroutineScope(Dispatchers.Default).launch {
+                if (sessionResponse.data == false) return@launch
+                repository.updateUser(userEntity)
+                repository.updateSession()
                 repository.getAccountDetails()
+            }
             sessionResponse
         } else
             result

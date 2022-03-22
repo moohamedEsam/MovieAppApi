@@ -118,7 +118,7 @@ fun LoginButton(
         val context = LocalContext.current
         Button(
             onClick = {
-                viewModel.login(context)
+                viewModel.login()
             },
             modifier = modifier,
             enabled = isVisible.currentState,

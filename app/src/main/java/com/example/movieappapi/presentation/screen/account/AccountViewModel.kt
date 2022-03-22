@@ -1,11 +1,11 @@
 package com.example.movieappapi.presentation.screen.account
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.useCase.GetAccountStatusUseCase
 import com.example.movieappapi.domain.useCase.UpdateCachedUser
 import com.example.movieappapi.domain.utils.UserStatus
@@ -26,9 +26,9 @@ class AccountViewModel(
     }
 
     val userStatus: State<UserStatus> = _userStatus
-    fun logOut(context: Context) = viewModelScope.launch {
+    fun logOut() = viewModelScope.launch {
         try {
-            updateCachedUser(context, "", "", false)
+            updateCachedUser(UserEntity("", "", false))
             _userStatus.value = UserStatus.LoggedOut
         } catch (exception: Exception) {
             Log.e("ProfileViewModel", "logOut: ${exception.message}")

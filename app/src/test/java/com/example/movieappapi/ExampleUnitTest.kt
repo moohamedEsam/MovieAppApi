@@ -14,7 +14,7 @@ class ExampleUnitTest {
     @Test
     fun `parse date`() {
         try {
-            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ")
             format.parse("2022-01-01 15:01:02")
         } catch (exception: Exception) {
             Log.e("ExampleUnitTest", "parse date: ${exception.message}")

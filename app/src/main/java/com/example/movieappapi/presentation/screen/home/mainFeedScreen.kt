@@ -1,5 +1,6 @@
 package com.example.movieappapi.presentation.screen.home
 
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -54,6 +55,7 @@ fun MainFeed(navHostController: NavHostController) {
         ) {
             popularMovies.HandleResourceChange { moviesResponse ->
                 moviesResponse.results?.let {
+                    Log.i("mainFeedScreen", "MainFeed: ${it.size}")
                     PopularMovieViewPager(
                         movies = it,
                         navHostController = navHostController,

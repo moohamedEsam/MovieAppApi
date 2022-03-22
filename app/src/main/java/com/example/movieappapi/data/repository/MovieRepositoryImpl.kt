@@ -1,22 +1,22 @@
 package com.example.movieappapi.data.repository
 
-import android.content.Context
 import android.util.Log
-import com.example.movieappapi.AppData
 import com.example.movieappapi.data.repository.dataSource.TMDBRemoteDataSource
 import com.example.movieappapi.domain.model.*
+import com.example.movieappapi.domain.model.room.MovieEntity
+import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
-import com.example.movieappapi.domain.utils.datastore
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
+import com.example.movieappapi.domain.utils.mappers.*
+import com.example.movieappapi.presentation.room.AppDao
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.text.SimpleDateFormat
 import java.util.*
 
 class MovieRepositoryImpl(
-    private val remote: TMDBRemoteDataSource
+    private val remote: TMDBRemoteDataSource,
+    private val local: AppDao
 ) : MovieRepository {
     private var isUserGuest = false
     private var tokenResponse = TokenResponse()
@@ -27,22 +27,18 @@ class MovieRepositoryImpl(
 
     override suspend fun getAccountDetails() {
         try {
-            Log.i("MovieRepositoryImpl", "getAccountDetails: called")
             accountDetailsResponse = remote.getAccountDetails(getActiveToken() ?: "")
-            Log.i("MovieRepositoryImpl", "getAccountDetails: ${accountDetailsResponse.id}")
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getAccountDetails: ${exception.message}")
         }
     }
 
     override suspend fun getSession(
-        context: Context,
-        username: String,
-        password: String
+        userEntity: UserEntity
     ): Resource<Boolean> {
         return try {
-            if (isSameCachedUser(context, username, password))
-                assignCachedSession(context)
+            if (isSameCachedUser(userEntity))
+                assignCachedSession()
             Resource.Success(sessionResponse.success == true)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getToken: ${exception.message}")
@@ -51,11 +47,41 @@ class MovieRepositoryImpl(
 
     }
 
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun getLocalMovies(): List<Movie> =
+        local.getMovie().map { it.toMovie() }
+
+    override suspend fun deleteAllMovies() = local.deleteAllMovies()
+
+    override suspend fun getLocalMovieDetails(movieId: Int): MovieDetailsResponse? =
+        local.getMovieDetails(movieId)?.toMovieDetailsResponse()
+
+    override suspend fun insertLocalMovies(movies: List<Movie>) {
+        movies.forEachIndexed { index, movie ->
+            try {
+                val movieEntity = if (index == 0) movie.toMovieEntity(Date())
+                else
+                    movie.toMovieEntity()
+                local.insertMovie(movieEntity)
+            } catch (exception: Exception) {
+                Log.e(
+                    "MovieRepositoryImpl",
+                    "insertLocalMovies: ${exception.message} -> ${movie.title}"
+                )
+            }
+        }
+    }
+
+    override suspend fun insertLocalMovieDetails(movie: MovieDetailsResponse) {
+        local.insertMovieDetails(movie.toMovieDetailsEntity())
+    }
+
     override suspend fun isCurrentUserGuest(): Boolean = isUserGuest
 
-    override suspend fun getSession(): SessionResponse = sessionResponse
+    override suspend fun getLocalSession(): SessionResponse = sessionResponse
 
-    override suspend fun requestToken(context: Context): Resource<Boolean> {
+    override suspend fun requestToken(): Resource<Boolean> {
         return try {
             tokenResponse = remote.requestToken()
             Resource.Success(tokenResponse.success ?: false)
@@ -67,12 +93,14 @@ class MovieRepositoryImpl(
 
 
     override suspend fun login(
-        context: Context,
-        username: String,
-        password: String
+        userEntity: UserEntity
     ): Resource<Boolean> {
         return try {
-            tokenResponse = remote.login(tokenResponse.requestToken ?: "", username, password)
+            tokenResponse = remote.login(
+                tokenResponse.requestToken ?: "",
+                userEntity.username,
+                userEntity.password
+            )
             Resource.Success(tokenResponse.success ?: false)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "login: ${exception.message}")
@@ -80,20 +108,14 @@ class MovieRepositoryImpl(
         }
     }
 
-    private suspend fun isSameCachedUser(
-        context: Context,
-        username: String,
-        password: String
-    ): Boolean {
-        val data = context.datastore.data.take(1).toList()[0]
-        return data.username == username && data.password == password
-    }
+    private suspend fun isSameCachedUser(userEntity: UserEntity) = userEntity == local.getUser()
 
-    override suspend fun createSession(context: Context): Resource<Boolean> {
+
+    override suspend fun createSession(): Resource<Boolean> {
         return try {
             isUserGuest = false
             sessionResponse = remote.createSession(tokenResponse.requestToken ?: "")
-            updateSession(context, sessionResponse.sessionId ?: "", tokenResponse.expiresAt ?: "")
+            updateSession()
             Resource.Success(sessionResponse.success ?: false)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "createSession: ${exception.message}")
@@ -202,9 +224,12 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun assignCachedSession(context: Context) {
-        val data = context.datastore.data.take(1).toList()[0]
-        assignTokenFromDatastore(data)
+    override suspend fun getLatestMovieAdded(): MovieEntity? = local.getLatestMovieAdded()
+
+    override suspend fun assignCachedSession() {
+        val session = local.getSession()
+        session?.success = session?.expiresAt?.after(Date()) ?: false
+        sessionResponse = session?.toSessionResponse() ?: return
     }
 
     override suspend fun resetRepository() {
@@ -215,17 +240,6 @@ class MovieRepositoryImpl(
         guestSessionResponse = GuestSessionResponse()
     }
 
-    private fun assignTokenFromDatastore(it: AppData) {
-        try {
-            sessionResponse.sessionId = it.sessionId
-            tokenResponse.expiresAt = it.expiresAt
-            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ")
-            val date = format.parse(it.expiresAt)
-            sessionResponse.success = date?.after(Date())
-        } catch (exception: Exception) {
-            Log.e("MovieRepositoryImpl", "assignTokenFromDatastore: ${exception.message}")
-        }
-    }
 
     override suspend fun createGuestSession(): Resource<Boolean> {
         return try {
@@ -462,30 +476,22 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun updateSession(context: Context, sessionId: String, expiresAt: String) {
-        context.datastore.updateData {
-            Log.i("MovieRepositoryImpl", "updateToken: $expiresAt")
-            it.toBuilder()
-                .setSessionId(sessionId)
-                .setExpiresAt(expiresAt)
-                .build()
+    override suspend fun updateSession() {
+        try {
+            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ")
+            val date = format.parse(tokenResponse.expiresAt ?: "")
+            local.insertSession(sessionResponse.toSessionEntity(date ?: Date()))
+        } catch (e: Exception) {
+            Log.e("MovieRepositoryImpl", "updateSession: ${e.message}")
         }
     }
 
-    override suspend fun getCachedUser(context: Context): Flow<AppData> = context.datastore.data
+    override suspend fun getCachedUser(): UserEntity? = local.getUser()
+
 
     override suspend fun updateUser(
-        context: Context,
-        username: String,
-        password: String,
-        loggedIn: Boolean
+        userEntity: UserEntity
     ) {
-        context.datastore.updateData {
-            it.toBuilder()
-                .setUsername(username)
-                .setPassword(password)
-                .setLoggedIn(loggedIn)
-                .build()
-        }
+        local.insertUser(userEntity)
     }
 }

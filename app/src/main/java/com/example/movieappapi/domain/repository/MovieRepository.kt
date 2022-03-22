@@ -1,20 +1,19 @@
 package com.example.movieappapi.domain.repository
 
-import android.content.Context
-import com.example.movieappapi.AppData
 import com.example.movieappapi.domain.model.*
+import com.example.movieappapi.domain.model.room.MovieEntity
+import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
-import kotlinx.coroutines.flow.Flow
 
 
 interface MovieRepository {
 
     suspend fun isCurrentUserGuest(): Boolean
 
-    suspend fun requestToken(context: Context): Resource<Boolean>
+    suspend fun requestToken(): Resource<Boolean>
 
-    suspend fun login(context: Context, username: String, password: String): Resource<Boolean>
+    suspend fun login(userEntity: UserEntity): Resource<Boolean>
 
     suspend fun getAccountDetails()
 
@@ -22,7 +21,7 @@ interface MovieRepository {
 
     suspend fun resetRepository()
 
-    suspend fun createSession(context: Context): Resource<Boolean>
+    suspend fun createSession(): Resource<Boolean>
 
     suspend fun createGuestSession(): Resource<Boolean>
 
@@ -95,15 +94,27 @@ interface MovieRepository {
 
     suspend fun discoverTv(): Resource<TvShowsResponse>
 
-    suspend fun assignCachedSession(context: Context)
+    suspend fun assignCachedSession()
 
-    suspend fun updateSession(context: Context, sessionId: String, expiresAt: String)
+    suspend fun updateSession()
 
-    suspend fun getSession(context: Context, username: String, password: String): Resource<Boolean>
+    suspend fun getSession(userEntity: UserEntity): Resource<Boolean>
 
-    suspend fun getCachedUser(context: Context): Flow<AppData>
+    suspend fun getCachedUser(): UserEntity?
 
-    suspend fun updateUser(context: Context, username: String, password: String, loggedIn: Boolean)
+    suspend fun getLatestMovieAdded(): MovieEntity?
 
-    suspend fun getSession(): SessionResponse
+    suspend fun updateUser(userEntity: UserEntity)
+
+    suspend fun getLocalSession(): SessionResponse
+
+    suspend fun deleteAllMovies()
+
+    suspend fun getLocalMovies(): List<Movie>
+
+    suspend fun getLocalMovieDetails(movieId: Int): MovieDetailsResponse?
+
+    suspend fun insertLocalMovies(movies: List<Movie>)
+
+    suspend fun insertLocalMovieDetails(movie: MovieDetailsResponse)
 }

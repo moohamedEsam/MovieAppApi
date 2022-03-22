@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                viewModel.userAlreadyLoggedIn(this@MainActivity)
+                viewModel.userAlreadyLoggedIn()
                 viewModel.userState.value is Resource.Success || viewModel.userState.value is Resource.Error
             }
         }

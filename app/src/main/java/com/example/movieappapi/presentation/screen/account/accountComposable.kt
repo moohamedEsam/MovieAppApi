@@ -26,7 +26,7 @@ fun AccountScreen(
         contentAlignment = Alignment.Center
     ) {
         Text(text = "Log Out", modifier = Modifier.clickable {
-            viewModel.logOut(context)
+            viewModel.logOut()
         })
         if (userStatus is UserStatus.LoggedOut)
             navHostController.navigate(Screens.LOGIN) {

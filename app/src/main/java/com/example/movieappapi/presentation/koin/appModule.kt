@@ -1,12 +1,15 @@
 package com.example.movieappapi.presentation.koin
 
 import android.util.Log
+import androidx.room.Room
 import com.example.movieappapi.data.repository.MovieRepositoryImpl
 import com.example.movieappapi.data.repository.dataSource.TMDBRemoteDataSource
 import com.example.movieappapi.data.repository.dataSourceImpl.TMDBRemoteDataSourceImpl
 import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.useCase.*
 import com.example.movieappapi.domain.utils.Constants
+import com.example.movieappapi.presentation.room.AppDatabase
+import com.example.movieappapi.presentation.room.migrations.MIGRATION_1_2
 import com.example.movieappapi.presentation.screen.account.AccountViewModel
 import com.example.movieappapi.presentation.screen.home.MainFeedViewModel
 import com.example.movieappapi.presentation.screen.login.LoginViewModel
@@ -23,6 +26,7 @@ import io.ktor.client.features.json.serializer.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import kotlinx.serialization.json.Json
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
@@ -54,6 +58,8 @@ val useCaseModule = module {
 val repositoryModule = module {
     single { provideJson() }
     single { provideHttpClient(get()) }
+    single { provideAppDatabase() }
+    single { provideAppDao(get()) }
     single { provideMovieRemoteDataSource() }
     single { provideMovieRepository() }
 }
@@ -70,10 +76,21 @@ val viewModelsModule = module {
 
 }
 
+fun provideAppDao(appDatabase: AppDatabase) = appDatabase.getDao()
+
+fun Scope.provideAppDatabase() = Room
+    .databaseBuilder(
+        androidContext(),
+        AppDatabase::class.java,
+        "movieDatabase"
+    )
+    .addMigrations(MIGRATION_1_2)
+    .build()
+
 private fun Scope.provideMovieRemoteDataSource(): TMDBRemoteDataSource =
     TMDBRemoteDataSourceImpl(get())
 
-private fun Scope.provideMovieRepository(): MovieRepository = MovieRepositoryImpl(get())
+private fun Scope.provideMovieRepository(): MovieRepository = MovieRepositoryImpl(get(), get())
 
 fun provideHttpClient(json: Json) = HttpClient(CIO) {
     install(Logging) {

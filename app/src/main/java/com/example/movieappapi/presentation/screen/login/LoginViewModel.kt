@@ -1,11 +1,11 @@
 package com.example.movieappapi.presentation.screen.login
 
-import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.useCase.GetUserUseCase
 import com.example.movieappapi.domain.useCase.LoginAsGuestUseCase
 import com.example.movieappapi.domain.useCase.LoginUseCase
@@ -30,16 +30,18 @@ class LoginViewModel(
     private val _password = mutableStateOf<String>("")
     val password: State<String> = _password
 
-    fun userAlreadyLoggedIn(context: Context) = viewModelScope.launch {
+    fun userAlreadyLoggedIn() = viewModelScope.launch {
         _userState.value = Resource.Loading()
-        val data = getUserUseCase(context)
-        val loggedIn = data.loggedIn
+        val data = getUserUseCase()
+        val loggedIn = data?.loggedIn ?: false
         _userState.value = if (loggedIn) {
-            loginUseCase(context, data.username, data.password)
+            loginUseCase(createUserEntity())
             Resource.Success(Unit)
         } else
             Resource.Error("")
     }
+
+    private fun createUserEntity(): UserEntity = UserEntity("mohamedEsam", "0Epn4HAjP176", true)
 
     fun setPassword(value: String) = viewModelScope.launch {
         _password.value = value
@@ -49,12 +51,12 @@ class LoginViewModel(
         _username.value = value
     }
 
-    fun login(context: Context) = viewModelScope.launch {
+    fun login() = viewModelScope.launch {
         _userState.value = Resource.Loading()
-        val result = loginUseCase(context, "mohamedEsam", "0Epn4HAjP176")
+        val result = loginUseCase(createUserEntity())
         if (result is Resource.Success && result.data == true) {
             _userState.value = Resource.Success(Unit)
-            updateCachedUser(context, "mohamedEsam", "0Epn4HAjP176", true)
+            updateCachedUser(createUserEntity())
         } else
             _userState.value = Resource.Error(result.message)
     }

@@ -4,6 +4,7 @@ plugins {
     id 'com.google.gms.google-services'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
     id 'com.google.protobuf'
+    id "com.google.devtools.ksp" version "1.6.10-1.0.2"
 }
 
 android {
@@ -78,6 +79,16 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
+    //room
+    implementation("androidx.room:room-runtime:$roomVersion")
+    annotationProcessor("androidx.room:room-compiler:$roomVersion")
+
+
+    // To use Kotlin Symbolic Processing (KSP)
+    ksp("androidx.room:room-compiler:$roomVersion")
+
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation("androidx.room:room-ktx:$roomVersion")
 
     // Koin main features for Android (Scope,ViewModel ...)
     implementation "io.insert-koin:koin-android:$koin_version"

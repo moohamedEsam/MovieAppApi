@@ -1,8 +1,12 @@
 package com.example.movieappapi.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.Slider
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.runtime.*
@@ -36,7 +40,7 @@ fun RateMotionLayout(
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Column(
             modifier = Modifier
-                .background(MaterialTheme.colors.surface)
+                .background(Color.LightGray)
                 .padding(8.dp)
         ) {
             MotionLayout(
@@ -62,7 +66,8 @@ fun RateMotionLayout(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Row(
-                modifier = Modifier.align(Alignment.End)
+                modifier = Modifier.align(Alignment.End),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
                     onClick = {
@@ -73,14 +78,17 @@ fun RateMotionLayout(
                     Text(text = "rate")
                 }
                 Spacer(modifier = Modifier.width(4.dp))
-                OutlinedButton(
-                    onClick = {
-                        onRemoveRate()
-                        onDismissRequest()
-                    },
-                ) {
-                    Text(text = "remove rate", color = Color.Red)
-                }
+
+                Text(
+                    text = "remove rate",
+                    color = Color.Red,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable {
+                            onRemoveRate()
+                            onDismissRequest()
+                        })
+
             }
         }
     }
