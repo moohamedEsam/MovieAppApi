@@ -5,6 +5,7 @@ object Screens {
     const val MAIN = "Main"
     const val ACCOUNT = "Account"
     const val ACCOUNT_LISTS = "Lists"
+    const val LIST = "List"
     const val ACCOUNT_Favorite_Movies = "Favorite Movies"
     const val ACCOUNT_Watchlist_Movies = "Watchlist Movies"
     const val ACCOUNT_Rated_Movies = "Rated Movies"

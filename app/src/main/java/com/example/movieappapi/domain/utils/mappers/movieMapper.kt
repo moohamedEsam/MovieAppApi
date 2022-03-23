@@ -6,11 +6,12 @@ import com.example.movieappapi.domain.model.room.MovieDetailsEntity
 import com.example.movieappapi.domain.model.room.MovieEntity
 import java.util.*
 
-fun Movie.toMovieEntity(dateAdded: Date? = null) = MovieEntity(
+fun Movie.toMovieEntity(dateAdded: Date? = null, tag: String = "popular") = MovieEntity(
     id = id ?: 0,
     posterPath = posterPath ?: "",
     title = title ?: "",
-    dateAdded = dateAdded
+    dateAdded = dateAdded,
+    tag = tag
 )
 
 fun MovieEntity.toMovie() = Movie(

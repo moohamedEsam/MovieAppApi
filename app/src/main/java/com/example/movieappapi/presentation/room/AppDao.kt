@@ -35,22 +35,25 @@ interface AppDao {
     @Insert
     suspend fun insertMovie(movieEntity: MovieEntity)
 
+    @Query("select * from movieEntity where id = (:movieId)")
+    suspend fun getMovie(movieId: Int): MovieEntity?
+
     @Update
     suspend fun updateMovie(movieEntity: MovieEntity)
 
     @Delete
     suspend fun deleteMovie(movieEntity: MovieEntity)
 
-    @Query("select * from movieEntity")
-    suspend fun getMovie(): List<MovieEntity>
+    @Query("select * from movieEntity where tag = (:tag)")
+    suspend fun getMovie(tag: String): List<MovieEntity>
 
-    @Query("select * from movieEntity where dateAdded is not null")
-    suspend fun getLatestMovieAdded(): MovieEntity?
+    @Query("select * from movieEntity where dateAdded is not null and tag = (:tag) order by dateAdded desc")
+    suspend fun getLatestMovieAdded(tag: String): MovieEntity?
 
-    @Query("delete from movieEntity")
-    suspend fun deleteAllMovies()
+    @Query("delete from movieEntity where tag like (:tag)")
+    suspend fun deleteAllMovies(tag: String)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovieDetails(movieDetailsEntity: MovieDetailsEntity)
 
     @Update

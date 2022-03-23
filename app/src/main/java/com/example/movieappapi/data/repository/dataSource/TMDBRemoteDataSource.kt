@@ -30,6 +30,17 @@ interface TMDBRemoteDataSource : MovieRemoteDataSource, TVRemoteDataSource {
 
     suspend fun getUserRatedTvEpisodes(accountId: Int, token: String): UserRatedTvEpisodesResponse
 
+    suspend fun createList(token: String, name: String, description: String): CreateListResponse
+
+    suspend fun deleteList(token: String, listId: Int): RateMediaResponse
+
+    suspend fun getList(listId: Int): UserListDetailsResponse
+
+    suspend fun clearList(token: String, listId: Int): RateMediaResponse
+
+    suspend fun addMovieToList(token: String, listId: Int, movieId: Int): RateMediaResponse
+
+    suspend fun removeMovieToList(token: String, listId: Int, movieId: Int): RateMediaResponse
 
     suspend fun markAsFavorite(
         accountId: Int,

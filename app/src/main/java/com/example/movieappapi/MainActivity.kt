@@ -11,8 +11,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
-import com.example.movieappapi.presentation.screen.MainScreen
 import com.example.movieappapi.presentation.screen.login.LoginViewModel
+import com.example.movieappapi.presentation.screen.shared.MainScreen
 import com.example.movieappapi.ui.theme.MovieAppApiTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi

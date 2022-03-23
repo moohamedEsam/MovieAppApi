@@ -1,4 +1,4 @@
-package com.example.movieappapi.presentation.screen
+package com.example.movieappapi.presentation.screen.shared
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image

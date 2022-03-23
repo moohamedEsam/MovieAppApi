@@ -3,6 +3,7 @@ package com.example.movieappapi.domain.repository
 import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.model.room.MovieEntity
 import com.example.movieappapi.domain.model.room.UserEntity
+import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
 
@@ -57,6 +58,18 @@ interface MovieRepository {
 
     suspend fun getUserCreatedList(): Resource<UserListsResponse>
 
+    suspend fun createList(name: String, description: String): Resource<CreateListResponse>
+
+    suspend fun addMovieToList(listId: Int, movieId: Int): Resource<RateMediaResponse>
+
+    suspend fun getList(listId: Int): Resource<UserListDetailsResponse>
+
+    suspend fun removeMovieToList(listId: Int, movieId: Int): Resource<RateMediaResponse>
+
+    suspend fun clearList(listId: Int): Resource<RateMediaResponse>
+
+    suspend fun deleteList(listId: Int): Resource<RateMediaResponse>
+
     suspend fun markAsFavorite(
         mediaId: Int,
         mediaType: String,
@@ -102,19 +115,24 @@ interface MovieRepository {
 
     suspend fun getCachedUser(): UserEntity?
 
-    suspend fun getLatestMovieAdded(): MovieEntity?
+    suspend fun getLatestMovieAdded(tag: String): MovieEntity?
 
     suspend fun updateUser(userEntity: UserEntity)
 
     suspend fun getLocalSession(): SessionResponse
 
-    suspend fun deleteAllMovies()
+    suspend fun deleteAllMovies(tag: String)
 
-    suspend fun getLocalMovies(): List<Movie>
+
+    suspend fun updateMovie(movie: MovieEntity)
+
+    suspend fun getMovie(movieId: Int): MovieEntity?
+
+    suspend fun getLocalMovies(movieList: MainFeedMovieList): List<Movie>
 
     suspend fun getLocalMovieDetails(movieId: Int): MovieDetailsResponse?
 
-    suspend fun insertLocalMovies(movies: List<Movie>)
+    suspend fun insertLocalMovies(movies: List<Movie>, tag: String)
 
     suspend fun insertLocalMovieDetails(movie: MovieDetailsResponse)
 }

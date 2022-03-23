@@ -8,7 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.SemanticContentDescription
-import com.example.movieappapi.presentation.screen.MainScreen
+import com.example.movieappapi.presentation.screen.shared.MainScreen
 import com.example.movieappapi.ui.theme.MovieAppApiTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

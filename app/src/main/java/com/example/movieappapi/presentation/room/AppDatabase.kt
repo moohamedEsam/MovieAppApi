@@ -13,7 +13,7 @@ import com.example.movieappapi.presentation.room.converters.SessionConverter
 
 @Database(
     entities = [MovieEntity::class, MovieDetailsEntity::class, SessionEntity::class, UserEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(AccountResponseConverter::class, GenresConverter::class, SessionConverter::class)

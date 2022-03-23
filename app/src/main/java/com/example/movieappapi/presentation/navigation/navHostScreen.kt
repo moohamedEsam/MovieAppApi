@@ -11,13 +11,14 @@ import androidx.navigation.navArgument
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.composables.SearchScreen
 import com.example.movieappapi.composables.SimilarMovieScreen
-import com.example.movieappapi.composables.UserListsScreen
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.UserMovieList
 import com.example.movieappapi.presentation.screen.account.AccountScreen
 import com.example.movieappapi.presentation.screen.home.MainFeed
+import com.example.movieappapi.presentation.screen.lists.ListScreen
 import com.example.movieappapi.presentation.screen.login.LoginScreen
 import com.example.movieappapi.presentation.screen.movie.MovieDetails
+import com.example.movieappapi.presentation.screen.userLists.UserListsScreen
 import com.example.movieappapi.presentation.screen.userMoviesList.UserMovieListScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -47,6 +48,19 @@ fun NavHostScreen(navHostController: NavHostController, startDestination: String
         composable(Screens.ACCOUNT_LISTS) {
             UserListsScreen(navHostController = navHostController)
         }
+
+        composable(
+            route = "${Screens.LIST}/{listId}",
+            arguments = listOf(
+                navArgument("listId") {
+                    type = NavType.IntType
+                })
+        ) {
+            val listId = it.arguments?.getInt("listId")
+            if (listId != null)
+                ListScreen(listId = listId, navHostController = navHostController)
+        }
+
         composable(Screens.ACCOUNT) {
             AccountScreen(navHostController = navHostController)
         }

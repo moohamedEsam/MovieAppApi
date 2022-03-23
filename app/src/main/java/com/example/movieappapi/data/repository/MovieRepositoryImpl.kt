@@ -6,6 +6,7 @@ import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.model.room.MovieEntity
 import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.repository.MovieRepository
+import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
 import com.example.movieappapi.domain.utils.mappers.*
@@ -49,21 +50,23 @@ class MovieRepositoryImpl(
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun getLocalMovies(): List<Movie> =
-        local.getMovie().map { it.toMovie() }
+    override suspend fun getLocalMovies(movieList: MainFeedMovieList): List<Movie> =
+        local.getMovie(movieList.tag).map { it.toMovie() }
 
-    override suspend fun deleteAllMovies() = local.deleteAllMovies()
+    override suspend fun deleteAllMovies(tag: String) = local.deleteAllMovies(tag)
 
     override suspend fun getLocalMovieDetails(movieId: Int): MovieDetailsResponse? =
         local.getMovieDetails(movieId)?.toMovieDetailsResponse()
 
-    override suspend fun insertLocalMovies(movies: List<Movie>) {
+    override suspend fun insertLocalMovies(movies: List<Movie>, tag: String) {
+        Log.i("MovieRepositoryImpl", "insertLocalMovies: called with tag $tag")
         movies.forEachIndexed { index, movie ->
             try {
-                val movieEntity = if (index == 0) movie.toMovieEntity(Date())
+                val movieEntity = if (index == 0) movie.toMovieEntity(Date(), tag)
                 else
-                    movie.toMovieEntity()
+                    movie.toMovieEntity(tag = tag)
                 local.insertMovie(movieEntity)
+                Log.i("MovieRepositoryImpl", "insertLocalMovies: done")
             } catch (exception: Exception) {
                 Log.e(
                     "MovieRepositoryImpl",
@@ -71,6 +74,12 @@ class MovieRepositoryImpl(
                 )
             }
         }
+    }
+
+    override suspend fun getMovie(movieId: Int): MovieEntity? = local.getMovie(movieId)
+
+    override suspend fun updateMovie(movie: MovieEntity) {
+        local.updateMovie(movie)
     }
 
     override suspend fun insertLocalMovieDetails(movie: MovieDetailsResponse) {
@@ -224,7 +233,8 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getLatestMovieAdded(): MovieEntity? = local.getLatestMovieAdded()
+    override suspend fun getLatestMovieAdded(tag: String): MovieEntity? =
+        local.getLatestMovieAdded(tag)
 
     override suspend fun assignCachedSession() {
         val session = local.getSession()
@@ -319,6 +329,69 @@ class MovieRepositoryImpl(
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getUserCreatedList: ${exception.message}")
             Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun createList(
+        name: String,
+        description: String
+    ): Resource<CreateListResponse> {
+        return try {
+            val response = remote.createList(getActiveToken() ?: "", name, description)
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "createList: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    override suspend fun addMovieToList(listId: Int, movieId: Int): Resource<RateMediaResponse> {
+        return try {
+            val response = remote.addMovieToList(getActiveToken() ?: "", listId, movieId)
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "addMovieToList: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    override suspend fun removeMovieToList(listId: Int, movieId: Int): Resource<RateMediaResponse> {
+        return try {
+            val response = remote.removeMovieToList(getActiveToken() ?: "", listId, movieId)
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "removeMovieToList: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    override suspend fun clearList(listId: Int): Resource<RateMediaResponse> {
+        return try {
+            val response = remote.clearList(getActiveToken() ?: "", listId)
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "clearList: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    override suspend fun deleteList(listId: Int): Resource<RateMediaResponse> {
+        return try {
+            val response = remote.deleteList(getActiveToken() ?: "", listId)
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "deleteList: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    override suspend fun getList(listId: Int): Resource<UserListDetailsResponse> {
+        return try {
+            val response = remote.getList(listId)
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "getList: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
         }
     }
 

@@ -5,19 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieappapi.domain.model.MoviesResponse
-import com.example.movieappapi.domain.useCase.GetNowPlayingMoviesUseCase
-import com.example.movieappapi.domain.useCase.GetPopularMoviesUseCase
-import com.example.movieappapi.domain.useCase.GetTopRatedUseCase
+import com.example.movieappapi.domain.useCase.GetMainFeedMoviesUseCase
+import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
 import kotlinx.coroutines.launch
 
-class MainFeedViewModel(
-    private val popularMoviesUseCase: GetPopularMoviesUseCase,
-    private val topRatedUseCase: GetTopRatedUseCase,
-    private val nowPlayingMoviesUseCase: GetNowPlayingMoviesUseCase,
-
-    ) : ViewModel() {
-
+class MainFeedViewModel(private val mainFeedMoviesUseCase: GetMainFeedMoviesUseCase) : ViewModel() {
 
     private val _popularMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
     val popularMovies: State<Resource<MoviesResponse>> = _popularMovies
@@ -41,7 +34,7 @@ class MainFeedViewModel(
         if (nowPlayingPage++ > nowPlayingMovies.value.data?.totalPages ?: 0) return@launch
         var movies = _nowPlayingMovies.value.data?.results
         _nowPlayingMovies.value = Resource.Loading()
-        val response = nowPlayingMoviesUseCase(nowPlayingPage)
+        val response = mainFeedMoviesUseCase(MainFeedMovieList.NowPlaying, nowPlayingPage)
         if (response is Resource.Success) {
             movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
             response.data?.results = movies
@@ -54,7 +47,7 @@ class MainFeedViewModel(
         if (topPage++ > topRatedMovies.value.data?.totalPages ?: 0) return@launch
         var movies = _topRatedMovies.value.data?.results
         _topRatedMovies.value = Resource.Loading()
-        val response = topRatedUseCase(topPage)
+        val response = mainFeedMoviesUseCase(MainFeedMovieList.TopRated, topPage)
         if (response is Resource.Success) {
             movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
             response.data?.results = movies
@@ -67,7 +60,7 @@ class MainFeedViewModel(
         if (popularPage++ > popularMovies.value.data?.totalPages ?: 0) return@launch
         var movies = _popularMovies.value.data?.results
         _popularMovies.value = Resource.Loading()
-        val response = popularMoviesUseCase(popularPage)
+        val response = mainFeedMoviesUseCase(MainFeedMovieList.Popular, popularPage)
         if (response is Resource.Success) {
             movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
             response.data?.results = movies

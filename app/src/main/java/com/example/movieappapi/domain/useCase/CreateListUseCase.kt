@@ -2,9 +2,9 @@ package com.example.movieappapi.domain.useCase
 
 import com.example.movieappapi.domain.repository.MovieRepository
 
-class GetTopRatedUseCase(
+class CreateListUseCase(
     private val repository: MovieRepository
 ) {
-
-    suspend operator fun invoke(page: Int) = repository.getTopRatedMovies(page)
+    suspend operator fun invoke(name: String, description: String) =
+        repository.createList(name, description)
 }

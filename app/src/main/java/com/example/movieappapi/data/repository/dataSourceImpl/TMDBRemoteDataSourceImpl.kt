@@ -7,6 +7,8 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 
+const val SESSION_PARAMETER = "session_id"
+
 class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataSource {
 
     override suspend fun getPopularTv(): TvShowsResponse = client.get(Url.POPULAR_Tv)
@@ -14,7 +16,7 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
 
     override suspend fun getAccountDetails(token: String): AccountDetailsResponse =
         client.get(Url.ACCOUNT_DETAILS) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
 
     override suspend fun createGuestSession(): GuestSessionResponse = client.post(Url.GUEST_LOGIN)
@@ -26,33 +28,80 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
 
     override suspend fun getUserCreatedList(accountId: Int, token: String): UserListsResponse =
         client.get(Url.getUserLists(accountId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
+
+    override suspend fun createList(
+        token: String,
+        name: String,
+        description: String
+    ): CreateListResponse =
+        client.post(Url.CREATE_LIST) {
+            parameter(SESSION_PARAMETER, token)
+            contentType(ContentType.Application.Json)
+            body = mapOf(
+                "name" to name,
+                "description" to description
+            )
+        }
+
+    override suspend fun deleteList(token: String, listId: Int): RateMediaResponse =
+        client.delete(Url.deleteList(listId)) {
+            parameter(SESSION_PARAMETER, token)
+        }
+
+    override suspend fun clearList(token: String, listId: Int): RateMediaResponse =
+        client.post(Url.clearList(listId)) {
+            parameter(SESSION_PARAMETER, token)
+        }
+
+    override suspend fun addMovieToList(
+        token: String,
+        listId: Int,
+        movieId: Int
+    ): RateMediaResponse = client.post(Url.addMovieToList(listId)) {
+        parameter(SESSION_PARAMETER, token)
+        contentType(ContentType.Application.Json)
+        body = mapOf("media_id" to movieId)
+    }
+
+    override suspend fun removeMovieToList(
+        token: String,
+        listId: Int,
+        movieId: Int
+    ): RateMediaResponse = client.post(Url.removeMovieToList(listId)) {
+        parameter(SESSION_PARAMETER, token)
+        contentType(ContentType.Application.Json)
+        body = mapOf("media_id" to movieId)
+    }
+
+    override suspend fun getList(listId: Int): UserListDetailsResponse =
+        client.get(Url.getList(listId))
 
     override suspend fun getUserFavoriteMovies(accountId: Int, token: String): MoviesResponse =
         client.get(Url.getUserFavoriteMovies(accountId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
 
     override suspend fun getMovieDetails(movieId: Int, sessionId: String): MovieDetailsResponse =
         client.get(Url.getMovieDetails(movieId)) {
-            parameter("session_id", sessionId)
+            parameter(SESSION_PARAMETER, sessionId)
             parameter("append_to_response", "account_states")
         }
 
     override suspend fun getUserFavoriteTv(accountId: Int, token: String): TvShowsResponse =
         client.get(Url.getUserFavoriteTv(accountId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
 
     override suspend fun getUserMovieWatchList(accountId: Int, token: String): MoviesResponse =
         client.get(Url.getUserWatchListMovies(accountId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
 
     override suspend fun getUserRatedMovies(accountId: Int, token: String): MoviesResponse =
         client.get(Url.getUserRatedMovies(accountId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
 
     override suspend fun markAsFavorite(
@@ -62,7 +111,7 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
         mediaType: String,
         isFavorite: Boolean
     ): RateMediaResponse = client.post(Url.markAsFavorite(accountId)) {
-        parameter("session_id", token)
+        parameter(SESSION_PARAMETER, token)
         header("Content-Type", "application/json;charset=utf-8")
         contentType(ContentType.Application.Json)
         body = MarkMediaFavoriteRequestBody(mediaType, mediaId, isFavorite)
@@ -79,7 +128,7 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
 
     override suspend fun getUserRatedTv(accountId: Int, token: String): TvShowsResponse =
         client.get(Url.getUserRatedTv(accountId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
 
     override suspend fun getUserRatedTvEpisodes(
@@ -87,12 +136,12 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
         token: String
     ): UserRatedTvEpisodesResponse =
         client.get(Url.getUserRatedTvEpisodes(accountId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
 
     override suspend fun getUserTvWatchList(accountId: Int, token: String): TvShowsResponse =
         client.get(Url.getUserWatchListTv(accountId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
 
     override suspend fun rateMovie(
@@ -100,7 +149,7 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
         token: String,
         value: Float
     ): RateMediaResponse = client.post(Url.rateMovie(movieId)) {
-        parameter("session_id", token)
+        parameter(SESSION_PARAMETER, token)
         contentType(ContentType.Application.Json)
         body = mapOf(
             "value" to value
@@ -109,17 +158,17 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
 
     override suspend fun deleteMovieRating(movieId: Int, token: String): RateMediaResponse =
         client.delete(Url.deleteMovieRating(movieId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
 
     override suspend fun deleteTvRating(tvId: Int, token: String): RateMediaResponse =
         client.delete(Url.deleteTvRating(tvId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
         }
 
     override suspend fun rateTv(tvId: Int, token: String, value: Float): RateMediaResponse =
         client.post(Url.rateTv(tvId)) {
-            parameter("session_id", token)
+            parameter(SESSION_PARAMETER, token)
             contentType(ContentType.Application.Json)
             body = mapOf(
                 "value" to value

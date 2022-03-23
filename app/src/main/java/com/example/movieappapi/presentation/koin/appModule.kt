@@ -10,8 +10,10 @@ import com.example.movieappapi.domain.useCase.*
 import com.example.movieappapi.domain.utils.Constants
 import com.example.movieappapi.presentation.room.AppDatabase
 import com.example.movieappapi.presentation.room.migrations.MIGRATION_1_2
+import com.example.movieappapi.presentation.room.migrations.MIGRATION_2_3
 import com.example.movieappapi.presentation.screen.account.AccountViewModel
 import com.example.movieappapi.presentation.screen.home.MainFeedViewModel
+import com.example.movieappapi.presentation.screen.lists.ListViewModel
 import com.example.movieappapi.presentation.screen.login.LoginViewModel
 import com.example.movieappapi.presentation.screen.movie.MovieViewModel
 import com.example.movieappapi.presentation.screen.recommendation.MovieRecommendationsViewModel
@@ -32,10 +34,7 @@ import org.koin.core.scope.Scope
 import org.koin.dsl.module
 
 val useCaseModule = module {
-    single { GetNowPlayingMoviesUseCase(get()) }
-    single { GetPopularMoviesUseCase(get()) }
     single { GetRecommendationsUseCase(get()) }
-    single { GetTopRatedUseCase(get()) }
     single { GetSimilarMoviesUseCase(get()) }
     single { GetUpcomingMoviesUseCase(get()) }
     single { LoginUseCase(get()) }
@@ -53,6 +52,10 @@ val useCaseModule = module {
     single { DeleteMovieRateUseCase(get()) }
     single { DeleteTvRateUseCase(get()) }
     single { GetAccountStatusUseCase(get()) }
+    single { GetMainFeedMoviesUseCase(get()) }
+    single { GetUserCreatedListsUseCase(get()) }
+    single { CreateListUseCase(get()) }
+    single { GetListDetailsUseCase(get()) }
 }
 
 val repositoryModule = module {
@@ -66,13 +69,14 @@ val repositoryModule = module {
 
 val viewModelsModule = module {
     viewModel { LoginViewModel(get(), get(), get(), get()) }
-    viewModel { MainFeedViewModel(get(), get(), get()) }
+    viewModel { MainFeedViewModel(get()) }
     viewModel { MovieRecommendationsViewModel(get(), get()) }
-    viewModel { UserListsViewModel() }
+    viewModel { UserListsViewModel(get(), get(), get()) }
     viewModel { MovieViewModel(get(), get(), get(), get(), get()) }
     viewModel { SearchViewModel(get(), get(), get(), get()) }
     viewModel { AccountViewModel(get(), get()) }
     viewModel { UserMoviesListViewModel(get()) }
+    viewModel { ListViewModel(get()) }
 
 }
 
@@ -84,7 +88,7 @@ fun Scope.provideAppDatabase() = Room
         AppDatabase::class.java,
         "movieDatabase"
     )
-    .addMigrations(MIGRATION_1_2)
+    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
     .build()
 
 private fun Scope.provideMovieRemoteDataSource(): TMDBRemoteDataSource =

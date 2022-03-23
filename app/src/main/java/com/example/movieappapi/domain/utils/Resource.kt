@@ -1,9 +1,12 @@
 package com.example.movieappapi.domain.utils
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
@@ -49,8 +52,13 @@ sealed class Resource<T>(var data: T? = null, var message: String? = null) {
     }
 
     @Composable
-    private fun LoadingStateComposable(modifier: Modifier = Modifier) {
-        CircularProgressIndicator(color = MaterialTheme.colors.primary, modifier = modifier)
+    fun LoadingStateComposable() {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.colors.primary)
+        }
     }
 
     suspend fun onSuccess(perform: suspend (T) -> Unit) {
