@@ -9,6 +9,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.material.Text
@@ -20,15 +21,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.movieappapi.domain.model.SearchResult
+import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
 
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
-fun SearchItem(searchResult: SearchResult) {
+fun SearchItem(searchResult: SearchResult, navHostController: NavHostController) {
     val isVisible = remember {
         MutableTransitionState(false).apply { targetState = true }
     }
@@ -42,6 +45,10 @@ fun SearchItem(searchResult: SearchResult) {
                 .fillMaxWidth()
                 .border(BorderStroke(4.dp, Color.Black))
                 .padding(8.dp)
+                .clickable {
+                    if (searchResult.mediaType == "movie")
+                        navHostController.navigate("${Screens.MOVIE_DETAILS}/${searchResult.id ?: 0}")
+                }
         ) {
             Row {
                 Image(

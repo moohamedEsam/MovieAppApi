@@ -20,6 +20,23 @@ fun MovieEntity.toMovie() = Movie(
     title = title
 )
 
+fun MovieDetailsResponse.toMovie() = Movie(
+    id = id,
+    adult = adult,
+    backdropPath = backdropPath,
+    genreIds = genres?.mapNotNull { it.id },
+    originalLanguage = originalLanguage,
+    originalTitle = originalTitle,
+    overview = overview,
+    popularity = popularity,
+    posterPath = posterPath,
+    releaseDate = releaseDate,
+    title = title,
+    video = video,
+    voteCount = voteCount,
+    voteAverage = voteAverage
+)
+
 fun MovieDetailsResponse.toMovieDetailsEntity() = MovieDetailsEntity(
     id ?: 0,
     genres ?: emptyList(),

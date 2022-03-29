@@ -1,6 +1,7 @@
 package com.example.movieappapi
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
                     val userState by viewModel.userState
+                    Log.i("MainActivity", "onCreate: $userState")
                     when (userState) {
                         is Resource.Success, is Resource.Error -> {
                             MainScreen(

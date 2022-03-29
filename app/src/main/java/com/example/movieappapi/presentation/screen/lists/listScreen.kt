@@ -30,6 +30,8 @@ fun ListScreen(listId: Int, navHostController: NavHostController) {
                 viewModel.setSearchMode(false)
 
         }
-    )
+    ) {
+
+    }
 
 }

@@ -9,8 +9,6 @@ import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.useCase.*
 import com.example.movieappapi.domain.utils.Constants
 import com.example.movieappapi.presentation.room.AppDatabase
-import com.example.movieappapi.presentation.room.migrations.MIGRATION_1_2
-import com.example.movieappapi.presentation.room.migrations.MIGRATION_2_3
 import com.example.movieappapi.presentation.screen.account.AccountViewModel
 import com.example.movieappapi.presentation.screen.home.MainFeedViewModel
 import com.example.movieappapi.presentation.screen.lists.ListViewModel
@@ -56,6 +54,8 @@ val useCaseModule = module {
     single { GetUserCreatedListsUseCase(get()) }
     single { CreateListUseCase(get()) }
     single { GetListDetailsUseCase(get()) }
+    single { AddMovieToListUseCase(get()) }
+    single { RemoveMovieFromListUseCase(get()) }
 }
 
 val repositoryModule = module {
@@ -72,7 +72,7 @@ val viewModelsModule = module {
     viewModel { MainFeedViewModel(get()) }
     viewModel { MovieRecommendationsViewModel(get(), get()) }
     viewModel { UserListsViewModel(get(), get(), get()) }
-    viewModel { MovieViewModel(get(), get(), get(), get(), get()) }
+    viewModel { MovieViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { SearchViewModel(get(), get(), get(), get()) }
     viewModel { AccountViewModel(get(), get()) }
     viewModel { UserMoviesListViewModel(get()) }
@@ -88,7 +88,7 @@ fun Scope.provideAppDatabase() = Room
         AppDatabase::class.java,
         "movieDatabase"
     )
-    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+    //.addMigrations(MIGRATION_1_2, MIGRATION_2_3)
     .build()
 
 private fun Scope.provideMovieRemoteDataSource(): TMDBRemoteDataSource =

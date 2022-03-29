@@ -8,6 +8,7 @@ import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.useCase.GetMainFeedMoviesUseCase
 import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MainFeedViewModel(private val mainFeedMoviesUseCase: GetMainFeedMoviesUseCase) : ViewModel() {
@@ -34,11 +35,11 @@ class MainFeedViewModel(private val mainFeedMoviesUseCase: GetMainFeedMoviesUseC
         if (nowPlayingPage++ > nowPlayingMovies.value.data?.totalPages ?: 0) return@launch
         var movies = _nowPlayingMovies.value.data?.results
         _nowPlayingMovies.value = Resource.Loading()
-        val response = mainFeedMoviesUseCase(MainFeedMovieList.NowPlaying, nowPlayingPage)
-        if (response is Resource.Success) {
-            movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
-            response.data?.results = movies
-            _nowPlayingMovies.value = response
+        mainFeedMoviesUseCase(MainFeedMovieList.NowPlaying, nowPlayingPage).collectLatest {
+            if (it !is Resource.Success) return@collectLatest
+            movies = movies?.plus(it.data?.results ?: emptyList()) ?: it.data?.results
+            it.data?.results = movies
+            _nowPlayingMovies.value = it
         }
     }
 
@@ -47,11 +48,11 @@ class MainFeedViewModel(private val mainFeedMoviesUseCase: GetMainFeedMoviesUseC
         if (topPage++ > topRatedMovies.value.data?.totalPages ?: 0) return@launch
         var movies = _topRatedMovies.value.data?.results
         _topRatedMovies.value = Resource.Loading()
-        val response = mainFeedMoviesUseCase(MainFeedMovieList.TopRated, topPage)
-        if (response is Resource.Success) {
-            movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
-            response.data?.results = movies
-            _topRatedMovies.value = response
+        mainFeedMoviesUseCase(MainFeedMovieList.TopRated, topPage).collectLatest {
+            if (it !is Resource.Success) return@collectLatest
+            movies = movies?.plus(it.data?.results ?: emptyList()) ?: it.data?.results
+            it.data?.results = movies
+            _topRatedMovies.value = it
         }
     }
 
@@ -60,11 +61,11 @@ class MainFeedViewModel(private val mainFeedMoviesUseCase: GetMainFeedMoviesUseC
         if (popularPage++ > popularMovies.value.data?.totalPages ?: 0) return@launch
         var movies = _popularMovies.value.data?.results
         _popularMovies.value = Resource.Loading()
-        val response = mainFeedMoviesUseCase(MainFeedMovieList.Popular, popularPage)
-        if (response is Resource.Success) {
-            movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
-            response.data?.results = movies
-            _popularMovies.value = response
+        mainFeedMoviesUseCase(MainFeedMovieList.Popular, popularPage).collectLatest {
+            if (it !is Resource.Success) return@collectLatest
+            movies = movies?.plus(it.data?.results ?: emptyList()) ?: it.data?.results
+            it.data?.results = movies
+            _popularMovies.value = it
         }
 
     }

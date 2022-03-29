@@ -3,9 +3,11 @@ package com.example.movieappapi.domain.repository
 import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.model.room.MovieEntity
 import com.example.movieappapi.domain.model.room.UserEntity
+import com.example.movieappapi.domain.model.room.UserListDetailsEntity
 import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
+import kotlinx.coroutines.flow.Flow
 
 
 interface MovieRepository {
@@ -64,7 +66,7 @@ interface MovieRepository {
 
     suspend fun getList(listId: Int): Resource<UserListDetailsResponse>
 
-    suspend fun removeMovieToList(listId: Int, movieId: Int): Resource<RateMediaResponse>
+    suspend fun removeMovieFromList(listId: Int, movieId: Int): Resource<RateMediaResponse>
 
     suspend fun clearList(listId: Int): Resource<RateMediaResponse>
 
@@ -115,7 +117,7 @@ interface MovieRepository {
 
     suspend fun getCachedUser(): UserEntity?
 
-    suspend fun getLatestMovieAdded(tag: String): MovieEntity?
+    suspend fun getLatestMovieAdded(tag: String): Flow<MovieEntity>
 
     suspend fun updateUser(userEntity: UserEntity)
 
@@ -126,13 +128,23 @@ interface MovieRepository {
 
     suspend fun updateMovie(movie: MovieEntity)
 
-    suspend fun getMovie(movieId: Int): MovieEntity?
+    suspend fun getMovie(movieId: Int): Flow<MovieEntity?>
 
-    suspend fun getLocalMovies(movieList: MainFeedMovieList): List<Movie>
+    suspend fun getLocalMovies(movieList: MainFeedMovieList): Flow<List<Movie>>
 
-    suspend fun getLocalMovieDetails(movieId: Int): MovieDetailsResponse?
+    suspend fun getLocalMovieDetails(movieId: Int): Flow<MovieDetailsResponse?>
 
     suspend fun insertLocalMovies(movies: List<Movie>, tag: String)
 
     suspend fun insertLocalMovieDetails(movie: MovieDetailsResponse)
+
+    suspend fun updateLocalMovieDetails(movie: MovieDetailsResponse)
+
+    suspend fun insertUserListDetails(userListDetailsResponse: UserListDetailsResponse): Resource<Unit>
+    suspend fun updateUserListDetails(userListDetailsResponse: UserListDetailsResponse): Resource<Unit>
+    suspend fun updateUserListDetails(userListDetailsEntity: UserListDetailsEntity): Resource<Unit>
+    suspend fun deleteUserListDetails(listId: Int): Resource<Unit>
+    suspend fun getUserListDetails(listId: Int): Flow<Resource<UserListDetailsResponse>>
+    suspend fun getUserLists(): Flow<Resource<UserListsResponse>>
+    suspend fun getUserListDetailsEntity(listId: Int): Flow<Resource<UserListDetailsEntity>>
 }

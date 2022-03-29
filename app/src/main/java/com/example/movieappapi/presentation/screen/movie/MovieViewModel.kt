@@ -1,5 +1,6 @@
 package com.example.movieappapi.presentation.screen.movie
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,8 @@ import com.example.movieappapi.domain.model.MovieDetailsResponse
 import com.example.movieappapi.domain.useCase.*
 import com.example.movieappapi.domain.utils.Resource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
@@ -17,7 +20,9 @@ class MovieViewModel(
     private val rateMovieUseCase: RateMovieUseCase,
     private val markAsFavoriteMovieUseCase: MarkAsFavoriteMovieUseCase,
     private val movieDetailsUseCase: GetMovieDetailsUseCase,
-    private val deleteMovieRateUseCase: DeleteMovieRateUseCase
+    private val deleteMovieRateUseCase: DeleteMovieRateUseCase,
+    private val addMovieToListUseCase: AddMovieToListUseCase,
+    private val userCreatedListsUseCase: GetUserCreatedListsUseCase
 ) : ViewModel() {
     private val _genres = mutableStateOf<GenreResponse?>(null)
 
@@ -27,7 +32,9 @@ class MovieViewModel(
 
     fun setMovie(movieId: Int) = viewModelScope.launch {
         _movie.value = Resource.Loading()
-        _movie.value = movieDetailsUseCase(movieId)
+        movieDetailsUseCase(movieId).collectLatest {
+            _movie.value = it
+        }
     }
 
 
@@ -56,21 +63,47 @@ class MovieViewModel(
         _movie.value.onSuccess {
             it.accountStatesResponse = accountStates
             markAsFavoriteMovieUseCase(
-                it.id ?: 1,
+                it,
                 accountStates?.favorite ?: true
             )
         }
     }
 
     fun rateMovie(value: Float) = viewModelScope.launch {
+        val accountStates = _movie.value.data?.accountStatesResponse
+        accountStates?.rated?.isRated = true
+        accountStates?.rated?.value = value
         _movie.value.onSuccess {
-            rateMovieUseCase(it.id ?: 1, value)
+            it.accountStatesResponse = accountStates
+            rateMovieUseCase(it, value)
         }
     }
 
     fun removeRate() = viewModelScope.launch {
+        val accountStates = _movie.value.data?.accountStatesResponse
+        accountStates?.rated?.isRated = false
+        accountStates?.rated?.value = 0f
         _movie.value.onSuccess {
-            deleteMovieRateUseCase(it.id ?: 1)
+            it.accountStatesResponse = accountStates
+            deleteMovieRateUseCase(it)
+        }
+    }
+
+    fun addToList(listId: Int) = viewModelScope.launch {
+        _movie.value.onSuccess {
+            val response = addMovieToListUseCase(
+                it.id ?: 0,
+                listId,
+                it.accountStatesResponse?.favorite ?: false
+            )
+            Log.i("MovieViewModel", "addToList: $response")
+        }
+    }
+
+    fun getUserLists() = channelFlow {
+        userCreatedListsUseCase().collectLatest {
+            if (it !is Resource.Success || it.data == null) return@collectLatest
+            send(it.data!!)
         }
     }
 }

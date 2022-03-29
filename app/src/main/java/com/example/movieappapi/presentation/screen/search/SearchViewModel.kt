@@ -68,6 +68,9 @@ class SearchViewModel(
             setSearchResults(filterResultsByQuery(query) ?: emptyList())
         } else
             _searchResults.value = searchAllUseCase(query.trim())
+        _searchResults.value.onSuccess {
+            it.searchResults = it.searchResults?.filter { search -> search.mediaType == "movie" }
+        }
 
     }
 

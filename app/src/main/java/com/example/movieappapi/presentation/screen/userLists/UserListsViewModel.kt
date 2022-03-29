@@ -12,6 +12,7 @@ import com.example.movieappapi.domain.useCase.GetAccountStatusUseCase
 import com.example.movieappapi.domain.useCase.GetUserCreatedListsUseCase
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class UserListsViewModel(
@@ -37,7 +38,9 @@ class UserListsViewModel(
 
     fun setUserLists() = viewModelScope.launch {
         _userLists.value = Resource.Loading()
-        _userLists.value = userCreatedListsUseCase()
+        userCreatedListsUseCase().collectLatest {
+            _userLists.value = it
+        }
     }
 
     fun createList(name: String, description: String) = viewModelScope.launch {

@@ -5,6 +5,7 @@ import com.example.movieappapi.data.repository.dataSource.TMDBRemoteDataSource
 import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.model.room.MovieEntity
 import com.example.movieappapi.domain.model.room.UserEntity
+import com.example.movieappapi.domain.model.room.UserListDetailsEntity
 import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
@@ -12,6 +13,7 @@ import com.example.movieappapi.domain.utils.UserStatus
 import com.example.movieappapi.domain.utils.mappers.*
 import com.example.movieappapi.presentation.room.AppDao
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -50,13 +52,13 @@ class MovieRepositoryImpl(
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun getLocalMovies(movieList: MainFeedMovieList): List<Movie> =
-        local.getMovie(movieList.tag).map { it.toMovie() }
+    override suspend fun getLocalMovies(movieList: MainFeedMovieList): Flow<List<Movie>> =
+        local.getMovie(movieList.tag).map { list -> list.map { it.toMovie() } }
 
     override suspend fun deleteAllMovies(tag: String) = local.deleteAllMovies(tag)
 
-    override suspend fun getLocalMovieDetails(movieId: Int): MovieDetailsResponse? =
-        local.getMovieDetails(movieId)?.toMovieDetailsResponse()
+    override suspend fun getLocalMovieDetails(movieId: Int): Flow<MovieDetailsResponse?> =
+        local.getMovieDetails(movieId).map { it?.toMovieDetailsResponse() }
 
     override suspend fun insertLocalMovies(movies: List<Movie>, tag: String) {
         Log.i("MovieRepositoryImpl", "insertLocalMovies: called with tag $tag")
@@ -76,7 +78,7 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getMovie(movieId: Int): MovieEntity? = local.getMovie(movieId)
+    override suspend fun getMovie(movieId: Int): Flow<MovieEntity?> = local.getMovie(movieId)
 
     override suspend fun updateMovie(movie: MovieEntity) {
         local.updateMovie(movie)
@@ -233,13 +235,14 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getLatestMovieAdded(tag: String): MovieEntity? =
+    override suspend fun getLatestMovieAdded(tag: String): Flow<MovieEntity> =
         local.getLatestMovieAdded(tag)
 
     override suspend fun assignCachedSession() {
-        val session = local.getSession()
-        session?.success = session?.expiresAt?.after(Date()) ?: false
-        sessionResponse = session?.toSessionResponse() ?: return
+        val local = local.getSession() ?: return
+        local.success = local.expiresAt.after(Date())
+        sessionResponse = local.toSessionResponse()
+
     }
 
     override suspend fun resetRepository() {
@@ -290,6 +293,14 @@ class MovieRepositoryImpl(
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getMovieDetails: ${exception.message}")
             Resource.Error(exception.localizedMessage)
+        }
+    }
+
+    override suspend fun updateLocalMovieDetails(movie: MovieDetailsResponse) {
+        try {
+            local.updateMovieDetails(movie.toMovieDetailsEntity())
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "updateLocalMovieDetails: ${exception.message}")
         }
     }
 
@@ -355,7 +366,10 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun removeMovieToList(listId: Int, movieId: Int): Resource<RateMediaResponse> {
+    override suspend fun removeMovieFromList(
+        listId: Int,
+        movieId: Int
+    ): Resource<RateMediaResponse> {
         return try {
             val response = remote.removeMovieToList(getActiveToken() ?: "", listId, movieId)
             Resource.Success(response)
@@ -435,6 +449,92 @@ class MovieRepositoryImpl(
             UserStatus.LoggedIn(accountDetailsResponse)
         else
             UserStatus.LoggedOut
+    }
+
+    override suspend fun insertUserListDetails(userListDetailsResponse: UserListDetailsResponse): Resource<Unit> {
+        return try {
+            local.insertUserListDetails(userListDetailsResponse.toUserListDetailsEntity())
+            Resource.Success(Unit)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "insertUserListDetails: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun updateUserListDetails(userListDetailsResponse: UserListDetailsResponse): Resource<Unit> {
+        return try {
+            local.updateUserListDetails(userListDetailsResponse.toUserListDetailsEntity())
+            Resource.Success(Unit)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "insertUserListDetails: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun deleteUserListDetails(listId: Int): Resource<Unit> {
+        return try {
+            local.deleteUserListDetails(listId)
+            Resource.Success(Unit)
+        } catch (exception: Exception) {
+            Log.e("MovieRepositoryImpl", "insertUserListDetails: ${exception.message}")
+            Resource.Error(exception.message)
+        }
+    }
+
+    private fun mapMovieIdsToMovies(movieIds: List<Int>) = flow {
+        val movies = mutableListOf<Movie>()
+        movieIds.map {
+            local.getMovie(it).collectLatest { movieEntity ->
+                movieEntity?.let { movie ->
+                    movies.add(movie.toMovie())
+                }
+            }
+        }
+        emit(movies.toList())
+    }
+
+
+    override suspend fun getUserListDetails(listId: Int): Flow<Resource<UserListDetailsResponse>> =
+        flow {
+            try {
+                local.getUserListDetails(listId).collectLatest { userList ->
+                    mapMovieIdsToMovies(userList.items ?: emptyList()).collectLatest { movies ->
+                        emit(Resource.Success(userList.toUserListDetailsResponse { movies }))
+                    }
+                }
+            } catch (exception: Exception) {
+                emit(Resource.Error(exception.message))
+            }
+        }
+
+    override suspend fun updateUserListDetails(userListDetailsEntity: UserListDetailsEntity): Resource<Unit> {
+        return try {
+            local.updateUserListDetails(userListDetailsEntity)
+            Resource.Success(Unit)
+        } catch (exception: Exception) {
+            Resource.Error(exception.message)
+        }
+    }
+
+    override suspend fun getUserListDetailsEntity(listId: Int): Flow<Resource<UserListDetailsEntity>> =
+        flow {
+            try {
+                local.getUserListDetails(listId).collectLatest {
+                    emit(Resource.Success(it))
+                }
+            } catch (exception: Exception) {
+                emit(Resource.Error(exception.message))
+            }
+        }
+
+    override suspend fun getUserLists(): Flow<Resource<UserListsResponse>> = channelFlow {
+        try {
+            local.getAllUserList().collectLatest {
+                send(Resource.Success(it.toUserListsResponse()))
+            }
+        } catch (exception: Exception) {
+            send(Resource.Error(exception.message))
+        }
     }
 
     override suspend fun rateMovie(
@@ -553,6 +653,7 @@ class MovieRepositoryImpl(
         try {
             val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ")
             val date = format.parse(tokenResponse.expiresAt ?: "")
+            local.deleteSession()
             local.insertSession(sessionResponse.toSessionEntity(date ?: Date()))
         } catch (e: Exception) {
             Log.e("MovieRepositoryImpl", "updateSession: ${e.message}")

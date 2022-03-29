@@ -1,10 +1,8 @@
 package com.example.movieappapi.presentation.room
 
 import androidx.room.*
-import com.example.movieappapi.domain.model.room.MovieDetailsEntity
-import com.example.movieappapi.domain.model.room.MovieEntity
-import com.example.movieappapi.domain.model.room.SessionEntity
-import com.example.movieappapi.domain.model.room.UserEntity
+import com.example.movieappapi.domain.model.room.*
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AppDao {
@@ -26,8 +24,8 @@ interface AppDao {
     @Update
     suspend fun updateSession(sessionEntity: SessionEntity)
 
-    @Delete
-    suspend fun deleteSession(sessionEntity: SessionEntity)
+    @Query("delete from sessionEntity")
+    suspend fun deleteSession()
 
     @Query("select * from sessionEntity")
     suspend fun getSession(): SessionEntity?
@@ -36,7 +34,7 @@ interface AppDao {
     suspend fun insertMovie(movieEntity: MovieEntity)
 
     @Query("select * from movieEntity where id = (:movieId)")
-    suspend fun getMovie(movieId: Int): MovieEntity?
+    fun getMovie(movieId: Int): Flow<MovieEntity?>
 
     @Update
     suspend fun updateMovie(movieEntity: MovieEntity)
@@ -45,10 +43,10 @@ interface AppDao {
     suspend fun deleteMovie(movieEntity: MovieEntity)
 
     @Query("select * from movieEntity where tag = (:tag)")
-    suspend fun getMovie(tag: String): List<MovieEntity>
+    fun getMovie(tag: String): Flow<List<MovieEntity>>
 
     @Query("select * from movieEntity where dateAdded is not null and tag = (:tag) order by dateAdded desc")
-    suspend fun getLatestMovieAdded(tag: String): MovieEntity?
+    fun getLatestMovieAdded(tag: String): Flow<MovieEntity>
 
     @Query("delete from movieEntity where tag like (:tag)")
     suspend fun deleteAllMovies(tag: String)
@@ -63,5 +61,23 @@ interface AppDao {
     suspend fun deleteMovieDetails(movieDetailsEntity: MovieDetailsEntity)
 
     @Query("select * from movieDetailsEntity where id = (:movieId)")
-    suspend fun getMovieDetails(movieId: Int): MovieDetailsEntity?
+    fun getMovieDetails(movieId: Int): Flow<MovieDetailsEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserListDetails(userListDetailsEntity: UserListDetailsEntity)
+
+    @Update
+    suspend fun updateUserListDetails(userListDetailsEntity: UserListDetailsEntity)
+
+    @Query("delete from userListDetailsEntity where id = (:listId)")
+    suspend fun deleteUserListDetails(listId: Int)
+
+    @Query("select * from userListDetailsEntity")
+    fun getUserAllListDetails(): Flow<List<UserListDetailsEntity>>
+
+    @Query("select * from userListDetailsEntity where id = (:listId)")
+    fun getUserListDetails(listId: Int): Flow<UserListDetailsEntity>
+
+    @Query("select id, name, description,favoriteCount,itemCount, posterPath from userListDetailsEntity")
+    fun getAllUserList(): Flow<List<UserListEntity>>
 }

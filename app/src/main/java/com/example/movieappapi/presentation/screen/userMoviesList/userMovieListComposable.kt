@@ -31,7 +31,7 @@ fun UserMovieListScreen(
             else
                 viewModel.setSearchMode(false)
         }
-    )
+    ) {}
 }
 
 

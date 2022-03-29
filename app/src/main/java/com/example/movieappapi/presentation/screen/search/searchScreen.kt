@@ -1,29 +1,25 @@
-package com.example.movieappapi.composables
+package com.example.movieappapi.presentation.screen.search
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.domain.model.AllSearchResponse
 import com.example.movieappapi.domain.model.SearchResult
-import com.example.movieappapi.presentation.components.SearchItem
+import com.example.movieappapi.domain.utils.mappers.toMovie
+import com.example.movieappapi.presentation.components.GridMovieList
+import com.example.movieappapi.presentation.components.SearchComposable
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
-import com.example.movieappapi.presentation.screen.search.SearchViewModel
 import com.example.movieappapi.ui.theme.MovieAppApiTheme
 import org.koin.androidx.compose.getViewModel
 
@@ -37,16 +33,17 @@ fun SearchScreen(navHostController: NavHostController) {
             .padding(8.dp)
     ) {
         SearchTextField()
-        FilterBox()
+        //FilterBox()
         CreateVerticalSpacer()
-        ResultList()
+
+        ResultList(navHostController)
     }
 }
 
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
-fun ResultList() {
+fun ResultList(navHostController: NavHostController) {
     val viewModel: SearchViewModel = getViewModel()
     val results by viewModel.searchResults
     val searchMode by viewModel.searchMode
@@ -55,7 +52,8 @@ fun ResultList() {
         ShowItems(
             searchMode = searchMode,
             searchItems = it,
-            filteredItems = filteredItems
+            filteredItems = filteredItems,
+            navHostController = navHostController
         )
     }
 
@@ -67,34 +65,17 @@ fun ResultList() {
 private fun ShowItems(
     searchMode: Boolean,
     searchItems: AllSearchResponse,
-    filteredItems: List<SearchResult>
+    filteredItems: List<SearchResult>,
+    navHostController: NavHostController
 ) {
     if (!searchMode)
-        ShowSearchResults(searchItems)
+        GridMovieList(
+            searchItems.searchResults?.map { it.toMovie() } ?: emptyList(),
+            navHostController
+        )
     else
-        ShowResults(filteredItems)
+        GridMovieList(filteredItems.map { it.toMovie() }, navHostController)
 }
-
-@ExperimentalCoilApi
-@ExperimentalAnimationApi
-@Composable
-private fun ShowSearchResults(results: AllSearchResponse) {
-    results.searchResults?.let { searchResults ->
-        ShowResults(searchResults)
-    }
-}
-
-@ExperimentalCoilApi
-@ExperimentalAnimationApi
-@Composable
-private fun ShowResults(items: List<SearchResult>) {
-    LazyColumn {
-        items(items) { item ->
-            SearchItem(searchResult = item)
-        }
-    }
-}
-
 
 @Composable
 fun FilterBox() {
@@ -259,43 +240,9 @@ fun FilterAlertDialog(values: List<String>, onClick: (String) -> Unit) {
 @Composable
 fun SearchTextField() {
     val viewModel: SearchViewModel = getViewModel()
-    var value by remember {
-        mutableStateOf("")
+    SearchComposable(onValueChange = {}) {
+        viewModel.setSearchResults(it)
     }
-
-    var isError by remember {
-        mutableStateOf(false)
-    }
-    var focusColor by remember {
-        mutableStateOf(Color.DarkGray)
-    }
-    OutlinedTextField(
-        value = value,
-        onValueChange = {
-            value = it
-            isError = it.isBlank()
-        },
-        trailingIcon = {
-            IconButton(onClick = {
-                viewModel.setSearchResults(value.trim())
-            }) {
-                Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .onFocusChanged {
-                focusColor = if (it.isFocused)
-                    Color.Green
-                else
-                    Color.DarkGray
-            },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            trailingIconColor = focusColor
-        ),
-        isError = isError,
-        label = { Text(text = "search a movie or tv show or actor") }
-    )
 }
 
 @Preview

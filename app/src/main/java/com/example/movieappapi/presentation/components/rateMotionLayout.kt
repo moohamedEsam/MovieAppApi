@@ -1,5 +1,6 @@
 package com.example.movieappapi.presentation.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,7 +25,7 @@ import androidx.constraintlayout.compose.MotionScene
 import com.example.movieappapi.R
 import com.example.movieappapi.ui.theme.MovieAppApiTheme
 
-@OptIn(ExperimentalMotionApi::class)
+@OptIn(ExperimentalMotionApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
 @Composable
 fun RateMotionLayout(
     initialProgress: Float = (0).toFloat(),
@@ -37,6 +38,7 @@ fun RateMotionLayout(
     var progress by remember {
         mutableStateOf(initialProgress)
     }
+
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Column(
             modifier = Modifier
@@ -59,7 +61,12 @@ fun RateMotionLayout(
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Slider(value = progress, onValueChange = { progress = it })
+            Slider(
+                value = progress,
+                onValueChange = { progress = it },
+                steps = 19
+            )
+
             Text(
                 text = "%.1f".format(progress * 10),
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -71,7 +78,7 @@ fun RateMotionLayout(
             ) {
                 Button(
                     onClick = {
-                        onRate(progress)
+                        onRate(progress * 10)
                         onDismissRequest()
                     },
                 ) {
@@ -98,6 +105,23 @@ fun RateMotionLayout(
 @Composable
 fun DialogPreview() {
     MovieAppApiTheme {
-        RateMotionLayout(onDismissRequest = { }, onRate = {})
+        var progress by remember {
+            mutableStateOf(0f)
+        }
+        SideEffect {
+            Log.i("rateMotionLayout", "DialogPreview: $progress")
+        }
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+
+            Slider(
+                value = progress,
+                onValueChange = { progress = it },
+//                valueRange = 0.5f..10.0f,
+                steps = 19
+            )
+        }
     }
 }

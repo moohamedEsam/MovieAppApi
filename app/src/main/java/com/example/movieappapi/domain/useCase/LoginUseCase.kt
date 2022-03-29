@@ -25,7 +25,7 @@ class LoginUseCase(
     }
 
     suspend fun login(userEntity: UserEntity): Resource<Boolean> {
-        val response = repository.requestToken()
+        repository.requestToken()
         val result = repository.login(userEntity)
         return if (result.data == true) {
             val sessionResponse = repository.createSession()

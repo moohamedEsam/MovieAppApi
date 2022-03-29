@@ -5,8 +5,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -27,7 +25,7 @@ import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
-import com.example.movieappapi.presentation.components.HorizontalListMovieItem
+import com.example.movieappapi.presentation.components.HorizontalMovieList
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -152,22 +150,6 @@ fun PopularMovieViewPager(
     }
 }
 
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@Composable
-fun HorizontalMovieList(
-    movies: List<Movie>,
-    navHostController: NavHostController,
-    paginate: () -> Unit = {}
-) {
-    LazyRow(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(horizontal = 8.dp)) {
-        itemsIndexed(movies) { index, movie ->
-            if (index == movies.lastIndex)
-                paginate()
-            HorizontalListMovieItem(movie = movie, navHostController = navHostController)
-        }
-    }
-}
 
 @ExperimentalSerializationApi
 @ExperimentalCoilApi

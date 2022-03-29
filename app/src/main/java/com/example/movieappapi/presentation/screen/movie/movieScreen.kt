@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material.icons.outlined.Favorite
@@ -34,6 +35,7 @@ import com.example.movieappapi.domain.model.MovieDetailsResponse
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
 import com.example.movieappapi.presentation.components.RateMotionLayout
+import com.example.movieappapi.presentation.components.UserListsDropDownMenu
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -53,7 +55,7 @@ fun MovieDetails(movieId: Int, navHostController: NavHostController) {
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class, coil.annotation.ExperimentalCoilApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalCoilApi::class)
 @Composable
 private fun BoxScope.MovieUi(
     movie: MovieDetailsResponse,
@@ -104,10 +106,29 @@ private fun MovieActionIconsColumn(movie: MovieDetailsResponse, modifier: Modifi
                     Color.White
             )
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
+        CreateVerticalSpacer()
         RateAction(rated)
+        CreateVerticalSpacer()
+        AddToListAction()
+    }
+}
+
+@Composable
+fun AddToListAction() {
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+    val viewModel: MovieViewModel = getViewModel()
+    IconButton(onClick = {
+        showDialog = true
+    }) {
+        Icon(imageVector = Icons.Default.Add, contentDescription = null)
+    }
+    UserListsDropDownMenu(
+        expanded = showDialog,
+        onDismissRequest = { showDialog = false }
+    ) {
+        viewModel.addToList(it)
     }
 }
 
