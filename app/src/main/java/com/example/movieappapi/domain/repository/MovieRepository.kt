@@ -117,7 +117,7 @@ interface MovieRepository {
 
     suspend fun getCachedUser(): UserEntity?
 
-    suspend fun getLatestMovieAdded(tag: String): Flow<MovieEntity>
+    suspend fun getLatestMovieAdded(tag: String): Flow<MovieEntity?>
 
     suspend fun updateUser(userEntity: UserEntity)
 

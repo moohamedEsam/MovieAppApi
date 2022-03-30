@@ -57,5 +57,9 @@ data class MovieDetailsResponse(
     @SerialName("vote_count")
     var voteCount: Int? = null,
     @SerialName("account_states")
-    var accountStatesResponse: AccountStatesResponse? = null
+    var accountStatesResponse: AccountStatesResponse? = null,
+    @SerialName("credits")
+    var movieCredits: MovieCredits? = null,
+    @SerialName("keywords")
+    var keywords: KeywordResponse? = null
 )

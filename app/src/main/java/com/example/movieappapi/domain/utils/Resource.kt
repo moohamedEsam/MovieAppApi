@@ -61,7 +61,14 @@ sealed class Resource<T>(var data: T? = null, var message: String? = null) {
         }
     }
 
+
     suspend fun onSuccess(perform: suspend (T) -> Unit) {
+        if (this is Success && data != null)
+            perform(data!!)
+    }
+
+    @Composable
+    fun OnSuccessComposable(perform: @Composable (T) -> Unit) {
         if (this is Success && data != null)
             perform(data!!)
     }

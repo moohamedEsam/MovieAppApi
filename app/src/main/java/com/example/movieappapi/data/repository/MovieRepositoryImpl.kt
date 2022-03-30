@@ -235,7 +235,7 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getLatestMovieAdded(tag: String): Flow<MovieEntity> =
+    override suspend fun getLatestMovieAdded(tag: String): Flow<MovieEntity?> =
         local.getLatestMovieAdded(tag)
 
     override suspend fun assignCachedSession() {

@@ -46,7 +46,7 @@ interface AppDao {
     fun getMovie(tag: String): Flow<List<MovieEntity>>
 
     @Query("select * from movieEntity where dateAdded is not null and tag = (:tag) order by dateAdded desc")
-    fun getLatestMovieAdded(tag: String): Flow<MovieEntity>
+    fun getLatestMovieAdded(tag: String): Flow<MovieEntity?>
 
     @Query("delete from movieEntity where tag like (:tag)")
     suspend fun deleteAllMovies(tag: String)

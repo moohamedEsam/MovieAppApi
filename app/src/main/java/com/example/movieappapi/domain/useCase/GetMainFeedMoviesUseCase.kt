@@ -15,9 +15,9 @@ class GetMainFeedMoviesUseCase(
     suspend operator fun invoke(movieList: MainFeedMovieList, page: Int) = channelFlow {
         repository.getLatestMovieAdded(movieList.tag).collectLatest { movie ->
             val calendar = Calendar.getInstance()
-            calendar.time = movie.dateAdded ?: Date()
+            calendar.time = movie?.dateAdded ?: Date()
             calendar.add(Calendar.DAY_OF_WEEK, 1)
-            if (!Date(calendar.timeInMillis).before(Date()) && page == 1) {
+            if (movie != null && !Date(calendar.timeInMillis).before(Date()) && page == 1) {
                 repository.getLocalMovies(movieList).collectLatest { movies ->
                     Log.i("GetMainFeedMoviesUseCase", "invoke: in")
                     send(Resource.Success(MoviesResponse(page = page, movies, totalPages = 4)))

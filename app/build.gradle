@@ -127,6 +127,10 @@ dependencies {
     implementation "androidx.datastore:datastore:1.0.0"
     implementation  "com.google.protobuf:protobuf-javalite:3.10.0"
 
+    //palatte
+    implementation("com.android.support:palette-v7:28.0.0")
+
+
     // Test rules and transitive dependencies:
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$compose_version")
     // Needed for createComposeRule, but not createAndroidComposeRule:

@@ -86,7 +86,7 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
     override suspend fun getMovieDetails(movieId: Int, sessionId: String): MovieDetailsResponse =
         client.get(Url.getMovieDetails(movieId)) {
             parameter(SESSION_PARAMETER, sessionId)
-            parameter("append_to_response", "account_states")
+            parameter("append_to_response", "account_states,credits,keywords")
         }
 
     override suspend fun getUserFavoriteTv(accountId: Int, token: String): TvShowsResponse =

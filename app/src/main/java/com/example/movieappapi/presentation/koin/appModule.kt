@@ -88,7 +88,7 @@ fun Scope.provideAppDatabase() = Room
         AppDatabase::class.java,
         "movieDatabase"
     )
-    //.addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+    //.addMigrations(MIGRATION_1_2)
     .build()
 
 private fun Scope.provideMovieRemoteDataSource(): TMDBRemoteDataSource =
