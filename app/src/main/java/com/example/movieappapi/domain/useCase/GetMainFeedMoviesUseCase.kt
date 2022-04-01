@@ -1,42 +1,52 @@
 package com.example.movieappapi.domain.useCase
 
-import android.util.Log
 import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collectLatest
-import java.util.*
 
 class GetMainFeedMoviesUseCase(
     private val repository: MovieRepository
 ) {
-    suspend operator fun invoke(movieList: MainFeedMovieList, page: Int) = channelFlow {
-        repository.getLatestMovieAdded(movieList.tag).collectLatest { movie ->
-            val calendar = Calendar.getInstance()
-            calendar.time = movie?.dateAdded ?: Date()
-            calendar.add(Calendar.DAY_OF_WEEK, 1)
-            if (movie != null && !Date(calendar.timeInMillis).before(Date()) && page == 1) {
-                repository.getLocalMovies(movieList).collectLatest { movies ->
-                    Log.i("GetMainFeedMoviesUseCase", "invoke: in")
-                    send(Resource.Success(MoviesResponse(page = page, movies, totalPages = 4)))
+    private var page = 0
+    private var endReached = false
+    suspend operator fun invoke(movieListType: MainFeedMovieList): Resource<MoviesResponse> {
+        if (endReached) return Resource.Success(MoviesResponse(results = emptyList()))
+        page++
+        val date = repository.getLatestMovieAdded(movieListType.tag)
+        return if (date == null)
+            getRemoteMovies(movieListType).also {
+                it.onSuccess { movies ->
+                    repository.insertLocalMovies(
+                        movies = movies.results ?: emptyList(),
+                        tag = movieListType.tag
+                    )
+
                 }
-            } else {
-                val response = when (movieList) {
-                    is MainFeedMovieList.Popular -> repository.getPopularMovies(page = page)
-                    is MainFeedMovieList.TopRated -> repository.getTopRatedMovies(page)
-                    else -> repository.getNowPlayingMovies(page)
-                }
-                if (response is Resource.Success && page == 1) {
-                    repository.deleteAllMovies(movieList.tag)
-                    response.data?.results?.let {
-                        repository.insertLocalMovies(it, movieList.tag)
+            }
+        else {
+            return if (page != 1)
+                getRemoteMovies(movieListType).also {
+                    it.onSuccess { moviesResponse ->
+                        endReached = page >= moviesResponse.totalPages ?: 0
                     }
                 }
-                send(response)
-            }
+            else
+                getLocalMovies(movieListType)
         }
-
     }
+
+
+    private suspend fun getLocalMovies(movieListType: MainFeedMovieList): Resource.Success<MoviesResponse> {
+        val movies = repository.getLocalMovies(movieListType)
+        return Resource.Success(MoviesResponse(page = 1, movies, totalPages = 4))
+    }
+
+
+    private suspend fun getRemoteMovies(movieListType: MainFeedMovieList) =
+        when (movieListType) {
+            is MainFeedMovieList.Popular -> repository.getPopularMovies(page = page)
+            is MainFeedMovieList.TopRated -> repository.getTopRatedMovies(page)
+            else -> repository.getNowPlayingMovies(page)
+        }
 }

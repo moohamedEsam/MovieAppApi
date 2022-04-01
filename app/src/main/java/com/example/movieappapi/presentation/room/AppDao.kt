@@ -3,6 +3,7 @@ package com.example.movieappapi.presentation.room
 import androidx.room.*
 import com.example.movieappapi.domain.model.room.*
 import kotlinx.coroutines.flow.Flow
+import java.util.*
 
 @Dao
 interface AppDao {
@@ -43,10 +44,10 @@ interface AppDao {
     suspend fun deleteMovie(movieEntity: MovieEntity)
 
     @Query("select * from movieEntity where tag = (:tag)")
-    fun getMovie(tag: String): Flow<List<MovieEntity>>
+    suspend fun getMovie(tag: String): List<MovieEntity>
 
-    @Query("select * from movieEntity where dateAdded is not null and tag = (:tag) order by dateAdded desc")
-    fun getLatestMovieAdded(tag: String): Flow<MovieEntity?>
+    @Query("select dateAdded from movieEntity where dateAdded is not null and tag = (:tag) order by dateAdded desc")
+    suspend fun getLatestMovieDate(tag: String): Date?
 
     @Query("delete from movieEntity where tag like (:tag)")
     suspend fun deleteAllMovies(tag: String)
@@ -71,9 +72,6 @@ interface AppDao {
 
     @Query("delete from userListDetailsEntity where id = (:listId)")
     suspend fun deleteUserListDetails(listId: Int)
-
-    @Query("select * from userListDetailsEntity")
-    fun getUserAllListDetails(): Flow<List<UserListDetailsEntity>>
 
     @Query("select * from userListDetailsEntity where id = (:listId)")
     fun getUserListDetails(listId: Int): Flow<UserListDetailsEntity>

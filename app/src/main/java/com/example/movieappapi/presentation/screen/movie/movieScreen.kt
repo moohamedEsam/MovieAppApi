@@ -1,25 +1,29 @@
 package com.example.movieappapi.presentation.screen.movie
 
 import android.graphics.Bitmap
-import androidx.compose.animation.ExperimentalAnimationApi
+import android.util.Log
+import androidx.compose.animation.*
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.StarRate
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -82,7 +86,7 @@ private fun BoxScope.MovieUi(
             }
         }
     }
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(background)
@@ -91,21 +95,17 @@ private fun BoxScope.MovieUi(
             Image(
                 bitmap = image!!.asImageBitmap(),
                 contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.7f),
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.FillBounds
             )
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(8.dp)
-        ) {
-            MovieDescription(
-                movie = movie,
-                navHostController = navHostController
-            )
-        }
+
+        MovieDescription(
+            movie = movie,
+            navHostController = navHostController,
+            background = background,
+            modifier = Modifier.align(BottomStart)
+        )
+
     }
     MovieActionIconsColumn(movie, Modifier.align(Alignment.TopEnd))
 
@@ -115,29 +115,93 @@ private fun BoxScope.MovieUi(
 @OptIn(ExperimentalCoilApi::class)
 @ExperimentalAnimationApi
 @Composable
-private fun ColumnScope.MovieDescription(
+private fun MovieDescription(
     movie: MovieDetailsResponse,
     navHostController: NavHostController,
+    background: Color,
+    modifier: Modifier
 ) {
-
-    Text(
-        text = movie.title ?: "",
-        fontWeight = FontWeight.ExtraBold,
-        fontSize = 24.sp,
-        modifier = Modifier.align(CenterHorizontally)
-    )
-    CreateVerticalSpacer(4.dp)
-    KeywordsChips(movie)
-    CreateVerticalSpacer(4.dp)
-    GenreChips(movie)
-    CreateVerticalSpacer(dp = 4.dp)
-    movie.movieCredits?.cast?.let {
-        CastList(it)
+    val isVisible = remember {
+        MutableTransitionState(false).apply { targetState = true }
     }
-    CreateVerticalSpacer(4.dp)
-    Text(text = movie.overview ?: "")
-    CreateVerticalSpacer(4.dp)
-    SimilarMoviesButton(navHostController, movie)
+    var cardVisible by remember {
+        mutableStateOf(true)
+    }
+    AnimatedVisibility(
+        visibleState = isVisible,
+        enter = expandVertically(expandFrom = Alignment.Top, animationSpec = tween(2000)) + fadeIn(
+            animationSpec = tween(2000)
+        ),
+        modifier = modifier.animateContentSize()
+
+    ) {
+        Card(
+            backgroundColor = background,
+            shape = RoundedCornerShape(topEnd = 10.dp, topStart = 10.dp),
+            modifier = Modifier
+                .alpha(0.9f)
+                .draggable(
+                    state = rememberDraggableState {
+                        Log.i("movieScreen", "MovieDescription: $it")
+                        cardVisible = it < 0
+                    },
+                    orientation = Orientation.Vertical
+                )
+        ) {
+            if (cardVisible)
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(8.dp)
+                        .draggable(
+                            state = rememberDraggableState {
+                                cardVisible = it < 0
+                            },
+                            orientation = Orientation.Vertical
+                        )
+                ) {
+                    IconButton(
+                        onClick = {
+                            cardVisible = false
+                        },
+                        modifier = Modifier.align(CenterHorizontally)
+                    ) {
+                        Icon(imageVector = Icons.Default.ExpandLess, contentDescription = null)
+                    }
+                    Text(
+                        text = movie.title ?: "",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp,
+                        modifier = Modifier.align(CenterHorizontally)
+                    )
+
+                    CreateVerticalSpacer(4.dp)
+                    KeywordsChips(movie)
+                    CreateVerticalSpacer(4.dp)
+                    GenreChips(movie)
+                    CreateVerticalSpacer(dp = 4.dp)
+                    movie.movieCredits?.cast?.let {
+                        CastList(it)
+                    }
+                    CreateVerticalSpacer(4.dp)
+                    Text(text = movie.overview ?: "")
+                    CreateVerticalSpacer(4.dp)
+                    SimilarMoviesButton(navHostController, movie)
+                }
+            else
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    IconButton(
+                        onClick = { cardVisible = true },
+                        modifier = Modifier.align(CenterHorizontally)
+                    ) {
+                        Icon(imageVector = Icons.Default.ExpandMore, contentDescription = null)
+                    }
+                }
+
+        }
+    }
+
+
 }
 
 @Composable
@@ -165,7 +229,7 @@ private fun SimilarMoviesButton(
 @Composable
 private fun CastList(it: List<Cast>) {
     if (it.isEmpty()) return
-    //Text(text = "Cast", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    Text(text = "Cast", fontSize = 16.sp, fontWeight = FontWeight.Bold)
     LazyRow {
         items(it) { cast ->
             Column(
@@ -225,7 +289,7 @@ private fun ChipsListRow(
     label: String
 ) {
     if (values.isEmpty()) return
-    //Text(text = label, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    Text(text = label, fontSize = 16.sp, fontWeight = FontWeight.Bold)
     ChipsListRow(values = values)
 }
 

@@ -52,8 +52,8 @@ class MovieRepositoryImpl(
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun getLocalMovies(movieList: MainFeedMovieList): Flow<List<Movie>> =
-        local.getMovie(movieList.tag).map { list -> list.map { it.toMovie() } }
+    override suspend fun getLocalMovies(movieList: MainFeedMovieList): List<Movie> =
+        local.getMovie(movieList.tag).map { it.toMovie() }
 
     override suspend fun deleteAllMovies(tag: String) = local.deleteAllMovies(tag)
 
@@ -62,13 +62,13 @@ class MovieRepositoryImpl(
 
     override suspend fun insertLocalMovies(movies: List<Movie>, tag: String) {
         Log.i("MovieRepositoryImpl", "insertLocalMovies: called with tag $tag")
+        Log.i("MovieRepositoryImpl", "insertLocalMovies: called with size ${movies.size}")
         movies.forEachIndexed { index, movie ->
             try {
                 val movieEntity = if (index == 0) movie.toMovieEntity(Date(), tag)
                 else
                     movie.toMovieEntity(tag = tag)
                 local.insertMovie(movieEntity)
-                Log.i("MovieRepositoryImpl", "insertLocalMovies: done")
             } catch (exception: Exception) {
                 Log.e(
                     "MovieRepositoryImpl",
@@ -235,8 +235,8 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getLatestMovieAdded(tag: String): Flow<MovieEntity?> =
-        local.getLatestMovieAdded(tag)
+    override suspend fun getLatestMovieAdded(tag: String): Date? =
+        local.getLatestMovieDate(tag)
 
     override suspend fun assignCachedSession() {
         val local = local.getSession() ?: return

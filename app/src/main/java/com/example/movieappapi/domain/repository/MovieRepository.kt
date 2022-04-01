@@ -8,6 +8,7 @@ import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
 import kotlinx.coroutines.flow.Flow
+import java.util.*
 
 
 interface MovieRepository {
@@ -117,7 +118,7 @@ interface MovieRepository {
 
     suspend fun getCachedUser(): UserEntity?
 
-    suspend fun getLatestMovieAdded(tag: String): Flow<MovieEntity?>
+    suspend fun getLatestMovieAdded(tag: String): Date?
 
     suspend fun updateUser(userEntity: UserEntity)
 
@@ -130,7 +131,7 @@ interface MovieRepository {
 
     suspend fun getMovie(movieId: Int): Flow<MovieEntity?>
 
-    suspend fun getLocalMovies(movieList: MainFeedMovieList): Flow<List<Movie>>
+    suspend fun getLocalMovies(movieList: MainFeedMovieList): List<Movie>
 
     suspend fun getLocalMovieDetails(movieId: Int): Flow<MovieDetailsResponse?>
 
