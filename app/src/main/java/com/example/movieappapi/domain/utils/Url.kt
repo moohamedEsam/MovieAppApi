@@ -43,4 +43,5 @@ object Url {
     fun getUserFavoriteTv(accountId: Int) = "${BASE_URL}account/${accountId}/favorite/tv"
     fun markAsFavorite(accountId: Int) = "${BASE_URL}account/${accountId}/favorite"
     fun addWatchList(accountId: Int) = "${BASE_URL}account/${accountId}/watchlist"
+    fun getKeywordMovies(keywordId: Int) = "${BASE_URL}keyword/$keywordId/movies"
 }

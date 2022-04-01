@@ -240,7 +240,10 @@ fun FilterAlertDialog(values: List<String>, onClick: (String) -> Unit) {
 @Composable
 fun SearchTextField() {
     val viewModel: SearchViewModel = getViewModel()
-    SearchComposable(onValueChange = {}) {
+    SearchComposable(
+        label = "search a movie",
+        onValueChange = {}
+    ) {
         viewModel.setSearchResults(it)
     }
 }

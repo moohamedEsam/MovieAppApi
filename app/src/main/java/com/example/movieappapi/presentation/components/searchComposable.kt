@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun SearchComposable(
+    label: String,
     onValueChange: (String) -> Unit,
     onSearch: (String) -> Unit
 ) {
@@ -45,6 +46,6 @@ fun SearchComposable(
         colors = TextFieldDefaults.textFieldColors(
             trailingIconColor = focusColor
         ),
-        label = { Text(text = "search a movie") }
+        label = { Text(text = label) }
     )
 }

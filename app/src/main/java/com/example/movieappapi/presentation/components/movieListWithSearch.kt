@@ -15,6 +15,7 @@ import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 @Composable
 fun MovieListComposable(
     movies: List<Movie>?,
+    label: String,
     navHostController: NavHostController,
     onSearchValueChange: (String) -> Unit,
     onSearch: (String) -> Unit
@@ -25,6 +26,7 @@ fun MovieListComposable(
             .padding(8.dp)
     ) {
         SearchComposable(
+            label = label,
             onValueChange = { onSearchValueChange(it) }
         ) {
             onSearch(it)

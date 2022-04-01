@@ -11,6 +11,7 @@ import com.example.movieappapi.domain.utils.Constants
 import com.example.movieappapi.presentation.room.AppDatabase
 import com.example.movieappapi.presentation.screen.account.AccountViewModel
 import com.example.movieappapi.presentation.screen.home.MainFeedViewModel
+import com.example.movieappapi.presentation.screen.keywords.KeywordsViewModel
 import com.example.movieappapi.presentation.screen.lists.ListViewModel
 import com.example.movieappapi.presentation.screen.login.LoginViewModel
 import com.example.movieappapi.presentation.screen.movie.MovieViewModel
@@ -56,6 +57,7 @@ val useCaseModule = module {
     single { GetListDetailsUseCase(get()) }
     single { AddMovieToListUseCase(get()) }
     single { RemoveMovieFromListUseCase(get()) }
+    single { GetKeywordsMoviesUseCase(get()) }
 }
 
 val repositoryModule = module {
@@ -77,6 +79,7 @@ val viewModelsModule = module {
     viewModel { AccountViewModel(get(), get()) }
     viewModel { UserMoviesListViewModel(get()) }
     viewModel { ListViewModel(get()) }
+    viewModel { KeywordsViewModel(get()) }
 
 }
 
@@ -88,7 +91,6 @@ fun Scope.provideAppDatabase() = Room
         AppDatabase::class.java,
         "movieDatabase"
     )
-    //.addMigrations(MIGRATION_1_2)
     .build()
 
 private fun Scope.provideMovieRemoteDataSource(): TMDBRemoteDataSource =

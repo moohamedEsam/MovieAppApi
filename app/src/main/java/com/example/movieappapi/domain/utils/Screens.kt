@@ -15,4 +15,5 @@ object Screens {
     const val MOVIE_DETAILS = "details"
     const val SIMILAR_MOVIES_SCREEN = "similar"
     const val SEARCH_SCREEN = "search"
+    const val KEYWORD_SCREEN = "keyword"
 }

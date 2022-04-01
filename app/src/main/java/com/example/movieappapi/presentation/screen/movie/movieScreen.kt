@@ -12,6 +12,7 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -45,6 +46,8 @@ import com.example.movieappapi.domain.utils.Url
 import com.example.movieappapi.presentation.components.RateMotionLayout
 import com.example.movieappapi.presentation.components.UserListsDropDownMenu
 import com.example.movieappapi.presentation.components.getPalette
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -176,9 +179,15 @@ private fun MovieDescription(
                     )
 
                     CreateVerticalSpacer(4.dp)
-                    KeywordsChips(movie)
+                    KeywordsChips(movie) {
+                        val keyword = movie.keywords?.keywords?.getOrNull(it)
+                        if (keyword != null) {
+                            val keywordString = Json.encodeToString(keyword)
+                            navHostController.navigate("${Screens.KEYWORD_SCREEN}/$keywordString")
+                        }
+                    }
                     CreateVerticalSpacer(4.dp)
-                    GenreChips(movie)
+                    GenreChips(movie) {}
                     CreateVerticalSpacer(dp = 4.dp)
                     movie.movieCredits?.cast?.let {
                         CastList(it)
@@ -261,46 +270,57 @@ private fun CastList(it: List<Cast>) {
 
 @Composable
 private fun GenreChips(
-    movie: MovieDetailsResponse
+    movie: MovieDetailsResponse,
+    onClick: (Int) -> Unit
 ) {
     val genres = movie.genres?.mapNotNull { it.name } ?: emptyList()
     if (genres.isNotEmpty())
         ChipsListRow(
             values = genres,
             label = "Genres"
-        )
+        ) {
+            onClick(it)
+        }
 }
 
 @Composable
 private fun KeywordsChips(
-    movie: MovieDetailsResponse
+    movie: MovieDetailsResponse,
+    onClick: (Int) -> Unit
 ) {
     val keywords = movie.keywords?.keywords?.mapNotNull { it.name } ?: emptyList()
     if (keywords.isNotEmpty())
         ChipsListRow(
             values = keywords,
             label = "Keywords"
-        )
+        ) {
+            onClick(it)
+        }
 }
 
 @Composable
 private fun ChipsListRow(
     values: List<String>,
-    label: String
+    label: String,
+    onClick: (Int) -> Unit
 ) {
     if (values.isEmpty()) return
     Text(text = label, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-    ChipsListRow(values = values)
+    ChipsListRow(values = values) {
+        onClick(it)
+    }
 }
 
 @Composable
-fun ChipsListRow(values: List<String>) {
+fun ChipsListRow(values: List<String>, onClick: (Int) -> Unit) {
     LazyRow(
         modifier = Modifier.fillMaxWidth()
     ) {
-        items(values) {
-            OutlinedButton(onClick = { }, modifier = Modifier.padding(8.dp)) {
-                Text(text = it)
+        itemsIndexed(values) { index, value ->
+            OutlinedButton(onClick = {
+                onClick(index)
+            }, modifier = Modifier.padding(8.dp)) {
+                Text(text = value)
             }
         }
     }

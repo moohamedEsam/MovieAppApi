@@ -78,6 +78,16 @@ class MovieRepositoryImpl(
         }
     }
 
+    override suspend fun getKeywordMovies(keywordId: Int): Resource<MoviesResponse> {
+        return try {
+            val response = remote.getKeywordMovies(keywordId)
+            Resource.Success(response)
+        } catch (exception: Exception) {
+            Log.i("MovieRepositoryImpl", "getKeywordMovies: ${exception.message}")
+            Resource.Error(exception.localizedMessage)
+        }
+    }
+
     override suspend fun getMovie(movieId: Int): Flow<MovieEntity?> = local.getMovie(movieId)
 
     override suspend fun updateMovie(movie: MovieEntity) {

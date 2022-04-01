@@ -22,6 +22,7 @@ fun ListScreen(listId: Int, navHostController: NavHostController) {
 
     MovieListComposable(
         movies = if (searchMode) searchResult else movies.data?.items,
+        "search movies",
         navHostController = navHostController,
         onSearchValueChange = {
             if (it.isNotEmpty())
@@ -29,7 +30,7 @@ fun ListScreen(listId: Int, navHostController: NavHostController) {
             else
                 viewModel.setSearchMode(false)
 
-        }
+        },
     ) {
 
     }

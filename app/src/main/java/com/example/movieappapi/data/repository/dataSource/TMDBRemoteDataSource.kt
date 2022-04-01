@@ -55,4 +55,6 @@ interface TMDBRemoteDataSource : MovieRemoteDataSource, TVRemoteDataSource {
     suspend fun searchAll(query: String): AllSearchResponse
 
     suspend fun getGenres(): GenreResponse
+
+    suspend fun getKeywordMovies(keywordId: Int): MoviesResponse
 }

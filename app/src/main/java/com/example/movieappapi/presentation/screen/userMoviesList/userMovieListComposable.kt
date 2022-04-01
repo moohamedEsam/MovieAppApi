@@ -24,6 +24,7 @@ fun UserMovieListScreen(
     }
     MovieListComposable(
         movies = if (searchMode) searchResult else movies.data?.results,
+        "search movies",
         navHostController = navHostController,
         onSearchValueChange = {
             if (it.isNotEmpty())

@@ -37,6 +37,8 @@ interface MovieRepository {
 
     suspend fun getNowPlayingMovies(page: Int = 0): Resource<MoviesResponse>
 
+    suspend fun getKeywordMovies(keywordId: Int): Resource<MoviesResponse>
+
     suspend fun getUpcomingMovies(page: Int = 0): Resource<MoviesResponse>
 
     suspend fun getRecommendations(movieId: Int, page: Int = 0): Resource<MoviesResponse>

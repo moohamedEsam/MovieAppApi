@@ -10,10 +10,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.composables.SimilarMovieScreen
+import com.example.movieappapi.domain.model.Keyword
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.UserMovieList
 import com.example.movieappapi.presentation.screen.account.AccountScreen
 import com.example.movieappapi.presentation.screen.home.MainFeed
+import com.example.movieappapi.presentation.screen.keywords.KeywordMovieScreen
 import com.example.movieappapi.presentation.screen.lists.ListScreen
 import com.example.movieappapi.presentation.screen.login.LoginScreen
 import com.example.movieappapi.presentation.screen.movie.MovieDetails
@@ -22,6 +24,8 @@ import com.example.movieappapi.presentation.screen.userLists.UserListsScreen
 import com.example.movieappapi.presentation.screen.userMoviesList.UserMovieListScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 @ExperimentalAnimationApi
 @ExperimentalSerializationApi
@@ -118,6 +122,18 @@ fun NavHostScreen(navHostController: NavHostController, startDestination: String
             )
         }
         composable(Screens.ACCOUNT_Watchlist_TV) {}
+        composable(
+            route = "${Screens.KEYWORD_SCREEN}/{keyword}",
+            arguments = listOf(
+                navArgument("keyword") {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            val keywordString = it.arguments?.getString("keyword") ?: return@composable
+            val keyword: Keyword = Json.decodeFromString(keywordString)
+            KeywordMovieScreen(keyword = keyword, navHostController = navHostController)
+        }
     }
 
 }
