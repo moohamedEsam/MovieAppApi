@@ -1,5 +1,6 @@
 package com.example.movieappapi.presentation.screen.home
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -10,10 +11,19 @@ import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
 import kotlinx.coroutines.launch
 
-class MainFeedViewModel(private val mainFeedMoviesUseCase: GetMainFeedMoviesUseCase) : ViewModel() {
+class MainFeedViewModel(
+    private val nowPlaying: GetMainFeedMoviesUseCase,
+    private val topRated: GetMainFeedMoviesUseCase,
+    private val upcoming: GetMainFeedMoviesUseCase,
+    private val popular: GetMainFeedMoviesUseCase
+) : ViewModel() {
 
     private val _popularMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
     val popularMovies: State<Resource<MoviesResponse>> = _popularMovies
+
+
+    private val _upcomingMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
+    val upcomingMovies: State<Resource<MoviesResponse>> = _upcomingMovies
 
 
     private val _topRatedMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
@@ -28,41 +38,42 @@ class MainFeedViewModel(private val mainFeedMoviesUseCase: GetMainFeedMoviesUseC
         setPopularMovies()
         setNowPlayingMovies()
         setTopRatedMovies()
+        setUpcomingMovies()
+    }
+
+    suspend fun setMovies(
+        resource: MutableState<Resource<MoviesResponse>>,
+        movieList: MainFeedMovieList
+    ) {
+        var movies = resource.value.data?.results
+        val response = when (movieList) {
+            is MainFeedMovieList.TopRated -> topRated(movieList)
+            is MainFeedMovieList.NowPlaying -> nowPlaying(movieList)
+            is MainFeedMovieList.Upcoming -> upcoming(movieList)
+            else -> popular(movieList)
+        }
+        movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
+        response.data?.results = movies
+        resource.value = response
+
+    }
+
+    fun setUpcomingMovies() = viewModelScope.launch {
+        setMovies(_upcomingMovies, MainFeedMovieList.Upcoming)
     }
 
     fun setNowPlayingMovies() = viewModelScope.launch {
-        var movies = _nowPlayingMovies.value.data?.results
-        _nowPlayingMovies.value = Resource.Loading()
-        mainFeedMoviesUseCase(MainFeedMovieList.NowPlaying).let {
-            if (it !is Resource.Success) return@let
-            movies = movies?.plus(it.data?.results ?: emptyList()) ?: it.data?.results
-            it.data?.results = movies
-            _nowPlayingMovies.value = it
-        }
+        setMovies(_nowPlayingMovies, MainFeedMovieList.NowPlaying)
     }
-
-
-    fun setTopRatedMovies() = viewModelScope.launch {
-        var movies = _topRatedMovies.value.data?.results
-        _topRatedMovies.value = Resource.Loading()
-        mainFeedMoviesUseCase(MainFeedMovieList.TopRated).let {
-            if (it !is Resource.Success) return@let
-            movies = movies?.plus(it.data?.results ?: emptyList()) ?: it.data?.results
-            it.data?.results = movies
-            _topRatedMovies.value = it
-        }
-    }
-
 
     fun setPopularMovies() = viewModelScope.launch {
-        var movies = _popularMovies.value.data?.results
-        _popularMovies.value = Resource.Loading()
-        mainFeedMoviesUseCase(MainFeedMovieList.Popular).let {
-            if (it !is Resource.Success) return@let
-            movies = movies?.plus(it.data?.results ?: emptyList()) ?: it.data?.results
-            it.data?.results = movies
-            _popularMovies.value = it
-        }
+        setMovies(_popularMovies, MainFeedMovieList.Popular)
 
     }
+
+    fun setTopRatedMovies() = viewModelScope.launch {
+        setMovies(_topRatedMovies, MainFeedMovieList.TopRated)
+    }
+
+
 }

@@ -10,8 +10,8 @@ import com.example.movieappapi.domain.useCase.*
 import com.example.movieappapi.domain.utils.Constants
 import com.example.movieappapi.presentation.room.AppDatabase
 import com.example.movieappapi.presentation.screen.account.AccountViewModel
+import com.example.movieappapi.presentation.screen.discover.DiscoverViewModel
 import com.example.movieappapi.presentation.screen.home.MainFeedViewModel
-import com.example.movieappapi.presentation.screen.keywords.KeywordsViewModel
 import com.example.movieappapi.presentation.screen.lists.ListViewModel
 import com.example.movieappapi.presentation.screen.login.LoginViewModel
 import com.example.movieappapi.presentation.screen.movie.MovieViewModel
@@ -33,31 +33,31 @@ import org.koin.core.scope.Scope
 import org.koin.dsl.module
 
 val useCaseModule = module {
-    single { GetRecommendationsUseCase(get()) }
-    single { GetSimilarMoviesUseCase(get()) }
-    single { GetUpcomingMoviesUseCase(get()) }
-    single { LoginUseCase(get()) }
-    single { SearchAllUseCase(get()) }
-    single { SearchMoviesUseCase(get()) }
-    single { SearchTvUseCase(get()) }
-    single { GetGenresUseCase(get()) }
-    single { GetUserUseCase(get()) }
-    single { UpdateCachedUser(get()) }
-    single { LoginAsGuestUseCase(get()) }
-    single { MarkAsFavoriteMovieUseCase(get()) }
-    single { RateMovieUseCase(get()) }
-    single { GetUserMovieListUseCase(get()) }
-    single { GetMovieDetailsUseCase(get()) }
-    single { DeleteMovieRateUseCase(get()) }
-    single { DeleteTvRateUseCase(get()) }
-    single { GetAccountStatusUseCase(get()) }
-    single { GetMainFeedMoviesUseCase(get()) }
-    single { GetUserCreatedListsUseCase(get()) }
-    single { CreateListUseCase(get()) }
-    single { GetListDetailsUseCase(get()) }
-    single { AddMovieToListUseCase(get()) }
-    single { RemoveMovieFromListUseCase(get()) }
-    single { GetKeywordsMoviesUseCase(get()) }
+    factory { GetRecommendationsUseCase(get()) }
+    factory { GetSimilarMoviesUseCase(get()) }
+    factory { GetUpcomingMoviesUseCase(get()) }
+    factory { LoginUseCase(get()) }
+    factory { SearchAllUseCase(get()) }
+    factory { SearchMoviesUseCase(get()) }
+    factory { SearchTvUseCase(get()) }
+    factory { GetGenresUseCase(get()) }
+    factory { GetUserUseCase(get()) }
+    factory { UpdateCachedUser(get()) }
+    factory { LoginAsGuestUseCase(get()) }
+    factory { MarkAsFavoriteMovieUseCase(get()) }
+    factory { RateMovieUseCase(get()) }
+    factory { GetUserMovieListUseCase(get()) }
+    factory { GetMovieDetailsUseCase(get()) }
+    factory { DeleteMovieRateUseCase(get()) }
+    factory { DeleteTvRateUseCase(get()) }
+    factory { GetAccountStatusUseCase(get()) }
+    factory { GetMainFeedMoviesUseCase(get()) }
+    factory { GetUserCreatedListsUseCase(get()) }
+    factory { CreateListUseCase(get()) }
+    factory { GetListDetailsUseCase(get()) }
+    factory { AddMovieToListUseCase(get()) }
+    factory { RemoveMovieFromListUseCase(get()) }
+    factory { GetDiscoverMoviesUseCase(get()) }
 }
 
 val repositoryModule = module {
@@ -71,7 +71,7 @@ val repositoryModule = module {
 
 val viewModelsModule = module {
     viewModel { LoginViewModel(get(), get(), get(), get()) }
-    viewModel { MainFeedViewModel(get()) }
+    viewModel { MainFeedViewModel(get(), get(), get(), get()) }
     viewModel { MovieRecommendationsViewModel(get(), get()) }
     viewModel { UserListsViewModel(get(), get(), get()) }
     viewModel { MovieViewModel(get(), get(), get(), get(), get(), get(), get()) }
@@ -79,7 +79,7 @@ val viewModelsModule = module {
     viewModel { AccountViewModel(get(), get()) }
     viewModel { UserMoviesListViewModel(get()) }
     viewModel { ListViewModel(get()) }
-    viewModel { KeywordsViewModel(get()) }
+    viewModel { DiscoverViewModel(get()) }
 
 }
 

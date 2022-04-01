@@ -24,6 +24,7 @@ import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
 import com.example.movieappapi.domain.utils.UserStatus
 import com.example.movieappapi.presentation.components.CreateListDialog
+import com.example.movieappapi.presentation.components.ResourceErrorSnackBar
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalCoilApi
@@ -55,7 +56,7 @@ fun UserCreatedListsUi(navHostController: NavHostController) {
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        userLists.HandleResourceChange {
+        userLists.OnSuccessComposable {
             it.userLists?.let { list: List<UserList> ->
                 LazyRow(
                     modifier = Modifier
@@ -69,6 +70,9 @@ fun UserCreatedListsUi(navHostController: NavHostController) {
             }
         }
         CreateListButton(modifier = Modifier.align(BottomEnd))
+        ResourceErrorSnackBar(resource = userLists) {
+            viewModel.setUserLists()
+        }
     }
 }
 

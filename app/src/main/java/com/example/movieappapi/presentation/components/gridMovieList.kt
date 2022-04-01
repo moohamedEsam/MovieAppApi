@@ -24,7 +24,7 @@ fun GridMovieList(
     paginate: () -> Unit = {}
 ) {
     LazyVerticalGrid(
-        cells = GridCells.Adaptive(80.dp),
+        cells = GridCells.Adaptive(100.dp),
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 8.dp)
     ) {

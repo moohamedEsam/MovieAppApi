@@ -31,7 +31,7 @@ class LoginViewModel(
     val password: State<String> = _password
 
     fun userAlreadyLoggedIn() = viewModelScope.launch {
-        _userState.value = Resource.Loading()
+        _userState.value = Resource.Loading(_userState.value.data)
         val data = getUserUseCase()
         val loggedIn = data?.loggedIn ?: false
         _userState.value = if (loggedIn) {
@@ -52,7 +52,7 @@ class LoginViewModel(
     }
 
     fun login() = viewModelScope.launch {
-        _userState.value = Resource.Loading()
+        _userState.value = Resource.Loading(_userState.value.data)
         val result = loginUseCase(createUserEntity())
         if (result is Resource.Success && result.data == true) {
             _userState.value = Resource.Success(Unit)
@@ -62,7 +62,7 @@ class LoginViewModel(
     }
 
     fun loginAsGuest() = viewModelScope.launch {
-        _userState.value = Resource.Loading()
+        _userState.value = Resource.Loading(_userState.value.data)
         val result = loginAsGuestUseCase()
         _userState.value = if (result is Resource.Success && result.data == true)
             Resource.Success(Unit)

@@ -29,7 +29,7 @@ class ListViewModel(
     }
 
     fun getList() = viewModelScope.launch {
-        _list.value = Resource.Loading()
+        _list.value = Resource.Loading(_list.value.data)
         _list.value = listDetailsUseCase(listId)
     }
 

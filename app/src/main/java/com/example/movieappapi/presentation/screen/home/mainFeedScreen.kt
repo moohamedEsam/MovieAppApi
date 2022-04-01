@@ -1,6 +1,5 @@
 package com.example.movieappapi.presentation.screen.home
 
-import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -26,6 +25,7 @@ import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
 import com.example.movieappapi.presentation.components.HorizontalMovieList
+import com.example.movieappapi.presentation.components.ResourceErrorSnackBar
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -44,6 +44,8 @@ fun MainFeed(navHostController: NavHostController) {
     val popularMovies by viewModel.popularMovies
     val topRatedMovies by viewModel.topRatedMovies
     val nowPlayingMovies by viewModel.nowPlayingMovies
+    val upcomingMovies by viewModel.upcomingMovies
+
     BoxWithConstraints {
         val height = maxHeight
         Column(
@@ -51,70 +53,52 @@ fun MainFeed(navHostController: NavHostController) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            popularMovies.HandleResourceChange { moviesResponse ->
-                moviesResponse.results?.let {
-                    Log.i("mainFeedScreen", "MainFeed: ${it.size}")
-                    PopularMovieViewPager(
-                        movies = it,
-                        navHostController = navHostController,
-                        imageHeight = height.div(2.5f)
-                    )
-                }
-            }
-            CreateVerticalSpacer(dp = 4.dp)
-            TopRatedMovieList(topRatedMovies, navHostController) {
-                viewModel.setTopRatedMovies()
-            }
+            PopularMovieViewPager(
+                movies = popularMovies.data?.results ?: emptyList(),
+                navHostController = navHostController,
+                imageHeight = height.div(2.5f)
+            )
             CreateVerticalSpacer()
-            NowPlayingMoviesList(nowPlayingMovies, navHostController) {
+            MovieHorizontalList(nowPlayingMovies, navHostController, "Now Playing") {
                 viewModel.setNowPlayingMovies()
             }
-        }
-    }
-}
-
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@Composable
-private fun NowPlayingMoviesList(
-    nowPlayingMovies: Resource<MoviesResponse>,
-    navHostController: NavHostController,
-    paginate: () -> Unit
-) {
-    Text(
-        text = "now playing",
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        modifier = Modifier.padding(8.dp)
-    )
-    CreateVerticalSpacer(4.dp)
-    nowPlayingMovies.HandleResourceChange { moviesResponse ->
-        moviesResponse.results?.let {
-            HorizontalMovieList(movies = it, navHostController = navHostController) {
-                paginate()
+            CreateVerticalSpacer(dp = 4.dp)
+            MovieHorizontalList(upcomingMovies, navHostController, "Upcoming") {
+                viewModel.setNowPlayingMovies()
+            }
+            CreateVerticalSpacer(4.dp)
+            MovieHorizontalList(topRatedMovies, navHostController, "Top Rated") {
+                viewModel.setTopRatedMovies()
             }
         }
+        ResourceErrorSnackBar(resource = popularMovies, actionText = "Retry") {}
+        ResourceErrorSnackBar(resource = nowPlayingMovies, actionText = "Retry") {}
+        ResourceErrorSnackBar(resource = upcomingMovies, actionText = "Retry") {}
+        ResourceErrorSnackBar(resource = topRatedMovies, actionText = "Retry") {}
     }
 }
+
 
 @ExperimentalAnimationApi
 @ExperimentalCoilApi
 @Composable
-private fun TopRatedMovieList(
-    topRatedMovies: Resource<MoviesResponse>,
+private fun MovieHorizontalList(
+    moviesResponse: Resource<MoviesResponse>,
     navHostController: NavHostController,
+    label: String,
     paginate: () -> Unit
 ) {
+
     Text(
-        text = "top rated",
+        text = label,
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
         modifier = Modifier.padding(8.dp)
     )
     CreateVerticalSpacer(dp = 4.dp)
-    topRatedMovies.HandleResourceChange { moviesResponse ->
-        moviesResponse.results?.let {
-            HorizontalMovieList(movies = it, navHostController = navHostController) {
+    moviesResponse.OnSuccessComposable {
+        it.results?.let { movies ->
+            HorizontalMovieList(movies = movies, navHostController = navHostController) {
                 paginate()
             }
         }
@@ -174,4 +158,3 @@ fun navigateToMovieDetail(
 ) {
     navHostController.navigate("${Screens.MOVIE_DETAILS}/$movieId")
 }
-

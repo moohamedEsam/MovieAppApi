@@ -10,12 +10,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.composables.SimilarMovieScreen
-import com.example.movieappapi.domain.model.Keyword
+import com.example.movieappapi.domain.utils.DiscoverType
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.UserMovieList
 import com.example.movieappapi.presentation.screen.account.AccountScreen
+import com.example.movieappapi.presentation.screen.discover.DiscoverMovieScreen
 import com.example.movieappapi.presentation.screen.home.MainFeed
-import com.example.movieappapi.presentation.screen.keywords.KeywordMovieScreen
 import com.example.movieappapi.presentation.screen.lists.ListScreen
 import com.example.movieappapi.presentation.screen.login.LoginScreen
 import com.example.movieappapi.presentation.screen.movie.MovieDetails
@@ -24,19 +24,21 @@ import com.example.movieappapi.presentation.screen.userLists.UserListsScreen
 import com.example.movieappapi.presentation.screen.userMoviesList.UserMovieListScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
 @ExperimentalAnimationApi
 @ExperimentalSerializationApi
 @ExperimentalCoilApi
 @ExperimentalPagerApi
 @Composable
-fun NavHostScreen(navHostController: NavHostController, startDestination: String) {
+fun NavHostScreen(
+    navHostController: NavHostController,
+    startDestination: String
+) {
     NavHost(
         navController = navHostController,
         startDestination = startDestination
     ) {
+
         composable(Screens.LOGIN) {
             LoginScreen(navHostController = navHostController)
         }
@@ -122,17 +124,35 @@ fun NavHostScreen(navHostController: NavHostController, startDestination: String
             )
         }
         composable(Screens.ACCOUNT_Watchlist_TV) {}
+
         composable(
-            route = "${Screens.KEYWORD_SCREEN}/{keyword}",
+            route = "${Screens.DISCOVER_SCREEN}/{name}/{id}/{type}",
             arguments = listOf(
-                navArgument("keyword") {
+                navArgument("name") {
+                    type = NavType.StringType
+                },
+                navArgument("id") {
+                    type = NavType.IntType
+                },
+                navArgument("type") {
                     type = NavType.StringType
                 }
             )
         ) {
-            val keywordString = it.arguments?.getString("keyword") ?: return@composable
-            val keyword: Keyword = Json.decodeFromString(keywordString)
-            KeywordMovieScreen(keyword = keyword, navHostController = navHostController)
+            val name = it.arguments?.getString("name") ?: return@composable
+            val id = it.arguments?.getInt("id") ?: return@composable
+            val type = it.arguments?.getString("type") ?: return@composable
+            val discover = when (type) {
+                "genre" -> DiscoverType.Genre
+                "keyword" -> DiscoverType.Keyword
+                else -> DiscoverType.Cast
+            }
+            DiscoverMovieScreen(
+                name = name,
+                id = id,
+                discoverType = discover,
+                navHostController = navHostController
+            )
         }
     }
 

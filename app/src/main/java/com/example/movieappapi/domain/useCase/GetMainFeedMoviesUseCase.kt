@@ -47,6 +47,7 @@ class GetMainFeedMoviesUseCase(
         when (movieListType) {
             is MainFeedMovieList.Popular -> repository.getPopularMovies(page = page)
             is MainFeedMovieList.TopRated -> repository.getTopRatedMovies(page)
+            is MainFeedMovieList.Upcoming -> repository.getUpcomingMovies(page = page)
             else -> repository.getNowPlayingMovies(page)
         }
 }

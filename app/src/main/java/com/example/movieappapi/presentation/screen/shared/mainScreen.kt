@@ -63,10 +63,17 @@ fun MainScreen(startDestination: String) {
             )
                 BottomBarSetup(navHostController = navHostController)
         },
-        content = { NavHostScreen(navHostController = navHostController, startDestination) },
+        content = {
+            NavHostScreen(
+                navHostController = navHostController,
+                startDestination = startDestination
+            )
+        },
         drawerContent = { DrawerContent(navHostController) }
+
     )
 }
+
 
 @Composable
 fun ColumnScope.DrawerContent(navHostController: NavHostController) {

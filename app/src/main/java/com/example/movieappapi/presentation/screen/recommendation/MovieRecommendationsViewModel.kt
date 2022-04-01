@@ -22,12 +22,12 @@ class MovieRecommendationsViewModel(
 
 
     fun setSimilarMovies(movieId: Int) = viewModelScope.launch {
-        _similarMovies.value = Resource.Loading()
+        _similarMovies.value = Resource.Loading(_similarMovies.value.data)
         _similarMovies.value = similarMoviesUseCase(movieId = movieId, 1)
     }
 
     fun setRecommendations(movieId: Int) = viewModelScope.launch {
-        _recommendations.value = Resource.Loading()
+        _recommendations.value = Resource.Loading(_recommendations.value.data)
         _recommendations.value = recommendationsUseCase(movieId, 1)
     }
 }

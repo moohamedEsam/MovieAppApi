@@ -7,6 +7,7 @@ import com.example.movieappapi.domain.model.room.MovieEntity
 import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.model.room.UserListDetailsEntity
 import com.example.movieappapi.domain.repository.MovieRepository
+import com.example.movieappapi.domain.utils.DiscoverType
 import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
@@ -78,9 +79,13 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getKeywordMovies(keywordId: Int): Resource<MoviesResponse> {
+    override suspend fun getDiscoverMovies(
+        id: Int,
+        discoverType: DiscoverType,
+        page: Int
+    ): Resource<MoviesResponse> {
         return try {
-            val response = remote.getKeywordMovies(keywordId)
+            val response = remote.getKeywordMovies(id, discoverType, page)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.i("MovieRepositoryImpl", "getKeywordMovies: ${exception.message}")

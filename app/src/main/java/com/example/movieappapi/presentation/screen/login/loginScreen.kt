@@ -32,7 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.movieappapi.R
+import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
+import com.example.movieappapi.presentation.components.ResourceErrorSnackBar
 import com.example.movieappapi.presentation.components.TextFieldSetup
 import org.koin.androidx.compose.getViewModel
 
@@ -40,6 +42,7 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun LoginScreen(navHostController: NavHostController) {
     val viewModel: LoginViewModel = getViewModel()
+    val userState by viewModel.userState
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -55,6 +58,9 @@ fun LoginScreen(navHostController: NavHostController) {
         ContinueAsGuest(
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+        ResourceErrorSnackBar(resource = userState, "") {
+
+        }
     }
 }
 
@@ -91,7 +97,7 @@ fun LoginUi(
                 .align(End)
                 .padding(8.dp)
         )
-        userState.HandleResourceChange {
+        userState.OnSuccessComposable {
             LaunchedEffect(key1 = Unit) {
                 navHostController.popBackStack()
                 navHostController.navigate(Screens.MAIN)
@@ -106,6 +112,7 @@ fun LoginButton(
     modifier: Modifier
 ) {
     val viewModel: LoginViewModel = getViewModel()
+    val userState by viewModel.userState
     val isVisible = remember {
         MutableTransitionState(false).apply { targetState = true }
     }
@@ -125,10 +132,8 @@ fun LoginButton(
         ) {
             Text(text = "Login")
         }
-        viewModel.userState.value.HandleResourceChange(
-            onLoading = {},
-            onError = { isVisible.targetState = true }
-        ) {}
+        if (userState is Resource.Error)
+            isVisible.targetState = true
     }
 
 }

@@ -37,7 +37,7 @@ class UserListsViewModel(
     }
 
     fun setUserLists() = viewModelScope.launch {
-        _userLists.value = Resource.Loading()
+        _userLists.value = Resource.Loading(_userLists.value.data)
         userCreatedListsUseCase().collectLatest {
             _userLists.value = it
         }

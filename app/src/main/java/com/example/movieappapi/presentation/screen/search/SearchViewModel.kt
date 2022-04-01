@@ -61,9 +61,9 @@ class SearchViewModel(
         _genres.value = genresUseCase().data
     }
 
-    fun setSearchResults(query: String) = viewModelScope.launch {
+    fun setSearchResults(query: String = lastQuery) = viewModelScope.launch {
         _filterMode.value = false
-        _searchResults.value = Resource.Loading()
+        _searchResults.value = Resource.Loading(_searchResults.value.data)
         if (lastQuery.contains(query)) {
             setSearchResults(filterResultsByQuery(query) ?: emptyList())
         } else
@@ -82,7 +82,7 @@ class SearchViewModel(
 
     private fun setSearchResults(searchResults: List<SearchResult>) {
         _filterMode.value = false
-        _searchResults.value = Resource.Loading()
+        _searchResults.value = Resource.Loading(_searchResults.value.data)
         _searchResults.value.data?.searchResults = searchResults
     }
 

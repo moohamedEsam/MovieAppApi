@@ -18,6 +18,7 @@ import com.example.movieappapi.domain.model.AllSearchResponse
 import com.example.movieappapi.domain.model.SearchResult
 import com.example.movieappapi.domain.utils.mappers.toMovie
 import com.example.movieappapi.presentation.components.GridMovieList
+import com.example.movieappapi.presentation.components.ResourceErrorSnackBar
 import com.example.movieappapi.presentation.components.SearchComposable
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.example.movieappapi.ui.theme.MovieAppApiTheme
@@ -48,13 +49,18 @@ fun ResultList(navHostController: NavHostController) {
     val results by viewModel.searchResults
     val searchMode by viewModel.searchMode
     val filteredItems by viewModel.filteredItems
-    results.HandleResourceChange {
-        ShowItems(
-            searchMode = searchMode,
-            searchItems = it,
-            filteredItems = filteredItems,
-            navHostController = navHostController
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        results.OnSuccessComposable {
+            ShowItems(
+                searchMode = searchMode,
+                searchItems = it,
+                filteredItems = filteredItems,
+                navHostController = navHostController
+            )
+        }
+        ResourceErrorSnackBar(resource = results) {
+            viewModel.setSearchResults()
+        }
     }
 
 }

@@ -31,7 +31,7 @@ class MovieViewModel(
 
 
     fun setMovie(movieId: Int) = viewModelScope.launch {
-        _movie.value = Resource.Loading()
+        _movie.value = Resource.Loading(_movie.value.data)
         movieDetailsUseCase(movieId).collectLatest {
             _movie.value = it
         }

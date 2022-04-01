@@ -8,4 +8,6 @@ sealed class MainFeedMovieList(val tag: String) {
 
     object NowPlaying : MainFeedMovieList("nowPlaying")
 
+    object Upcoming : MainFeedMovieList("upcoming")
+
 }

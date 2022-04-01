@@ -17,8 +17,10 @@ fun MovieListComposable(
     movies: List<Movie>?,
     label: String,
     navHostController: NavHostController,
+    paginateState: Any = Unit,
     onSearchValueChange: (String) -> Unit,
-    onSearch: (String) -> Unit
+    onSearch: (String) -> Unit,
+    onPaginate: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -32,6 +34,11 @@ fun MovieListComposable(
             onSearch(it)
         }
         CreateVerticalSpacer()
-        GridMovieList(movies = movies ?: emptyList(), navHostController = navHostController)
+        GridMovieList(
+            movies = movies ?: emptyList(),
+            navHostController = navHostController
+        ) {
+            onPaginate()
+        }
     }
 }

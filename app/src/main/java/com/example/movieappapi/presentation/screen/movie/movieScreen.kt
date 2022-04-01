@@ -1,7 +1,6 @@
 package com.example.movieappapi.presentation.screen.movie
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
@@ -46,8 +45,6 @@ import com.example.movieappapi.domain.utils.Url
 import com.example.movieappapi.presentation.components.RateMotionLayout
 import com.example.movieappapi.presentation.components.UserListsDropDownMenu
 import com.example.movieappapi.presentation.components.getPalette
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -145,7 +142,6 @@ private fun MovieDescription(
                 .alpha(0.9f)
                 .draggable(
                     state = rememberDraggableState {
-                        Log.i("movieScreen", "MovieDescription: $it")
                         cardVisible = it < 0
                     },
                     orientation = Orientation.Vertical
@@ -156,20 +152,26 @@ private fun MovieDescription(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
                         .padding(8.dp)
-                        .draggable(
-                            state = rememberDraggableState {
-                                cardVisible = it < 0
-                            },
-                            orientation = Orientation.Vertical
-                        )
                 ) {
-                    IconButton(
-                        onClick = {
-                            cardVisible = false
-                        },
-                        modifier = Modifier.align(CenterHorizontally)
+                    Row(
+                        modifier = Modifier
+                            .draggable(
+                                state = rememberDraggableState {
+                                    cardVisible = it < 0
+                                },
+                                orientation = Orientation.Vertical
+                            )
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(imageVector = Icons.Default.ExpandLess, contentDescription = null)
+                        IconButton(
+                            onClick = {
+                                cardVisible = false
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Default.ExpandLess, contentDescription = null)
+                        }
                     }
                     Text(
                         text = movie.title ?: "",
@@ -182,15 +184,23 @@ private fun MovieDescription(
                     KeywordsChips(movie) {
                         val keyword = movie.keywords?.keywords?.getOrNull(it)
                         if (keyword != null) {
-                            val keywordString = Json.encodeToString(keyword)
-                            navHostController.navigate("${Screens.KEYWORD_SCREEN}/$keywordString")
+                            val name = keyword.name ?: ""
+                            val id = keyword.id ?: 0
+                            navHostController.navigate("${Screens.DISCOVER_SCREEN}/$name/$id/keyword")
                         }
                     }
                     CreateVerticalSpacer(4.dp)
-                    GenreChips(movie) {}
+                    GenreChips(movie) {
+                        val genre = movie.genres?.getOrNull(it)
+                        if (genre != null) {
+                            val name = genre.name ?: ""
+                            val id = genre.id ?: 0
+                            navHostController.navigate("${Screens.DISCOVER_SCREEN}/$name/$id/genre")
+                        }
+                    }
                     CreateVerticalSpacer(dp = 4.dp)
                     movie.movieCredits?.cast?.let {
-                        CastList(it)
+                        CastList(it, navHostController)
                     }
                     CreateVerticalSpacer(4.dp)
                     Text(text = movie.overview ?: "")
@@ -198,7 +208,16 @@ private fun MovieDescription(
                     SimilarMoviesButton(navHostController, movie)
                 }
             else
-                Column(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .draggable(
+                            state = rememberDraggableState {
+                                cardVisible = it < 0
+                            },
+                            orientation = Orientation.Vertical
+                        )
+                ) {
                     IconButton(
                         onClick = { cardVisible = true },
                         modifier = Modifier.align(CenterHorizontally)
@@ -236,13 +255,19 @@ private fun SimilarMoviesButton(
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-private fun CastList(it: List<Cast>) {
+private fun CastList(it: List<Cast>, navHostController: NavHostController) {
     if (it.isEmpty()) return
     Text(text = "Cast", fontSize = 16.sp, fontWeight = FontWeight.Bold)
     LazyRow {
         items(it) { cast ->
             Column(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clickable {
+                        val name = cast.name ?: ""
+                        val id = cast.id ?: 0
+                        navHostController.navigate("${Screens.DISCOVER_SCREEN}/$name/$id/people")
+                    },
                 horizontalAlignment = CenterHorizontally
             ) {
                 Image(

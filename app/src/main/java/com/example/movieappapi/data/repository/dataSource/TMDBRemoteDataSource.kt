@@ -1,6 +1,7 @@
 package com.example.movieappapi.data.repository.dataSource
 
 import com.example.movieappapi.domain.model.*
+import com.example.movieappapi.domain.utils.DiscoverType
 
 interface TMDBRemoteDataSource : MovieRemoteDataSource, TVRemoteDataSource {
 
@@ -56,5 +57,5 @@ interface TMDBRemoteDataSource : MovieRemoteDataSource, TVRemoteDataSource {
 
     suspend fun getGenres(): GenreResponse
 
-    suspend fun getKeywordMovies(keywordId: Int): MoviesResponse
+    suspend fun getKeywordMovies(id: Int, discoverType: DiscoverType, page: Int): MoviesResponse
 }
