@@ -45,6 +45,8 @@ import com.example.movieappapi.domain.utils.Url
 import com.example.movieappapi.presentation.components.RateMotionLayout
 import com.example.movieappapi.presentation.components.UserListsDropDownMenu
 import com.example.movieappapi.presentation.components.getPalette
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -184,18 +186,28 @@ private fun MovieDescription(
                     KeywordsChips(movie) {
                         val keyword = movie.keywords?.keywords?.getOrNull(it)
                         if (keyword != null) {
-                            val name = keyword.name ?: ""
                             val id = keyword.id ?: 0
-                            navHostController.navigate("${Screens.DISCOVER_SCREEN}/$name/$id/keyword")
+                            val params: HashMap<String, String> = HashMap(
+                                mapOf(
+                                    "with_keywords" to id.toString()
+                                )
+                            )
+                            val paramsString = Json.encodeToString(params)
+                            navHostController.navigate("${Screens.DISCOVER_SCREEN}/$paramsString")
                         }
                     }
                     CreateVerticalSpacer(4.dp)
                     GenreChips(movie) {
                         val genre = movie.genres?.getOrNull(it)
                         if (genre != null) {
-                            val name = genre.name ?: ""
                             val id = genre.id ?: 0
-                            navHostController.navigate("${Screens.DISCOVER_SCREEN}/$name/$id/genre")
+                            val params: HashMap<String, String> = HashMap(
+                                mapOf(
+                                    "with_genres" to id.toString()
+                                )
+                            )
+                            val paramsString = Json.encodeToString(params)
+                            navHostController.navigate("${Screens.DISCOVER_SCREEN}/$paramsString")
                         }
                     }
                     CreateVerticalSpacer(dp = 4.dp)
@@ -264,9 +276,14 @@ private fun CastList(it: List<Cast>, navHostController: NavHostController) {
                 modifier = Modifier
                     .padding(8.dp)
                     .clickable {
-                        val name = cast.name ?: ""
                         val id = cast.id ?: 0
-                        navHostController.navigate("${Screens.DISCOVER_SCREEN}/$name/$id/people")
+                        val params: HashMap<String, String> = HashMap(
+                            mapOf(
+                                "with_people" to id.toString()
+                            )
+                        )
+                        val paramsString = Json.encodeToString(params)
+                        navHostController.navigate("${Screens.DISCOVER_SCREEN}/$paramsString")
                     },
                 horizontalAlignment = CenterHorizontally
             ) {

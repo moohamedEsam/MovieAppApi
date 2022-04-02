@@ -14,6 +14,5 @@ object Screens {
     const val ACCOUNT_Watchlist_TV = "Watchlist Tv"
     const val MOVIE_DETAILS = "details"
     const val SIMILAR_MOVIES_SCREEN = "similar"
-    const val SEARCH_SCREEN = "search"
     const val DISCOVER_SCREEN = "discover"
 }

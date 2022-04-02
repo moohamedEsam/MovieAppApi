@@ -10,7 +10,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.composables.SimilarMovieScreen
-import com.example.movieappapi.domain.utils.DiscoverType
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.UserMovieList
 import com.example.movieappapi.presentation.screen.account.AccountScreen
@@ -19,11 +18,12 @@ import com.example.movieappapi.presentation.screen.home.MainFeed
 import com.example.movieappapi.presentation.screen.lists.ListScreen
 import com.example.movieappapi.presentation.screen.login.LoginScreen
 import com.example.movieappapi.presentation.screen.movie.MovieDetails
-import com.example.movieappapi.presentation.screen.search.SearchScreen
 import com.example.movieappapi.presentation.screen.userLists.UserListsScreen
 import com.example.movieappapi.presentation.screen.userMoviesList.UserMovieListScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 @ExperimentalAnimationApi
 @ExperimentalSerializationApi
@@ -45,10 +45,6 @@ fun NavHostScreen(
 
         composable(Screens.MAIN) {
             MainFeed(navHostController)
-        }
-
-        composable(Screens.SEARCH_SCREEN) {
-            SearchScreen(navHostController = navHostController)
         }
 
         composable(Screens.ACCOUNT_LISTS) {
@@ -126,31 +122,17 @@ fun NavHostScreen(
         composable(Screens.ACCOUNT_Watchlist_TV) {}
 
         composable(
-            route = "${Screens.DISCOVER_SCREEN}/{name}/{id}/{type}",
+            route = "${Screens.DISCOVER_SCREEN}/{params}",
             arguments = listOf(
-                navArgument("name") {
-                    type = NavType.StringType
-                },
-                navArgument("id") {
-                    type = NavType.IntType
-                },
-                navArgument("type") {
+                navArgument("params") {
                     type = NavType.StringType
                 }
             )
         ) {
-            val name = it.arguments?.getString("name") ?: return@composable
-            val id = it.arguments?.getInt("id") ?: return@composable
-            val type = it.arguments?.getString("type") ?: return@composable
-            val discover = when (type) {
-                "genre" -> DiscoverType.Genre
-                "keyword" -> DiscoverType.Keyword
-                else -> DiscoverType.Cast
-            }
+            val paramsString = it.arguments?.getString("params") ?: return@composable
+            val params: HashMap<String, String> = Json.decodeFromString(paramsString)
             DiscoverMovieScreen(
-                name = name,
-                id = id,
-                discoverType = discover,
+                params = params,
                 navHostController = navHostController
             )
         }

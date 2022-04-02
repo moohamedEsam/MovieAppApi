@@ -2,7 +2,6 @@ package com.example.movieappapi.domain.useCase
 
 import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.repository.MovieRepository
-import com.example.movieappapi.domain.utils.DiscoverType
 import com.example.movieappapi.domain.utils.Resource
 
 class GetDiscoverMoviesUseCase(
@@ -10,16 +9,13 @@ class GetDiscoverMoviesUseCase(
 ) {
     private var page = 0
     private var endReached = false
-    private var isLoading = false
-    suspend operator fun invoke(id: Int, discoverType: DiscoverType): Resource<MoviesResponse> {
-        if (endReached || isLoading) return Resource.Success(MoviesResponse(results = emptyList()))
+    suspend operator fun invoke(params: HashMap<String, String>): Resource<MoviesResponse> {
+        if (endReached) return Resource.Success(MoviesResponse(results = emptyList()))
         page++
-        isLoading = true
-        val response = repository.getDiscoverMovies(id, discoverType, page = page)
+        val response = repository.getDiscoverMovies(params, page)
         response.onSuccess {
             endReached = page >= it.totalPages ?: 0
         }
-        isLoading = false
         return response
     }
 }

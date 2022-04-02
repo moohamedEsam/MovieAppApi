@@ -4,7 +4,6 @@ import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.model.room.MovieEntity
 import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.model.room.UserListDetailsEntity
-import com.example.movieappapi.domain.utils.DiscoverType
 import com.example.movieappapi.domain.utils.MainFeedMovieList
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
@@ -39,8 +38,7 @@ interface MovieRepository {
     suspend fun getNowPlayingMovies(page: Int = 0): Resource<MoviesResponse>
 
     suspend fun getDiscoverMovies(
-        id: Int,
-        discoverType: DiscoverType,
+        params: HashMap<String, String>,
         page: Int
     ): Resource<MoviesResponse>
 

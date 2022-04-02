@@ -2,7 +2,6 @@ package com.example.movieappapi.data.repository.dataSourceImpl
 
 import com.example.movieappapi.data.repository.dataSource.TMDBRemoteDataSource
 import com.example.movieappapi.domain.model.*
-import com.example.movieappapi.domain.utils.DiscoverType
 import com.example.movieappapi.domain.utils.Url
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -100,14 +99,15 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
             parameter(SESSION_PARAMETER, token)
         }
 
-    override suspend fun getKeywordMovies(
-        id: Int,
-        discoverType: DiscoverType,
+    override suspend fun discoverMovies(
+        params: HashMap<String, String>,
         page: Int
     ): MoviesResponse =
         client.get(Url.DISCOVER_MOVIES) {
-            parameter(discoverType.param, id)
             parameter("page", page)
+            params.forEach { (key, value) ->
+                parameter(key, value)
+            }
         }
 
     override suspend fun getUserRatedMovies(accountId: Int, token: String): MoviesResponse =

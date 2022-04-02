@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.movieappapi.domain.model.Movie
@@ -17,7 +18,8 @@ fun MovieListComposable(
     movies: List<Movie>?,
     label: String,
     navHostController: NavHostController,
-    paginateState: Any = Unit,
+    leadingIcon: ImageVector? = null,
+    onLeadingIconClicked: () -> Unit = {},
     onSearchValueChange: (String) -> Unit,
     onSearch: (String) -> Unit,
     onPaginate: () -> Unit = {}
@@ -29,7 +31,9 @@ fun MovieListComposable(
     ) {
         SearchComposable(
             label = label,
-            onValueChange = { onSearchValueChange(it) }
+            leadingIcon = leadingIcon,
+            onValueChange = onSearchValueChange,
+            onLeadingIconClicked = onLeadingIconClicked
         ) {
             onSearch(it)
         }

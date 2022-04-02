@@ -12,9 +12,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material.icons.filled.WatchLater
+import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -40,6 +40,8 @@ import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.example.movieappapi.ui.theme.MovieAppApiTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -268,12 +270,13 @@ fun BottomBarSetup(navHostController: NavHostController) {
             itemIcon = Icons.Outlined.Home,
             itemLabel = "home"
         )
+        val paramsString = Json.encodeToString(HashMap<String, String>(mapOf()))
         NavItemSetup(
             currentDestination = currentDestination,
             navHostController = navHostController,
-            itemRoute = Screens.SEARCH_SCREEN,
-            itemIcon = Icons.Outlined.Search,
-            itemLabel = "search"
+            itemRoute = "${Screens.DISCOVER_SCREEN}/$paramsString",
+            itemIcon = Icons.Outlined.Explore,
+            itemLabel = "discover"
         )
         NavItemSetup(
             currentDestination = currentDestination,
@@ -301,7 +304,7 @@ private fun RowScope.NavItemSetup(
     itemLabel: String
 ) {
     BottomNavigationItem(
-        selected = currentDestination == itemRoute,
+        selected = itemRoute.takeWhile { it != '/' } == currentDestination?.takeWhile { it != '/' },
         onClick = {
             navHostController.navigate(itemRoute) {
                 launchSingleTop = true

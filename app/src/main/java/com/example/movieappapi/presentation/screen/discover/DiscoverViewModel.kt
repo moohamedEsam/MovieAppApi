@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.useCase.GetDiscoverMoviesUseCase
-import com.example.movieappapi.domain.utils.DiscoverType
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.presentation.utils.BaseSearchPaginateViewModel
 import kotlinx.coroutines.launch
@@ -19,8 +18,15 @@ class DiscoverViewModel(
         mutableStateOf(Resource.Initialized())
     override var filteredItems: MutableState<MoviesResponse?> = mutableStateOf(null)
     override var searchMode: MutableState<Boolean> = mutableStateOf(false)
-    private var id = 0
+    val params = mutableStateOf(hashMapOf<String, String>())
 
+    fun setParams(values: HashMap<String, String>) = viewModelScope.launch {
+        params.value = values
+    }
+
+    fun addFilter(addParam: (HashMap<String, String>) -> HashMap<String, String>) {
+        params.value = addParam(params.value)
+    }
 
     override fun setFilteredItems(query: String) {
         viewModelScope.launch {
@@ -33,9 +39,9 @@ class DiscoverViewModel(
         }
     }
 
-    fun setMovies(discoverType: DiscoverType) = viewModelScope.launch {
+    fun setMovies() = viewModelScope.launch {
         results.value = Resource.Loading(results.value.data)
-        val response = discoverMoviesUseCase(id, discoverType)
+        val response = discoverMoviesUseCase(params.value)
         response.onSuccess {
             if (results.value.data != null) {
                 val movies = results.value.data?.results?.plus(it.results ?: emptyList())
@@ -43,9 +49,5 @@ class DiscoverViewModel(
             }
             results.value = response
         }
-    }
-
-    fun setKeywordId(value: Int) {
-        id = value
     }
 }
