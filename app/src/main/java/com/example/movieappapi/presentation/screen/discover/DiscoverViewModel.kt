@@ -6,12 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.useCase.GetDiscoverMoviesUseCase
+import com.example.movieappapi.domain.useCase.SearchMoviesUseCase
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.presentation.utils.BaseSearchPaginateViewModel
 import kotlinx.coroutines.launch
 
 class DiscoverViewModel(
-    private val discoverMoviesUseCase: GetDiscoverMoviesUseCase
+    private val discoverMoviesUseCase: GetDiscoverMoviesUseCase,
+    private val searchMoviesUseCase: SearchMoviesUseCase
 ) : ViewModel(), BaseSearchPaginateViewModel<MoviesResponse> {
 
     override var results: MutableState<Resource<MoviesResponse>> =
@@ -49,5 +51,11 @@ class DiscoverViewModel(
             }
             results.value = response
         }
+    }
+
+    fun searchByQuery(query: String) = viewModelScope.launch {
+        if (query.isBlank()) return@launch
+        results.value = Resource.Loading(results.value.data)
+        results.value = searchMoviesUseCase(query)
     }
 }

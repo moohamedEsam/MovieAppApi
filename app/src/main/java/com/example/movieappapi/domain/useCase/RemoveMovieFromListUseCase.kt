@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.flow
 class RemoveMovieFromListUseCase(
     private val repository: MovieRepository
 ) {
-    suspend operator fun invoke(movieId: Int, listId: Int, favorite: Boolean) = flow {
+    operator fun invoke(movieId: Int, listId: Int, favorite: Boolean) = flow {
         val response = repository.removeMovieFromList(listId, movieId)
         response.onSuccess {
             repository.getUserListDetailsEntity(listId).collectLatest {

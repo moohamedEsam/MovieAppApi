@@ -31,7 +31,9 @@ fun GridMovieList(
         itemsIndexed(movies) { index, movie ->
             if (index == movies.lastIndex)
                 paginate()
+
             HorizontalListMovieItem(movie = movie, navHostController = navHostController)
+
         }
     }
 }

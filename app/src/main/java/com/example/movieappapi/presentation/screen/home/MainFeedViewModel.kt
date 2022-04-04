@@ -41,10 +41,10 @@ class MainFeedViewModel(
         setUpcomingMovies()
     }
 
-    suspend fun setMovies(
+    fun setMovies(
         resource: MutableState<Resource<MoviesResponse>>,
         movieList: MainFeedMovieList
-    ) {
+    ) = viewModelScope.launch {
         var movies = resource.value.data?.results
         val response = when (movieList) {
             is MainFeedMovieList.TopRated -> topRated(movieList)

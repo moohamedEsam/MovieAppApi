@@ -1,13 +1,9 @@
 package com.example.movieappapi.presentation.components
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.Slider
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.runtime.*
@@ -40,62 +36,63 @@ fun RateMotionLayout(
     }
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
-        Column(
-            modifier = Modifier
-                .background(Color.LightGray)
-                .padding(8.dp)
-        ) {
-            MotionLayout(
-                motionScene = MotionScene(content = scene),
-                progress = progress,
+        Surface {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                val properties = motionProperties(id = "star")
-                Icon(
-                    imageVector = Icons.Default.StarRate,
-                    contentDescription = null,
-                    modifier = Modifier.layoutId("star"),
-                    tint = properties.value.color("background")
-                )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Slider(
-                value = progress,
-                onValueChange = { progress = it },
-                steps = 19
-            )
-
-            Text(
-                text = "%.1f".format(progress * 10),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.align(Alignment.End),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = {
-                        onRate(progress * 10)
-                        onDismissRequest()
-                    },
+                MotionLayout(
+                    motionScene = MotionScene(content = scene),
+                    progress = progress,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
                 ) {
-                    Text(text = "rate")
+                    val properties = motionProperties(id = "star")
+                    Icon(
+                        imageVector = Icons.Default.StarRate,
+                        contentDescription = null,
+                        modifier = Modifier.layoutId("star"),
+                        tint = properties.value.color("background")
+                    )
                 }
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+                Slider(
+                    value = progress,
+                    onValueChange = { progress = it },
+                    steps = 19
+                )
 
                 Text(
-                    text = "remove rate",
-                    color = Color.Red,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clickable {
-                            onRemoveRate()
+                    text = "%.1f".format(progress * 10),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.align(Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = {
+                            onRate(progress * 10)
                             onDismissRequest()
-                        })
+                        },
+                    ) {
+                        Text(text = "rate")
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
 
+                    Text(
+                        text = "remove rate",
+                        color = Color.Red,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable {
+                                onRemoveRate()
+                                onDismissRequest()
+                            })
+
+                }
             }
         }
     }

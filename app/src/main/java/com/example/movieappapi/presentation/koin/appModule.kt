@@ -77,7 +77,7 @@ val viewModelsModule = module {
     viewModel { AccountViewModel(get(), get()) }
     viewModel { UserMoviesListViewModel(get()) }
     viewModel { ListViewModel(get()) }
-    viewModel { DiscoverViewModel(get()) }
+    viewModel { DiscoverViewModel(get(), get()) }
 
 }
 

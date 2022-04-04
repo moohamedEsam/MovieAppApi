@@ -9,7 +9,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material.icons.filled.WatchLater
 import androidx.compose.material.icons.outlined.Explore
@@ -278,13 +277,13 @@ fun BottomBarSetup(navHostController: NavHostController) {
             itemIcon = Icons.Outlined.Explore,
             itemLabel = "discover"
         )
-        NavItemSetup(
-            currentDestination = currentDestination,
-            navHostController = navHostController,
-            itemRoute = Screens.ACCOUNT_LISTS,
-            itemIcon = Icons.Default.Menu,
-            itemLabel = "lists"
-        )
+//        NavItemSetup(
+//            currentDestination = currentDestination,
+//            navHostController = navHostController,
+//            itemRoute = Screens.ACCOUNT_LISTS,
+//            itemIcon = Icons.Default.Menu,
+//            itemLabel = "lists"
+//        )
         NavItemSetup(
             currentDestination = currentDestination,
             navHostController = navHostController,

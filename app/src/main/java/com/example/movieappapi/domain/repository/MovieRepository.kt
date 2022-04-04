@@ -19,7 +19,8 @@ interface MovieRepository {
 
     suspend fun login(userEntity: UserEntity): Resource<Boolean>
 
-    suspend fun getAccountDetails()
+    suspend fun setAccountDetails()
+
 
     suspend fun getAccountStatus(): UserStatus
 
@@ -134,11 +135,11 @@ interface MovieRepository {
 
     suspend fun updateMovie(movie: MovieEntity)
 
-    suspend fun getMovie(movieId: Int): Flow<MovieEntity?>
+    suspend fun getMovie(movieId: Int): MovieEntity?
 
     suspend fun getLocalMovies(movieList: MainFeedMovieList): List<Movie>
 
-    suspend fun getLocalMovieDetails(movieId: Int): Flow<MovieDetailsResponse?>
+    fun getLocalMovieDetails(movieId: Int): Flow<MovieDetailsResponse?>
 
     suspend fun insertLocalMovies(movies: List<Movie>, tag: String)
 
@@ -150,7 +151,7 @@ interface MovieRepository {
     suspend fun updateUserListDetails(userListDetailsResponse: UserListDetailsResponse): Resource<Unit>
     suspend fun updateUserListDetails(userListDetailsEntity: UserListDetailsEntity): Resource<Unit>
     suspend fun deleteUserListDetails(listId: Int): Resource<Unit>
-    suspend fun getUserListDetails(listId: Int): Flow<Resource<UserListDetailsResponse>>
-    suspend fun getUserLists(): Flow<Resource<UserListsResponse>>
-    suspend fun getUserListDetailsEntity(listId: Int): Flow<Resource<UserListDetailsEntity>>
+    fun getUserListDetails(listId: Int): Flow<Resource<UserListDetailsResponse>>
+    fun getUserLists(): Flow<Resource<UserListsResponse>>
+    fun getUserListDetailsEntity(listId: Int): Flow<Resource<UserListDetailsEntity>>
 }

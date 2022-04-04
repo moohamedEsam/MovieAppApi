@@ -16,7 +16,7 @@ class LoginUseCase(
         val response = repository.getSession(userEntity)
         return when (response.data) {
             true -> {
-                repository.getAccountDetails()
+                repository.setAccountDetails()
                 response
             }
             else -> login(userEntity)
@@ -33,7 +33,7 @@ class LoginUseCase(
                 if (sessionResponse.data == false) return@launch
                 repository.updateUser(userEntity)
                 repository.updateSession()
-                repository.getAccountDetails()
+                repository.setAccountDetails()
             }
             sessionResponse
         } else

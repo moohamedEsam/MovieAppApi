@@ -28,13 +28,15 @@ class MovieRepositoryImpl(
     private var genreResponse = GenreResponse()
     private var accountDetailsResponse = AccountDetailsResponse()
 
-    override suspend fun getAccountDetails() {
+    override suspend fun setAccountDetails() {
         try {
+            Log.i("MovieRepositoryImpl", "setAccountDetails: called")
             accountDetailsResponse = remote.getAccountDetails(getActiveToken() ?: "")
         } catch (exception: Exception) {
-            Log.e("MovieRepositoryImpl", "getAccountDetails: ${exception.message}")
+            Log.e("MovieRepositoryImpl", "setAccountDetails: ${exception.message}")
         }
     }
+
 
     override suspend fun getSession(
         userEntity: UserEntity
@@ -57,18 +59,17 @@ class MovieRepositoryImpl(
 
     override suspend fun deleteAllMovies(tag: String) = local.deleteAllMovies(tag)
 
-    override suspend fun getLocalMovieDetails(movieId: Int): Flow<MovieDetailsResponse?> =
+    override fun getLocalMovieDetails(movieId: Int): Flow<MovieDetailsResponse?> =
         local.getMovieDetails(movieId).map { it?.toMovieDetailsResponse() }
 
     override suspend fun insertLocalMovies(movies: List<Movie>, tag: String) {
-        Log.i("MovieRepositoryImpl", "insertLocalMovies: called with tag $tag")
-        Log.i("MovieRepositoryImpl", "insertLocalMovies: called with size ${movies.size}")
         movies.forEachIndexed { index, movie ->
             try {
                 val movieEntity = if (index == 0) movie.toMovieEntity(Date(), tag)
                 else
                     movie.toMovieEntity(tag = tag)
                 local.insertMovie(movieEntity)
+
             } catch (exception: Exception) {
                 Log.e(
                     "MovieRepositoryImpl",
@@ -91,7 +92,7 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getMovie(movieId: Int): Flow<MovieEntity?> = local.getMovie(movieId)
+    override suspend fun getMovie(movieId: Int): MovieEntity? = local.getMovie(movieId)
 
     override suspend fun updateMovie(movie: MovieEntity) {
         local.updateMovie(movie)
@@ -497,7 +498,7 @@ class MovieRepositoryImpl(
     private fun mapMovieIdsToMovies(movieIds: List<Int>) = flow {
         val movies = mutableListOf<Movie>()
         movieIds.map {
-            local.getMovie(it).collectLatest { movieEntity ->
+            local.getMovie(it).let { movieEntity ->
                 movieEntity?.let { movie ->
                     movies.add(movie.toMovie())
                 }
@@ -507,7 +508,7 @@ class MovieRepositoryImpl(
     }
 
 
-    override suspend fun getUserListDetails(listId: Int): Flow<Resource<UserListDetailsResponse>> =
+    override fun getUserListDetails(listId: Int): Flow<Resource<UserListDetailsResponse>> =
         flow {
             try {
                 local.getUserListDetails(listId).collectLatest { userList ->
@@ -529,7 +530,7 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getUserListDetailsEntity(listId: Int): Flow<Resource<UserListDetailsEntity>> =
+    override fun getUserListDetailsEntity(listId: Int): Flow<Resource<UserListDetailsEntity>> =
         flow {
             try {
                 local.getUserListDetails(listId).collectLatest {
@@ -540,7 +541,7 @@ class MovieRepositoryImpl(
             }
         }
 
-    override suspend fun getUserLists(): Flow<Resource<UserListsResponse>> = channelFlow {
+    override fun getUserLists(): Flow<Resource<UserListsResponse>> = channelFlow {
         try {
             local.getAllUserList().collectLatest {
                 send(Resource.Success(it.toUserListsResponse()))

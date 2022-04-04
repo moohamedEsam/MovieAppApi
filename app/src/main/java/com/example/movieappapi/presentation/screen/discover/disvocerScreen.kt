@@ -41,7 +41,7 @@ fun DiscoverMovieScreen(
                 else
                     movies.data?.results ?: emptyList(),
                 label = "search movies",
-//                leadingIcon = Icons.Default.FilterList,
+                //leadingIcon = Icons.Default.FilterList,
                 navHostController = navHostController,
                 onLeadingIconClicked = {
                     showDialog = true
@@ -49,7 +49,9 @@ fun DiscoverMovieScreen(
                 onSearchValueChange = { query ->
                     viewModel.setFilteredItems(query)
                 },
-                onSearch = {}
+                onSearch = {
+                    viewModel.searchByQuery(it)
+                }
             ) {
                 if (!searchMode && movies is Resource.Success)
                     viewModel.setMovies()

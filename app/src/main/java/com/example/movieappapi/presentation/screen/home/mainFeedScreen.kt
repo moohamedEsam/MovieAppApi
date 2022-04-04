@@ -52,6 +52,7 @@ fun MainFeed(navHostController: NavHostController) {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .padding(bottom = 64.dp)
         ) {
             PopularMovieViewPager(
                 movies = popularMovies.data?.results ?: emptyList(),
@@ -70,6 +71,7 @@ fun MainFeed(navHostController: NavHostController) {
             MovieHorizontalList(topRatedMovies, navHostController, "Top Rated") {
                 viewModel.setTopRatedMovies()
             }
+
         }
         ResourceErrorSnackBar(resource = popularMovies, actionText = "Retry") {}
         ResourceErrorSnackBar(resource = nowPlayingMovies, actionText = "Retry") {}

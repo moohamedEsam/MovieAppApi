@@ -397,7 +397,7 @@ private fun MovieActionIconsColumn(movie: MovieDetailsResponse, modifier: Modifi
         CreateVerticalSpacer()
         RateAction(rated)
         CreateVerticalSpacer()
-        AddToListAction()
+        //AddToListAction()
     }
 }
 
@@ -428,6 +428,7 @@ private fun RateAction(rated: Boolean, value: Float? = null) {
     val viewModel: MovieViewModel = getViewModel()
     if (showDialog)
         RateMotionLayout(
+            initialProgress = value ?: 0f,
             onDismissRequest = {
                 showDialog = false
             },

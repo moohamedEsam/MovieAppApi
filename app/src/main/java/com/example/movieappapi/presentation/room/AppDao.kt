@@ -35,7 +35,7 @@ interface AppDao {
     suspend fun insertMovie(movieEntity: MovieEntity)
 
     @Query("select * from movieEntity where id = (:movieId)")
-    fun getMovie(movieId: Int): Flow<MovieEntity?>
+    suspend fun getMovie(movieId: Int): MovieEntity?
 
     @Update
     suspend fun updateMovie(movieEntity: MovieEntity)

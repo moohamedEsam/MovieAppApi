@@ -5,7 +5,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,7 +35,7 @@ fun HorizontalListMovieItem(movie: Movie, navHostController: NavHostController) 
     AnimatedVisibility(
         visibleState = isVisible,
         enter = fadeIn(animationSpec = tween(1000)),
-        exit = slideOutVertically()
+        exit = fadeOut()
     ) {
         Column(
             modifier = Modifier
