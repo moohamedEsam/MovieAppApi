@@ -35,7 +35,6 @@ import org.koin.dsl.module
 val useCaseModule = module {
     factory { GetRecommendationsUseCase(get()) }
     factory { GetSimilarMoviesUseCase(get()) }
-    factory { GetUpcomingMoviesUseCase(get()) }
     factory { LoginUseCase(get()) }
     factory { SearchAllUseCase(get()) }
     factory { SearchMoviesUseCase(get()) }
@@ -57,7 +56,7 @@ val useCaseModule = module {
     factory { GetListDetailsUseCase(get()) }
     factory { AddMovieToListUseCase(get()) }
     factory { RemoveMovieFromListUseCase(get()) }
-    factory { GetDiscoverMoviesUseCase(get()) }
+    factory { DiscoverMoviesUseCase(get()) }
 }
 
 val repositoryModule = module {
@@ -71,7 +70,7 @@ val repositoryModule = module {
 
 val viewModelsModule = module {
     viewModel { LoginViewModel(get(), get(), get(), get()) }
-    viewModel { MainFeedViewModel(get(), get(), get(), get()) }
+    viewModel { MainFeedViewModel(get()) }
     viewModel { MovieRecommendationsViewModel(get(), get()) }
     viewModel { UserListsViewModel(get(), get(), get()) }
     viewModel { MovieViewModel(get(), get(), get(), get(), get(), get(), get()) }

@@ -4,7 +4,7 @@ import com.example.movieappapi.domain.model.*
 import com.example.movieappapi.domain.model.room.MovieEntity
 import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.model.room.UserListDetailsEntity
-import com.example.movieappapi.domain.utils.MainFeedMovieList
+import com.example.movieappapi.domain.utils.MainFeedMovieListType
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
 import kotlinx.coroutines.flow.Flow
@@ -21,7 +21,6 @@ interface MovieRepository {
 
     suspend fun setAccountDetails()
 
-
     suspend fun getAccountStatus(): UserStatus
 
     suspend fun resetRepository()
@@ -32,24 +31,17 @@ interface MovieRepository {
 
     suspend fun getMovieDetails(movieId: Int): Resource<MovieDetailsResponse>
 
-    suspend fun getPopularMovies(page: Int = 0): Resource<MoviesResponse>
+    suspend fun getMainFeedMovies(mainFeedMovieListType: MainFeedMovieListType): Resource<MoviesResponse>
 
-    suspend fun getTopRatedMovies(page: Int = 0): Resource<MoviesResponse>
-
-    suspend fun getNowPlayingMovies(page: Int = 0): Resource<MoviesResponse>
-
-    suspend fun getDiscoverMovies(
+    suspend fun discoverMovies(
         params: HashMap<String, String>,
         page: Int
     ): Resource<MoviesResponse>
 
-    suspend fun getUpcomingMovies(page: Int = 0): Resource<MoviesResponse>
 
     suspend fun getRecommendations(movieId: Int, page: Int = 0): Resource<MoviesResponse>
 
     suspend fun getSimilarMovies(movieId: Int, page: Int = 0): Resource<MoviesResponse>
-
-    suspend fun discoverMovies(page: Int = 0): Resource<MoviesResponse>
 
     suspend fun getUserFavoriteMovies(): Resource<MoviesResponse>
 
@@ -137,7 +129,7 @@ interface MovieRepository {
 
     suspend fun getMovie(movieId: Int): MovieEntity?
 
-    suspend fun getLocalMovies(movieList: MainFeedMovieList): List<Movie>
+    suspend fun getLocalMovies(movieListType: MainFeedMovieListType): List<Movie>
 
     fun getLocalMovieDetails(movieId: Int): Flow<MovieDetailsResponse?>
 

@@ -5,14 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieappapi.domain.model.MoviesResponse
-import com.example.movieappapi.domain.useCase.GetDiscoverMoviesUseCase
+import com.example.movieappapi.domain.useCase.DiscoverMoviesUseCase
 import com.example.movieappapi.domain.useCase.SearchMoviesUseCase
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.presentation.utils.BaseSearchPaginateViewModel
 import kotlinx.coroutines.launch
 
 class DiscoverViewModel(
-    private val discoverMoviesUseCase: GetDiscoverMoviesUseCase,
+    private val discoverMoviesUseCase: DiscoverMoviesUseCase,
     private val searchMoviesUseCase: SearchMoviesUseCase
 ) : ViewModel(), BaseSearchPaginateViewModel<MoviesResponse> {
 

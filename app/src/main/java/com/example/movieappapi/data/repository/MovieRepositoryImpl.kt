@@ -7,7 +7,7 @@ import com.example.movieappapi.domain.model.room.MovieEntity
 import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.model.room.UserListDetailsEntity
 import com.example.movieappapi.domain.repository.MovieRepository
-import com.example.movieappapi.domain.utils.MainFeedMovieList
+import com.example.movieappapi.domain.utils.MainFeedMovieListType
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
 import com.example.movieappapi.domain.utils.mappers.*
@@ -54,8 +54,8 @@ class MovieRepositoryImpl(
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun getLocalMovies(movieList: MainFeedMovieList): List<Movie> =
-        local.getMovie(movieList.tag).map { it.toMovie() }
+    override suspend fun getLocalMovies(movieListType: MainFeedMovieListType): List<Movie> =
+        local.getMovie(movieListType.tag).map { it.toMovie() }
 
     override suspend fun deleteAllMovies(tag: String) = local.deleteAllMovies(tag)
 
@@ -79,7 +79,7 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getDiscoverMovies(
+    override suspend fun discoverMovies(
         params: HashMap<String, String>,
         page: Int
     ): Resource<MoviesResponse> {
@@ -148,45 +148,17 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getPopularMovies(page: Int): Resource<MoviesResponse> {
-        return try {
-            val response: MoviesResponse = remote.getPopularMovies(page)
-            Resource.Success(response)
-        } catch (exception: Exception) {
-            Log.e("MovieRemoteDataSourceImpl", "getPopularMovies: ${exception.localizedMessage}")
-            Resource.Error(exception.message)
-        }
-    }
 
-    override suspend fun getTopRatedMovies(page: Int): Resource<MoviesResponse> {
+    override suspend fun getMainFeedMovies(mainFeedMovieListType: MainFeedMovieListType): Resource<MoviesResponse> {
         return try {
-            val response: MoviesResponse = remote.getTopRatedMovies(page)
-            Resource.Success(response)
-        } catch (exception: Exception) {
-            Log.e("MovieRemoteDataSourceImpl", "getTopRatedMovies: ${exception.localizedMessage}")
-            Resource.Error(exception.localizedMessage)
-        }
-    }
-
-    override suspend fun getNowPlayingMovies(page: Int): Resource<MoviesResponse> {
-        return try {
-            val response: MoviesResponse = remote.getNowPlayingMovies(page)
-            Resource.Success(response)
-        } catch (exception: Exception) {
-            Log.e("MovieRemoteDataSourceImpl", "getNowPlayingMovies: ${exception.localizedMessage}")
-            Resource.Error(exception.localizedMessage)
-        }
-    }
-
-    override suspend fun getUpcomingMovies(page: Int): Resource<MoviesResponse> {
-        return try {
-            val response: MoviesResponse = remote.getUpcomingMovies(page)
+            val response: MoviesResponse = remote.getMainFeedMovies(mainFeedMovieListType)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "getUpcomingMovies: ${exception.localizedMessage}")
             Resource.Error(exception.localizedMessage)
         }
     }
+
 
     override suspend fun getRecommendations(movieId: Int, page: Int): Resource<MoviesResponse> {
         return try {
@@ -275,16 +247,6 @@ class MovieRepositoryImpl(
             Resource.Success(guestSessionResponse.success ?: false)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "createGuestSession: ${exception.message}")
-            Resource.Error(exception.message)
-        }
-    }
-
-    override suspend fun discoverMovies(page: Int): Resource<MoviesResponse> {
-        return try {
-            val response = remote.discoverMovies(page)
-            Resource.Success(response)
-        } catch (exception: Exception) {
-            Log.e("MovieRepositoryImpl", "discoverMovies: ${exception.message}")
             Resource.Error(exception.message)
         }
     }

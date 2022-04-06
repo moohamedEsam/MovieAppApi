@@ -2,6 +2,7 @@ package com.example.movieappapi.data.repository.dataSourceImpl
 
 import com.example.movieappapi.data.repository.dataSource.TMDBRemoteDataSource
 import com.example.movieappapi.domain.model.*
+import com.example.movieappapi.domain.utils.MainFeedMovieListType
 import com.example.movieappapi.domain.utils.Url
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -21,10 +22,6 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
 
     override suspend fun createGuestSession(): GuestSessionResponse = client.post(Url.GUEST_LOGIN)
 
-    override suspend fun discoverMovies(page: Int): MoviesResponse =
-        client.get(Url.DISCOVER_MOVIES) {
-            parameter("page", page)
-        }
 
     override suspend fun getUserCreatedList(accountId: Int, token: String): UserListsResponse =
         client.get(Url.getUserLists(accountId)) {
@@ -208,25 +205,11 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
             }
         }
 
-    override suspend fun getPopularMovies(page: Int): MoviesResponse =
-        client.get(Url.POPULAR_MOVIES) {
-            parameter("page", page)
+    override suspend fun getMainFeedMovies(mainFeedMovieListType: MainFeedMovieListType): MoviesResponse =
+        client.get(Url.getMainFeedMoviesUrl(mainFeedMovieListType.tag)) {
+            parameter("page", mainFeedMovieListType.page)
         }
 
-    override suspend fun getTopRatedMovies(page: Int): MoviesResponse =
-        client.get(Url.TOP_RATED_MOVIES) {
-            parameter("page", page)
-        }
-
-    override suspend fun getNowPlayingMovies(page: Int): MoviesResponse =
-        client.get(Url.NOW_PLAYING_MOVIES) {
-            parameter("page", page)
-        }
-
-    override suspend fun getUpcomingMovies(page: Int): MoviesResponse =
-        client.get(Url.UPCOMING_MOVIES) {
-            parameter("page", page)
-        }
 
     override suspend fun getRecommendations(movieId: Int, page: Int): MoviesResponse =
         client.get(Url.getRecommendations(movieId)) {

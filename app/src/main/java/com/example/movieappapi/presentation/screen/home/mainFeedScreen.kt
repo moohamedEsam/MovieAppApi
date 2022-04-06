@@ -6,26 +6,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.movieappapi.domain.model.Movie
-import com.example.movieappapi.domain.model.MoviesResponse
-import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
-import com.example.movieappapi.presentation.components.HorizontalMovieList
 import com.example.movieappapi.presentation.components.ResourceErrorSnackBar
+import com.example.movieappapi.presentation.customComoposables.HorizontalMovieListWithLabel
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -60,15 +55,15 @@ fun MainFeed(navHostController: NavHostController) {
                 imageHeight = height.div(2.5f)
             )
             CreateVerticalSpacer()
-            MovieHorizontalList(nowPlayingMovies, navHostController, "Now Playing") {
+            HorizontalMovieListWithLabel(nowPlayingMovies, navHostController, "Now Playing") {
                 viewModel.setNowPlayingMovies()
             }
             CreateVerticalSpacer(dp = 4.dp)
-            MovieHorizontalList(upcomingMovies, navHostController, "Upcoming") {
-                viewModel.setNowPlayingMovies()
+            HorizontalMovieListWithLabel(upcomingMovies, navHostController, "Upcoming") {
+                viewModel.setUpcomingMovies()
             }
             CreateVerticalSpacer(4.dp)
-            MovieHorizontalList(topRatedMovies, navHostController, "Top Rated") {
+            HorizontalMovieListWithLabel(topRatedMovies, navHostController, "Top Rated") {
                 viewModel.setTopRatedMovies()
             }
 
@@ -81,31 +76,6 @@ fun MainFeed(navHostController: NavHostController) {
 }
 
 
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@Composable
-private fun MovieHorizontalList(
-    moviesResponse: Resource<MoviesResponse>,
-    navHostController: NavHostController,
-    label: String,
-    paginate: () -> Unit
-) {
-
-    Text(
-        text = label,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        modifier = Modifier.padding(8.dp)
-    )
-    CreateVerticalSpacer(dp = 4.dp)
-    moviesResponse.OnSuccessComposable {
-        it.results?.let { movies ->
-            HorizontalMovieList(movies = movies, navHostController = navHostController) {
-                paginate()
-            }
-        }
-    }
-}
 
 @ExperimentalSerializationApi
 @ExperimentalCoilApi

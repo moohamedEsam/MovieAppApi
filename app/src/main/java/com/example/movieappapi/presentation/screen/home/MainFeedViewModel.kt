@@ -1,38 +1,31 @@
 package com.example.movieappapi.presentation.screen.home
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.useCase.GetMainFeedMoviesUseCase
-import com.example.movieappapi.domain.utils.MainFeedMovieList
+import com.example.movieappapi.domain.utils.MainFeedMovieListType
 import com.example.movieappapi.domain.utils.Resource
 import kotlinx.coroutines.launch
 
 class MainFeedViewModel(
-    private val nowPlaying: GetMainFeedMoviesUseCase,
-    private val topRated: GetMainFeedMoviesUseCase,
-    private val upcoming: GetMainFeedMoviesUseCase,
-    private val popular: GetMainFeedMoviesUseCase
+    private val mainFeedMoviesUseCase: GetMainFeedMoviesUseCase
 ) : ViewModel() {
 
-    private val _popularMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
-    val popularMovies: State<Resource<MoviesResponse>> = _popularMovies
+    val popularMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
 
+    val upcomingMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
 
-    private val _upcomingMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
-    val upcomingMovies: State<Resource<MoviesResponse>> = _upcomingMovies
+    val topRatedMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
 
+    val nowPlayingMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
 
-    private val _topRatedMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
-    val topRatedMovies: State<Resource<MoviesResponse>> = _topRatedMovies
-
-
-    private val _nowPlayingMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
-    val nowPlayingMovies: State<Resource<MoviesResponse>> = _nowPlayingMovies
-
+    private val topRatedMovieList = MainFeedMovieListType.TopRated
+    private val nowPlayingMovieList = MainFeedMovieListType.NowPlaying
+    private val popularMovieList = MainFeedMovieListType.Popular
+    private val upcomingMovieList = MainFeedMovieListType.Upcoming
 
     init {
         setPopularMovies()
@@ -41,17 +34,14 @@ class MainFeedViewModel(
         setUpcomingMovies()
     }
 
-    fun setMovies(
+    private fun setMovies(
         resource: MutableState<Resource<MoviesResponse>>,
-        movieList: MainFeedMovieList
+        movieListType: MainFeedMovieListType
     ) = viewModelScope.launch {
         var movies = resource.value.data?.results
-        val response = when (movieList) {
-            is MainFeedMovieList.TopRated -> topRated(movieList)
-            is MainFeedMovieList.NowPlaying -> nowPlaying(movieList)
-            is MainFeedMovieList.Upcoming -> upcoming(movieList)
-            else -> popular(movieList)
-        }
+        val response = mainFeedMoviesUseCase(movieListType)
+        if (response is Resource.Success)
+            movieListType.page++
         movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
         response.data?.results = movies
         resource.value = response
@@ -59,20 +49,19 @@ class MainFeedViewModel(
     }
 
     fun setUpcomingMovies() = viewModelScope.launch {
-        setMovies(_upcomingMovies, MainFeedMovieList.Upcoming)
+        setMovies(upcomingMovies, upcomingMovieList)
     }
 
     fun setNowPlayingMovies() = viewModelScope.launch {
-        setMovies(_nowPlayingMovies, MainFeedMovieList.NowPlaying)
+        setMovies(nowPlayingMovies, nowPlayingMovieList)
     }
 
     fun setPopularMovies() = viewModelScope.launch {
-        setMovies(_popularMovies, MainFeedMovieList.Popular)
-
+        setMovies(popularMovies, popularMovieList)
     }
 
     fun setTopRatedMovies() = viewModelScope.launch {
-        setMovies(_topRatedMovies, MainFeedMovieList.TopRated)
+        setMovies(topRatedMovies, topRatedMovieList)
     }
 
 

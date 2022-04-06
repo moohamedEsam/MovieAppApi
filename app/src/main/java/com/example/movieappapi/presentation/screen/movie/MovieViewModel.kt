@@ -32,9 +32,7 @@ class MovieViewModel(
 
     fun setMovie(movieId: Int) = viewModelScope.launch {
         _movie.value = Resource.Loading(_movie.value.data)
-        movieDetailsUseCase(movieId).collectLatest {
-            _movie.value = it
-        }
+        _movie.value = movieDetailsUseCase(movieId)
     }
 
 
@@ -63,7 +61,7 @@ class MovieViewModel(
         _movie.value.onSuccess {
             it.accountStatesResponse = accountStates
             markAsFavoriteMovieUseCase(
-                it,
+                _movie.value.data?.id ?: 0,
                 accountStates?.favorite ?: true
             )
         }
@@ -75,7 +73,7 @@ class MovieViewModel(
         accountStates?.rated?.value = value
         _movie.value.onSuccess {
             it.accountStatesResponse = accountStates
-            rateMovieUseCase(it, value)
+            rateMovieUseCase(_movie.value.data?.id ?: 0, value)
         }
     }
 

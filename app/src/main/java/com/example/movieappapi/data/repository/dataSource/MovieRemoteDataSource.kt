@@ -3,20 +3,14 @@ package com.example.movieappapi.data.repository.dataSource
 import com.example.movieappapi.domain.model.MovieDetailsResponse
 import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.model.RateMediaResponse
+import com.example.movieappapi.domain.utils.MainFeedMovieListType
 
 interface MovieRemoteDataSource {
 
     suspend fun getMovieDetails(movieId: Int, sessionId: String): MovieDetailsResponse
 
-    suspend fun getPopularMovies(page: Int = 0): MoviesResponse
+    suspend fun getMainFeedMovies(mainFeedMovieListType: MainFeedMovieListType): MoviesResponse
 
-    suspend fun discoverMovies(page: Int = 0): MoviesResponse
-
-    suspend fun getTopRatedMovies(page: Int = 0): MoviesResponse
-
-    suspend fun getNowPlayingMovies(page: Int = 0): MoviesResponse
-
-    suspend fun getUpcomingMovies(page: Int = 0): MoviesResponse
 
     suspend fun getRecommendations(movieId: Int, page: Int = 0): MoviesResponse
 

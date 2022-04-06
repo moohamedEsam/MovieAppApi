@@ -1,6 +1,5 @@
 package com.example.movieappapi.presentation.screen.recommendation
 
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,20 +13,28 @@ class MovieRecommendationsViewModel(
     private val recommendationsUseCase: GetRecommendationsUseCase,
     private val similarMoviesUseCase: GetSimilarMoviesUseCase
 ) : ViewModel() {
-    private val _recommendations = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
-    val recommendations: State<Resource<MoviesResponse>> = _recommendations
+    val recommendations = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
 
-    private val _similarMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
-    val similarMovies: State<Resource<MoviesResponse>> = _similarMovies
+    val similarMovies = mutableStateOf<Resource<MoviesResponse>>(Resource.Initialized())
 
 
     fun setSimilarMovies(movieId: Int) = viewModelScope.launch {
-        _similarMovies.value = Resource.Loading(_similarMovies.value.data)
-        _similarMovies.value = similarMoviesUseCase(movieId = movieId, 1)
+        var movies = similarMovies.value.data?.results
+        similarMovies.value = Resource.Loading(similarMovies.value.data)
+        val response = similarMoviesUseCase(movieId)
+        movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
+        response.data?.results =
+            movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
+        similarMovies.value = response
     }
 
     fun setRecommendations(movieId: Int) = viewModelScope.launch {
-        _recommendations.value = Resource.Loading(_recommendations.value.data)
-        _recommendations.value = recommendationsUseCase(movieId, 1)
+        var movies = recommendations.value.data?.results
+        recommendations.value = Resource.Loading(recommendations.value.data)
+        val response = similarMoviesUseCase(movieId)
+        movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
+        response.data?.results =
+            movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results
+        recommendations.value = response
     }
 }

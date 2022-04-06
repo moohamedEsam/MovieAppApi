@@ -1,26 +1,20 @@
 package com.example.movieappapi.composables
 
-import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import com.example.movieappapi.domain.model.MoviesResponse
-import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Url
-import com.example.movieappapi.presentation.components.HorizontalMovieList
+import com.example.movieappapi.presentation.customComoposables.HorizontalMovieListWithLabel
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import com.example.movieappapi.presentation.screen.recommendation.MovieRecommendationsViewModel
 import org.koin.androidx.compose.getViewModel
@@ -52,47 +46,17 @@ fun SimilarMovieScreen(movieId: Int, posterPath: String, navHostController: NavH
                 contentScale = ContentScale.FillBounds
             )
             CreateVerticalSpacer()
-            SimilarMovies(similar, navHostController)
+            HorizontalMovieListWithLabel(similar, navHostController, "SimilarMovies") {
+                viewModel.setSimilarMovies(movieId)
+            }
             CreateVerticalSpacer()
-            RecommendationsMovies(
-                recommendations = recommendations,
-                navHostController = navHostController
-            )
+            HorizontalMovieListWithLabel(
+                moviesResponse = recommendations,
+                navHostController = navHostController,
+                label = "Recommendations"
+            ) {
+                viewModel.setRecommendations(movieId)
+            }
         }
-    }
-}
-
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@Composable
-private fun SimilarMovies(
-    similar: Resource<MoviesResponse>,
-    navHostController: NavHostController
-) {
-    Text(
-        text = "similar movies",
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp
-    )
-    similar.data?.results?.let {
-        Log.d("similarMoviesScreen", "SimilarMovies: ${it.size}")
-        HorizontalMovieList(movies = it, navHostController = navHostController)
-    }
-}
-
-@ExperimentalAnimationApi
-@ExperimentalCoilApi
-@Composable
-private fun RecommendationsMovies(
-    recommendations: Resource<MoviesResponse>,
-    navHostController: NavHostController
-) {
-    Text(
-        text = "recommendations",
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp
-    )
-    recommendations.data?.results?.let {
-        HorizontalMovieList(movies = it, navHostController = navHostController)
     }
 }

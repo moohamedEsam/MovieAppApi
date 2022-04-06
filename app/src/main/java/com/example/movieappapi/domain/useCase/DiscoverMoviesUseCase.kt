@@ -4,7 +4,7 @@ import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.repository.MovieRepository
 import com.example.movieappapi.domain.utils.Resource
 
-class GetDiscoverMoviesUseCase(
+class DiscoverMoviesUseCase(
     private val repository: MovieRepository
 ) {
     private var page = 0
@@ -12,7 +12,7 @@ class GetDiscoverMoviesUseCase(
     suspend operator fun invoke(params: HashMap<String, String>): Resource<MoviesResponse> {
         if (endReached) return Resource.Success(MoviesResponse(results = emptyList()))
         page++
-        val response = repository.getDiscoverMovies(params, page)
+        val response = repository.discoverMovies(params, page)
         response.onSuccess {
             endReached = page >= it.totalPages ?: 0
         }
