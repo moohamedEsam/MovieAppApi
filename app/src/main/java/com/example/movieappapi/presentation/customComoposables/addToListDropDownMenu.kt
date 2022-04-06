@@ -1,4 +1,4 @@
-package com.example.movieappapi.presentation.components
+package com.example.movieappapi.presentation.customComoposables
 
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem

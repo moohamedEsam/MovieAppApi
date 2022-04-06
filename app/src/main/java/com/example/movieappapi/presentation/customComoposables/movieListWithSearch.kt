@@ -1,4 +1,4 @@
-package com.example.movieappapi.presentation.components
+package com.example.movieappapi.presentation.customComoposables
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.movieappapi.domain.model.Movie
+import com.example.movieappapi.presentation.components.GridMovieList
+import com.example.movieappapi.presentation.components.SearchComposable
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 
 @OptIn(ExperimentalAnimationApi::class, coil.annotation.ExperimentalCoilApi::class)

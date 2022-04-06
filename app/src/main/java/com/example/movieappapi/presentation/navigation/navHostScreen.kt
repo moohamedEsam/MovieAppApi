@@ -18,6 +18,7 @@ import com.example.movieappapi.presentation.screen.home.MainFeed
 import com.example.movieappapi.presentation.screen.lists.ListScreen
 import com.example.movieappapi.presentation.screen.login.LoginScreen
 import com.example.movieappapi.presentation.screen.movie.MovieDetails
+import com.example.movieappapi.presentation.screen.search.SearchMovieScreen
 import com.example.movieappapi.presentation.screen.userLists.UserListsScreen
 import com.example.movieappapi.presentation.screen.userMoviesList.UserMovieListScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -120,7 +121,9 @@ fun NavHostScreen(
             )
         }
         composable(Screens.ACCOUNT_Watchlist_TV) {}
-
+        composable(Screens.SEARCH) {
+            SearchMovieScreen(navHostController = navHostController)
+        }
         composable(
             route = "${Screens.DISCOVER_SCREEN}/{params}",
             arguments = listOf(

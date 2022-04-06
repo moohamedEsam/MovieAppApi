@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.domain.model.Movie
+import com.example.movieappapi.presentation.customComoposables.HorizontalListMovieItem
 
 @ExperimentalAnimationApi
 @ExperimentalCoilApi

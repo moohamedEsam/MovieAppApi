@@ -43,8 +43,8 @@ import com.example.movieappapi.domain.model.MovieDetailsResponse
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.domain.utils.Url
 import com.example.movieappapi.presentation.components.RateMotionLayout
-import com.example.movieappapi.presentation.components.UserListsDropDownMenu
 import com.example.movieappapi.presentation.components.getPalette
+import com.example.movieappapi.presentation.customComoposables.UserListsDropDownMenu
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.getViewModel

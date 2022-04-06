@@ -6,7 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import com.example.movieappapi.domain.utils.UserMovieList
-import com.example.movieappapi.presentation.components.MovieListComposable
+import com.example.movieappapi.presentation.customComoposables.MovieListComposable
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalAnimationApi::class, coil.annotation.ExperimentalCoilApi::class)

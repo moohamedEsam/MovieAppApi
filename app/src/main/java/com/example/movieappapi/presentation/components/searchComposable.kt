@@ -23,13 +23,34 @@ fun SearchComposable(
         mutableStateOf("")
     }
 
+    StateFullSearchComposable(
+        value = value,
+        onValueChange = {
+            onValueChange(it)
+            value = it
+        },
+        onSearch = onSearch,
+        label = label,
+        leadingIcon = leadingIcon,
+        onLeadingIconClicked = onLeadingIconClicked
+    )
+}
+
+@Composable
+fun StateFullSearchComposable(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onSearch: (String) -> Unit,
+    label: String,
+    leadingIcon: ImageVector? = null,
+    onLeadingIconClicked: () -> Unit = {}
+) {
     var focusColor by remember {
         mutableStateOf(Color.DarkGray)
     }
     TextField(
         value = value,
         onValueChange = {
-            value = it
             onValueChange(it)
         },
         trailingIcon = {

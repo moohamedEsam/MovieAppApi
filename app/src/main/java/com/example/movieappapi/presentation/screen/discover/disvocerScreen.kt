@@ -11,8 +11,8 @@ import androidx.navigation.NavHostController
 import com.example.movieappapi.domain.model.Keyword
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.presentation.components.DiscoverFilterDialog
-import com.example.movieappapi.presentation.components.MovieListComposable
 import com.example.movieappapi.presentation.components.ResourceErrorSnackBar
+import com.example.movieappapi.presentation.customComoposables.MovieListComposable
 import org.koin.androidx.compose.getViewModel
 
 @Composable

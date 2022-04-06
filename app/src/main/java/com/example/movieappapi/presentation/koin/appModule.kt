@@ -16,6 +16,7 @@ import com.example.movieappapi.presentation.screen.lists.ListViewModel
 import com.example.movieappapi.presentation.screen.login.LoginViewModel
 import com.example.movieappapi.presentation.screen.movie.MovieViewModel
 import com.example.movieappapi.presentation.screen.recommendation.MovieRecommendationsViewModel
+import com.example.movieappapi.presentation.screen.search.SearchViewModel
 import com.example.movieappapi.presentation.screen.userLists.UserListsViewModel
 import com.example.movieappapi.presentation.screen.userMoviesList.UserMoviesListViewModel
 import io.ktor.client.*
@@ -78,6 +79,7 @@ val viewModelsModule = module {
     viewModel { UserMoviesListViewModel(get()) }
     viewModel { ListViewModel(get()) }
     viewModel { DiscoverViewModel(get(), get()) }
+    viewModel { SearchViewModel(get()) }
 
 }
 

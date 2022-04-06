@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.WatchLater
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -277,13 +278,13 @@ fun BottomBarSetup(navHostController: NavHostController) {
             itemIcon = Icons.Outlined.Explore,
             itemLabel = "discover"
         )
-//        NavItemSetup(
-//            currentDestination = currentDestination,
-//            navHostController = navHostController,
-//            itemRoute = Screens.ACCOUNT_LISTS,
-//            itemIcon = Icons.Default.Menu,
-//            itemLabel = "lists"
-//        )
+        NavItemSetup(
+            currentDestination = currentDestination,
+            navHostController = navHostController,
+            itemRoute = Screens.SEARCH,
+            itemIcon = Icons.Outlined.Search,
+            itemLabel = "search"
+        )
         NavItemSetup(
             currentDestination = currentDestination,
             navHostController = navHostController,

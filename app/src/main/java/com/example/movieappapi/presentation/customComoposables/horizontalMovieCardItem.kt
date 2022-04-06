@@ -1,4 +1,4 @@
-package com.example.movieappapi.presentation.components
+package com.example.movieappapi.presentation.customComoposables
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
