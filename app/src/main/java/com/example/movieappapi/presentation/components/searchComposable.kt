@@ -2,6 +2,7 @@ package com.example.movieappapi.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
@@ -80,6 +81,11 @@ fun StateFullSearchComposable(
                     modifier = Modifier.clickable {
                         onLeadingIconClicked()
                     })
-        }
+        },
+        keyboardActions = KeyboardActions(onDone = {
+            onSearch(value)
+        }),
+        maxLines = 1,
+        singleLine = true
     )
 }

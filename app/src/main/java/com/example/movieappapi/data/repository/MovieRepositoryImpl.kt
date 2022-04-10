@@ -21,17 +21,17 @@ class MovieRepositoryImpl(
     private val remote: TMDBRemoteDataSource,
     private val local: AppDao
 ) : MovieRepository {
-    private var isUserGuest = false
     private var tokenResponse = TokenResponse()
     private var sessionResponse = SessionResponse()
     private var guestSessionResponse = GuestSessionResponse()
     private var genreResponse = GenreResponse()
-    private var accountDetailsResponse = AccountDetailsResponse()
+    private var accountDetailsResponse: MutableStateFlow<UserStatus> =
+        MutableStateFlow(UserStatus.LoggedOut)
 
     override suspend fun setAccountDetails() {
         try {
-            Log.i("MovieRepositoryImpl", "setAccountDetails: called")
-            accountDetailsResponse = remote.getAccountDetails(getActiveToken() ?: "")
+            val response = remote.getAccountDetails(getActiveToken())
+            accountDetailsResponse.emit(UserStatus.LoggedIn(response))
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "setAccountDetails: ${exception.message}")
         }
@@ -47,7 +47,8 @@ class MovieRepositoryImpl(
             Resource.Success(sessionResponse.success == true)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getToken: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
 
     }
@@ -88,7 +89,8 @@ class MovieRepositoryImpl(
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.i("MovieRepositoryImpl", "getKeywordMovies: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -102,7 +104,8 @@ class MovieRepositoryImpl(
         local.insertMovieDetails(movie.toMovieDetailsEntity())
     }
 
-    override suspend fun isCurrentUserGuest(): Boolean = isUserGuest
+    override suspend fun isCurrentUserGuest(): Boolean =
+        accountDetailsResponse.value.data?.id == null
 
     override suspend fun getLocalSession(): SessionResponse = sessionResponse
 
@@ -138,7 +141,7 @@ class MovieRepositoryImpl(
 
     override suspend fun createSession(): Resource<Boolean> {
         return try {
-            isUserGuest = false
+
             sessionResponse = remote.createSession(tokenResponse.requestToken ?: "")
             updateSession()
             Resource.Success(sessionResponse.success ?: false)
@@ -154,8 +157,8 @@ class MovieRepositoryImpl(
             val response: MoviesResponse = remote.getMainFeedMovies(mainFeedMovieListType)
             Resource.Success(response)
         } catch (exception: Exception) {
-            Log.e("MovieRemoteDataSourceImpl", "getUpcomingMovies: ${exception.localizedMessage}")
-            Resource.Error(exception.localizedMessage)
+            Log.e("MovieRemoteDataSourceImpl", "getMainFeedMovies: ${exception.localizedMessage}")
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' })
         }
     }
 
@@ -166,7 +169,8 @@ class MovieRepositoryImpl(
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "getRecommendations: ${exception.localizedMessage}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -176,7 +180,8 @@ class MovieRepositoryImpl(
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "getSimilarMovies: ${exception.localizedMessage}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -186,7 +191,8 @@ class MovieRepositoryImpl(
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "searchAll: ${exception.localizedMessage}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -196,7 +202,8 @@ class MovieRepositoryImpl(
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "searchMovie: ${exception.localizedMessage}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -206,7 +213,8 @@ class MovieRepositoryImpl(
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "searchTv: ${exception.localizedMessage}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -217,7 +225,8 @@ class MovieRepositoryImpl(
             Resource.Success(genreResponse)
         } catch (exception: Exception) {
             Log.e("MovieRemoteDataSourceImpl", "getGenres: ${exception.localizedMessage}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -228,14 +237,12 @@ class MovieRepositoryImpl(
         val local = local.getSession() ?: return
         local.success = local.expiresAt.after(Date())
         sessionResponse = local.toSessionResponse()
-
     }
 
     override suspend fun resetRepository() {
+        accountDetailsResponse.emit(UserStatus.LoggedOut)
         sessionResponse = SessionResponse()
         tokenResponse = TokenResponse()
-        accountDetailsResponse = AccountDetailsResponse()
-        isUserGuest = false
         guestSessionResponse = GuestSessionResponse()
     }
 
@@ -243,7 +250,7 @@ class MovieRepositoryImpl(
     override suspend fun createGuestSession(): Resource<Boolean> {
         return try {
             guestSessionResponse = remote.createGuestSession()
-            isUserGuest = true
+            accountDetailsResponse.emit(UserStatus.LoggedIn(AccountDetailsResponse()))
             Resource.Success(guestSessionResponse.success ?: false)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "createGuestSession: ${exception.message}")
@@ -254,7 +261,10 @@ class MovieRepositoryImpl(
     override suspend fun getUserFavoriteMovies(): Resource<MoviesResponse> {
         return try {
             val response =
-                remote.getUserFavoriteMovies(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+                remote.getUserFavoriteMovies(
+                    accountDetailsResponse.value.data?.id ?: 1,
+                    getActiveToken()
+                )
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getUserFavoriteMovies: ${exception.message}")
@@ -268,7 +278,8 @@ class MovieRepositoryImpl(
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getMovieDetails: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -281,15 +292,15 @@ class MovieRepositoryImpl(
     }
 
     private fun getActiveToken() =
-        if (isUserGuest)
-            guestSessionResponse.guestSessionId
-        else
-            sessionResponse.sessionId
+        sessionResponse.sessionId ?: guestSessionResponse.guestSessionId ?: ""
 
     override suspend fun getUserMovieWatchList(): Resource<MoviesResponse> {
         return try {
             val response =
-                remote.getUserMovieWatchList(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+                remote.getUserMovieWatchList(
+                    accountDetailsResponse.value.data?.id ?: 1,
+                    getActiveToken()
+                )
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getUserMovieWatchList: ${exception.message}")
@@ -300,7 +311,10 @@ class MovieRepositoryImpl(
     override suspend fun getUserRatedMovies(): Resource<MoviesResponse> {
         return try {
             val response =
-                remote.getUserRatedMovies(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+                remote.getUserRatedMovies(
+                    accountDetailsResponse.value.data?.id ?: 1,
+                    getActiveToken()
+                )
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getUserRatedMovies: ${exception.message}")
@@ -311,7 +325,10 @@ class MovieRepositoryImpl(
     override suspend fun getUserCreatedList(): Resource<UserListsResponse> {
         return try {
             val response =
-                remote.getUserCreatedList(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+                remote.getUserCreatedList(
+                    accountDetailsResponse.value.data?.id ?: 1,
+                    getActiveToken()
+                )
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getUserCreatedList: ${exception.message}")
@@ -324,21 +341,23 @@ class MovieRepositoryImpl(
         description: String
     ): Resource<CreateListResponse> {
         return try {
-            val response = remote.createList(getActiveToken() ?: "", name, description)
+            val response = remote.createList(getActiveToken(), name, description)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "createList: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
     override suspend fun addMovieToList(listId: Int, movieId: Int): Resource<RateMediaResponse> {
         return try {
-            val response = remote.addMovieToList(getActiveToken() ?: "", listId, movieId)
+            val response = remote.addMovieToList(getActiveToken(), listId, movieId)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "addMovieToList: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -347,31 +366,34 @@ class MovieRepositoryImpl(
         movieId: Int
     ): Resource<RateMediaResponse> {
         return try {
-            val response = remote.removeMovieToList(getActiveToken() ?: "", listId, movieId)
+            val response = remote.removeMovieToList(getActiveToken(), listId, movieId)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "removeMovieToList: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
     override suspend fun clearList(listId: Int): Resource<RateMediaResponse> {
         return try {
-            val response = remote.clearList(getActiveToken() ?: "", listId)
+            val response = remote.clearList(getActiveToken(), listId)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "clearList: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
     override suspend fun deleteList(listId: Int): Resource<RateMediaResponse> {
         return try {
-            val response = remote.deleteList(getActiveToken() ?: "", listId)
+            val response = remote.deleteList(getActiveToken(), listId)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "deleteList: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -381,7 +403,8 @@ class MovieRepositoryImpl(
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getList: ${exception.message}")
-            Resource.Error(exception.localizedMessage)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' }
+                ?: exception.message)
         }
     }
 
@@ -392,8 +415,8 @@ class MovieRepositoryImpl(
     ): Resource<RateMediaResponse> {
         return try {
             val response = remote.markAsFavorite(
-                accountDetailsResponse.id ?: 1,
-                token = getActiveToken() ?: "",
+                accountDetailsResponse.value.data?.id ?: 1,
+                token = getActiveToken(),
                 mediaId = mediaId,
                 mediaType = mediaType,
                 isFavorite = isFavorite
@@ -410,7 +433,12 @@ class MovieRepositoryImpl(
         mediaType: String
     ): Resource<RateMediaResponse> {
         return try {
-            val response = remote.addToWatchList(mediaId, accountDetailsResponse.id ?: 1, mediaType)
+            val response =
+                remote.addToWatchList(
+                    mediaId,
+                    accountDetailsResponse.value.data?.id ?: 1,
+                    mediaType
+                )
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "addToWatchList: ${exception.message}")
@@ -418,14 +446,7 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getAccountStatus(): UserStatus {
-        return if (isUserGuest && accountDetailsResponse.id == null)
-            UserStatus.Guest
-        else if (accountDetailsResponse.id != null)
-            UserStatus.LoggedIn(accountDetailsResponse)
-        else
-            UserStatus.LoggedOut
-    }
+    override suspend fun getAccountStatus(): StateFlow<UserStatus> = accountDetailsResponse
 
     override suspend fun insertUserListDetails(userListDetailsResponse: UserListDetailsResponse): Resource<Unit> {
         return try {
@@ -518,7 +539,7 @@ class MovieRepositoryImpl(
         value: Float
     ): Resource<RateMediaResponse> {
         return try {
-            val response = remote.rateMovie(movieId, getActiveToken() ?: "", value)
+            val response = remote.rateMovie(movieId, getActiveToken(), value)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "rateMovie: ${exception.message}")
@@ -528,7 +549,7 @@ class MovieRepositoryImpl(
 
     override suspend fun deleteRateMovie(movieId: Int): Resource<RateMediaResponse> {
         return try {
-            val response = remote.deleteMovieRating(movieId, getActiveToken() ?: "")
+            val response = remote.deleteMovieRating(movieId, getActiveToken())
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "deleteRateMovie: ${exception.message}")
@@ -538,7 +559,7 @@ class MovieRepositoryImpl(
 
     override suspend fun deleteRateTv(tvId: Int): Resource<RateMediaResponse> {
         return try {
-            val response = remote.deleteTvRating(tvId, getActiveToken() ?: "")
+            val response = remote.deleteTvRating(tvId, getActiveToken())
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "deleteRateTv: ${exception.message}")
@@ -551,7 +572,7 @@ class MovieRepositoryImpl(
         value: Float
     ): Resource<RateMediaResponse> {
         return try {
-            val response = remote.rateTv(tvId, getActiveToken() ?: "", value)
+            val response = remote.rateTv(tvId, getActiveToken(), value)
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "rateTv: ${exception.message}")
@@ -572,7 +593,10 @@ class MovieRepositoryImpl(
     override suspend fun getUserFavoriteTv(): Resource<TvShowsResponse> {
         return try {
             val response =
-                remote.getUserFavoriteTv(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+                remote.getUserFavoriteTv(
+                    accountDetailsResponse.value.data?.id ?: 1,
+                    getActiveToken()
+                )
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getUserFavoriteTv: ${exception.message}")
@@ -583,7 +607,7 @@ class MovieRepositoryImpl(
     override suspend fun getUserRatedTv(): Resource<TvShowsResponse> {
         return try {
             val response =
-                remote.getUserRatedTv(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+                remote.getUserRatedTv(accountDetailsResponse.value.data?.id ?: 1, getActiveToken())
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getUserRatedTv: ${exception.message}")
@@ -594,8 +618,8 @@ class MovieRepositoryImpl(
     override suspend fun getUserRatedTvEpisodes(): Resource<UserRatedTvEpisodesResponse> {
         return try {
             val response = remote.getUserRatedTvEpisodes(
-                accountDetailsResponse.id ?: 1,
-                getActiveToken() ?: ""
+                accountDetailsResponse.value.data?.id ?: 1,
+                getActiveToken()
             )
             Resource.Success(response)
         } catch (exception: Exception) {
@@ -607,7 +631,10 @@ class MovieRepositoryImpl(
     override suspend fun getUserTvWatchList(): Resource<TvShowsResponse> {
         return try {
             val response =
-                remote.getUserTvWatchList(accountDetailsResponse.id ?: 1, getActiveToken() ?: "")
+                remote.getUserTvWatchList(
+                    accountDetailsResponse.value.data?.id ?: 1,
+                    getActiveToken()
+                )
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "getUserTvWatchList: ${exception.message}")
@@ -621,7 +648,7 @@ class MovieRepositoryImpl(
             Resource.Success(response)
         } catch (exception: Exception) {
             Log.e("MovieRepositoryImpl", "discoverTv: ${exception.message}")
-            Resource.Error(exception.message)
+            Resource.Error(exception.message?.substringAfter("[\"")?.takeWhile { it != '"' })
         }
     }
 

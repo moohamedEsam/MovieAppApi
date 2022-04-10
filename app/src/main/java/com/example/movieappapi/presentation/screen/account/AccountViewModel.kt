@@ -8,6 +8,7 @@ import com.example.movieappapi.domain.model.room.UserEntity
 import com.example.movieappapi.domain.useCase.GetAccountStatusUseCase
 import com.example.movieappapi.domain.useCase.UpdateCachedUser
 import com.example.movieappapi.domain.utils.UserStatus
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class AccountViewModel(
@@ -20,8 +21,14 @@ class AccountViewModel(
 
 
     init {
+        getUserStatus()
+    }
+
+    fun getUserStatus() {
         viewModelScope.launch {
-            userStatus.value = accountStatus()
+            accountStatus().collectLatest {
+                userStatus.value = it
+            }
         }
     }
 

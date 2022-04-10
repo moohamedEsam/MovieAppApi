@@ -108,7 +108,9 @@ fun provideHttpClient(json: Json) = HttpClient(CIO) {
 
     install(JsonFeature) {
         serializer = KotlinxSerializer(json)
+
     }
+    developmentMode = true
 
     defaultRequest {
         parameter("api_key", Constants.API_KEY)

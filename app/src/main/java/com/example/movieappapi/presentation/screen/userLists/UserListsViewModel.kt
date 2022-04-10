@@ -33,7 +33,9 @@ class UserListsViewModel(
     }
 
     private suspend fun setUser() {
-        _userStatus.value = accountStatusUseCase()
+        accountStatusUseCase().collectLatest {
+            _userStatus.value = it
+        }
     }
 
     fun setUserLists() = viewModelScope.launch {

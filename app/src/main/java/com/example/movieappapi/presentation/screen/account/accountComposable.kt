@@ -26,13 +26,13 @@ fun AccountScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-
-        Text(
-            text = userStatus.data?.username!!,
-            fontWeight = FontWeight.Bold,
-            fontSize = 32.sp,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
+        if (userStatus is UserStatus.LoggedIn)
+            Text(
+                text = userStatus.data?.username ?: "",
+                fontWeight = FontWeight.Bold,
+                fontSize = 32.sp,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
 
         Text(
             text = "Log Out",

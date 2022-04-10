@@ -8,6 +8,7 @@ import com.example.movieappapi.domain.utils.MainFeedMovieListType
 import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.UserStatus
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.*
 
 
@@ -21,7 +22,7 @@ interface MovieRepository {
 
     suspend fun setAccountDetails()
 
-    suspend fun getAccountStatus(): UserStatus
+    suspend fun getAccountStatus(): StateFlow<UserStatus>
 
     suspend fun resetRepository()
 
