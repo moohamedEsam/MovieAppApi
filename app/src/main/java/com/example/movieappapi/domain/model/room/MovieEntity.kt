@@ -10,5 +10,6 @@ data class MovieEntity(
     var posterPath: String,
     var title: String,
     val dateAdded: Date? = null,
+    val rating: Float,
     var tag: String = "popular"
 )

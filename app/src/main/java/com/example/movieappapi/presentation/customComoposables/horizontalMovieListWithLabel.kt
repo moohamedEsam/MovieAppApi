@@ -12,7 +12,6 @@ import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.domain.model.MoviesResponse
 import com.example.movieappapi.domain.utils.Resource
-import com.example.movieappapi.presentation.components.HorizontalMovieList
 import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 
 @ExperimentalAnimationApi

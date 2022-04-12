@@ -137,7 +137,9 @@ fun ColumnScope.LoggedInDrawer(
             )
         }
     ) {
-        navHostController.navigate(Screens.ACCOUNT_Favorite_Movies)
+        navHostController.navigate(Screens.ACCOUNT_Favorite_Movies) {
+            launchSingleTop = true
+        }
     }
 
     DrawerItem(
@@ -154,7 +156,9 @@ fun ColumnScope.LoggedInDrawer(
             )
         }
     ) {
-        navHostController.navigate(Screens.ACCOUNT_Favorite_Tv)
+        navHostController.navigate(Screens.ACCOUNT_Favorite_Tv) {
+            launchSingleTop = true
+        }
     }
 
     DrawerItem(
@@ -171,7 +175,9 @@ fun ColumnScope.LoggedInDrawer(
             )
         }
     ) {
-        navHostController.navigate(Screens.ACCOUNT_Rated_Movies)
+        navHostController.navigate(Screens.ACCOUNT_Rated_Movies) {
+            launchSingleTop = true
+        }
     }
 
     DrawerItem(
@@ -188,7 +194,9 @@ fun ColumnScope.LoggedInDrawer(
             )
         }
     ) {
-        navHostController.navigate(Screens.ACCOUNT_Rated_Tv)
+        navHostController.navigate(Screens.ACCOUNT_Rated_Tv) {
+            launchSingleTop = true
+        }
     }
 
     DrawerItem(
@@ -205,7 +213,9 @@ fun ColumnScope.LoggedInDrawer(
             )
         }
     ) {
-        navHostController.navigate(Screens.ACCOUNT_Watchlist_Movies)
+        navHostController.navigate(Screens.ACCOUNT_Watchlist_Movies) {
+            launchSingleTop = true
+        }
     }
 
     DrawerItem(
@@ -222,7 +232,9 @@ fun ColumnScope.LoggedInDrawer(
             )
         }
     ) {
-        navHostController.navigate(Screens.ACCOUNT_Watchlist_TV)
+        navHostController.navigate(Screens.ACCOUNT_Watchlist_TV) {
+            launchSingleTop = true
+        }
     }
 }
 
@@ -303,15 +315,17 @@ private fun RowScope.NavItemSetup(
     itemIcon: ImageVector,
     itemLabel: String
 ) {
+    val selected = itemRoute.takeWhile { it != '/' } == currentDestination?.takeWhile { it != '/' }
     BottomNavigationItem(
-        selected = itemRoute.takeWhile { it != '/' } == currentDestination?.takeWhile { it != '/' },
+        selected = selected,
         onClick = {
-            navHostController.navigate(itemRoute) {
-                launchSingleTop = true
-                popUpTo(0) {
-                    inclusive = false
+            if (!selected)
+                navHostController.navigate(itemRoute) {
+                    launchSingleTop = true
+                    popUpTo(0) {
+                        inclusive = false
+                    }
                 }
-            }
         },
         icon = {
             Icon(

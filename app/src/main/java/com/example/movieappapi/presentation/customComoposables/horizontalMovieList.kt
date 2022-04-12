@@ -1,4 +1,4 @@
-package com.example.movieappapi.presentation.components
+package com.example.movieappapi.presentation.customComoposables
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import com.example.movieappapi.domain.model.Movie
-import com.example.movieappapi.presentation.customComoposables.HorizontalListMovieItem
+import com.example.movieappapi.presentation.components.HorizontalListMovieItem
 
 @ExperimentalAnimationApi
 @ExperimentalCoilApi

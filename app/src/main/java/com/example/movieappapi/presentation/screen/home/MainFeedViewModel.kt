@@ -39,6 +39,7 @@ class MainFeedViewModel(
         movieListType: MainFeedMovieListType
     ) = viewModelScope.launch {
         var movies = resource.value.data?.results
+        resource.value = Resource.Loading(resource.value.data)
         val response = mainFeedMoviesUseCase(movieListType)
         if (response is Resource.Success)
             movieListType.page++

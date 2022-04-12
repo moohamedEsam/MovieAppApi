@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -107,10 +108,15 @@ private fun BoxScope.MovieUi(
             background = background,
             modifier = Modifier.align(BottomStart)
         )
-
     }
     MovieActionIconsColumn(movie, Modifier.align(Alignment.TopEnd))
 
+}
+
+private fun calculateMovieRuntime(runtime: Int): String {
+    val hours = runtime.div(60)
+    val minutes = runtime.mod(60)
+    return "$hours:$minutes"
 }
 
 
@@ -123,6 +129,45 @@ private fun MovieDescription(
     background: Color,
     modifier: Modifier
 ) {
+    Column(
+        modifier = modifier.animateContentSize()
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .shadow(16.dp)
+        ) {
+            Text(text = "Rating %.1f".format(movie.voteAverage), fontWeight = FontWeight.Bold)
+            Text(text = "Popularity %.1f".format(movie.popularity), fontWeight = FontWeight.Bold)
+        }
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .shadow(16.dp)
+        ) {
+            Text(
+                text = "Runtime ${calculateMovieRuntime(movie.runtime ?: 0)}",
+                fontWeight = FontWeight.Bold
+            )
+            Text(text = "Release Date ${movie.releaseDate}", fontWeight = FontWeight.Bold)
+        }
+
+
+        MovieCardDescription(background, movie, navHostController)
+    }
+
+}
+
+@Composable
+private fun MovieCardDescription(
+    background: Color,
+    movie: MovieDetailsResponse,
+    navHostController: NavHostController
+) {
     val isVisible = remember {
         MutableTransitionState(false).apply { targetState = true }
     }
@@ -134,7 +179,7 @@ private fun MovieDescription(
         enter = expandVertically(expandFrom = Alignment.Top, animationSpec = tween(2000)) + fadeIn(
             animationSpec = tween(2000)
         ),
-        modifier = modifier.animateContentSize()
+        modifier = Modifier.animateContentSize()
 
     ) {
         Card(
@@ -240,8 +285,6 @@ private fun MovieDescription(
 
         }
     }
-
-
 }
 
 @Composable
@@ -294,7 +337,7 @@ private fun CastList(it: List<Cast>, navHostController: NavHostController) {
                         ),
                         builder = {
                             transformations(CircleCropTransformation())
-                            placeholder(R.drawable.ic_launcher_foreground)
+                            placeholder(R.drawable.icon_loading)
                             crossfade(true)
                         },
                     ),

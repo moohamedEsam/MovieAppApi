@@ -11,13 +11,15 @@ fun Movie.toMovieEntity(dateAdded: Date? = null, tag: String = "popular") = Movi
     posterPath = posterPath ?: "",
     title = title ?: "",
     dateAdded = dateAdded,
-    tag = tag
+    tag = tag,
+    rating = (voteAverage ?: 0).toFloat()
 )
 
 fun MovieEntity.toMovie() = Movie(
     id = id,
     posterPath = posterPath,
-    title = title
+    title = title,
+    voteAverage = rating.toDouble()
 )
 
 fun MovieDetailsResponse.toMovie() = Movie(
