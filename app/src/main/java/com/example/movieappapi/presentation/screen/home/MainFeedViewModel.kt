@@ -26,6 +26,8 @@ class MainFeedViewModel(
     private val nowPlayingMovieList = MainFeedMovieListType.NowPlaying
     private val popularMovieList = MainFeedMovieListType.Popular
     private val upcomingMovieList = MainFeedMovieListType.Upcoming
+    private var lastMainFeedType: MainFeedMovieListType? = null
+    private var isLoading = false
 
     init {
         setPopularMovies()
@@ -38,9 +40,13 @@ class MainFeedViewModel(
         resource: MutableState<Resource<MoviesResponse>>,
         movieListType: MainFeedMovieListType
     ) = viewModelScope.launch {
+        if (movieListType == lastMainFeedType && isLoading) return@launch
+        isLoading = true
+        lastMainFeedType = movieListType
         var movies = resource.value.data?.results
-        resource.value = Resource.Loading(resource.value.data)
+        //resource.value = Resource.Loading(resource.value.data)
         val response = mainFeedMoviesUseCase(movieListType)
+        isLoading = false
         if (response is Resource.Success)
             movieListType.page++
         movies = movies?.plus(response.data?.results ?: emptyList()) ?: response.data?.results

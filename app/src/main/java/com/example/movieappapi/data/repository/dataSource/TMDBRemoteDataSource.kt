@@ -50,7 +50,12 @@ interface TMDBRemoteDataSource : MovieRemoteDataSource, TVRemoteDataSource {
         isFavorite: Boolean = true
     ): RateMediaResponse
 
-    suspend fun addToWatchList(mediaId: Int, accountId: Int, mediaType: String): RateMediaResponse
+    suspend fun addToWatchList(
+        mediaId: Int,
+        accountId: Int,
+        sessionId: String,
+        mediaType: String
+    ): RateMediaResponse
 
     suspend fun searchAll(query: String): AllSearchResponse
 

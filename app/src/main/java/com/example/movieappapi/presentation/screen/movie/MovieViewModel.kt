@@ -21,7 +21,7 @@ class MovieViewModel(
     private val markAsFavoriteMovieUseCase: MarkAsFavoriteMovieUseCase,
     private val movieDetailsUseCase: GetMovieDetailsUseCase,
     private val deleteMovieRateUseCase: DeleteMovieRateUseCase,
-    private val addMovieToListUseCase: AddMovieToListUseCase,
+    private val addMovieToListUseCase: AddMovieToWatchListUseCase,
     private val userCreatedListsUseCase: GetUserCreatedListsUseCase
 ) : ViewModel() {
     private val _genres = mutableStateOf<GenreResponse?>(null)
@@ -87,13 +87,9 @@ class MovieViewModel(
         }
     }
 
-    fun addToList(listId: Int) = viewModelScope.launch {
+    fun addToList() = viewModelScope.launch {
         _movie.value.onSuccess {
-            val response = addMovieToListUseCase(
-                it.id ?: 0,
-                listId,
-                it.accountStatesResponse?.favorite ?: false
-            )
+            val response = addMovieToListUseCase(it.id ?: 0)
             Log.i("MovieViewModel", "addToList: $response")
         }
     }

@@ -142,24 +142,24 @@ fun ColumnScope.LoggedInDrawer(
         }
     }
 
-    DrawerItem(
-        label = Screens.ACCOUNT_Favorite_Tv,
-        currentDestination = currentDestination,
-        icon = {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription = null,
-                tint = if (currentDestination == Screens.ACCOUNT_Favorite_Tv)
-                    MaterialTheme.colors.primary
-                else
-                    Color.White
-            )
-        }
-    ) {
-        navHostController.navigate(Screens.ACCOUNT_Favorite_Tv) {
-            launchSingleTop = true
-        }
-    }
+//    DrawerItem(
+//        label = Screens.ACCOUNT_Favorite_Tv,
+//        currentDestination = currentDestination,
+//        icon = {
+//            Icon(
+//                imageVector = Icons.Default.Favorite,
+//                contentDescription = null,
+//                tint = if (currentDestination == Screens.ACCOUNT_Favorite_Tv)
+//                    MaterialTheme.colors.primary
+//                else
+//                    Color.White
+//            )
+//        }
+//    ) {
+//        navHostController.navigate(Screens.ACCOUNT_Favorite_Tv) {
+//            launchSingleTop = true
+//        }
+//    }
 
     DrawerItem(
         label = Screens.ACCOUNT_Rated_Movies,
@@ -180,24 +180,24 @@ fun ColumnScope.LoggedInDrawer(
         }
     }
 
-    DrawerItem(
-        label = Screens.ACCOUNT_Rated_Tv,
-        currentDestination = currentDestination,
-        icon = {
-            Icon(
-                imageVector = Icons.Default.StarRate,
-                contentDescription = null,
-                tint = if (currentDestination == Screens.ACCOUNT_Rated_Tv)
-                    MaterialTheme.colors.primary
-                else
-                    Color.White
-            )
-        }
-    ) {
-        navHostController.navigate(Screens.ACCOUNT_Rated_Tv) {
-            launchSingleTop = true
-        }
-    }
+//    DrawerItem(
+//        label = Screens.ACCOUNT_Rated_Tv,
+//        currentDestination = currentDestination,
+//        icon = {
+//            Icon(
+//                imageVector = Icons.Default.StarRate,
+//                contentDescription = null,
+//                tint = if (currentDestination == Screens.ACCOUNT_Rated_Tv)
+//                    MaterialTheme.colors.primary
+//                else
+//                    Color.White
+//            )
+//        }
+//    ) {
+//        navHostController.navigate(Screens.ACCOUNT_Rated_Tv) {
+//            launchSingleTop = true
+//        }
+//    }
 
     DrawerItem(
         label = Screens.ACCOUNT_Watchlist_Movies,
@@ -218,24 +218,24 @@ fun ColumnScope.LoggedInDrawer(
         }
     }
 
-    DrawerItem(
-        label = Screens.ACCOUNT_Watchlist_TV,
-        currentDestination = currentDestination,
-        icon = {
-            Icon(
-                imageVector = Icons.Default.WatchLater,
-                contentDescription = null,
-                tint = if (currentDestination == Screens.ACCOUNT_Watchlist_TV)
-                    MaterialTheme.colors.primary
-                else
-                    Color.White
-            )
-        }
-    ) {
-        navHostController.navigate(Screens.ACCOUNT_Watchlist_TV) {
-            launchSingleTop = true
-        }
-    }
+//    DrawerItem(
+//        label = Screens.ACCOUNT_Watchlist_TV,
+//        currentDestination = currentDestination,
+//        icon = {
+//            Icon(
+//                imageVector = Icons.Default.WatchLater,
+//                contentDescription = null,
+//                tint = if (currentDestination == Screens.ACCOUNT_Watchlist_TV)
+//                    MaterialTheme.colors.primary
+//                else
+//                    Color.White
+//            )
+//        }
+//    ) {
+//        navHostController.navigate(Screens.ACCOUNT_Watchlist_TV) {
+//            launchSingleTop = true
+//        }
+//    }
 }
 
 @Composable
@@ -322,7 +322,7 @@ private fun RowScope.NavItemSetup(
             if (!selected)
                 navHostController.navigate(itemRoute) {
                     launchSingleTop = true
-                    popUpTo(0) {
+                    popUpTo(itemRoute) {
                         inclusive = false
                     }
                 }

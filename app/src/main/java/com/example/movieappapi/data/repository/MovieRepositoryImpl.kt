@@ -437,6 +437,7 @@ class MovieRepositoryImpl(
                 remote.addToWatchList(
                     mediaId,
                     accountDetailsResponse.value.data?.id ?: 1,
+                    getActiveToken(),
                     mediaType
                 )
             Resource.Success(response)

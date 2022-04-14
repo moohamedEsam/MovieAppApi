@@ -57,6 +57,7 @@ val useCaseModule = module {
     factory { AddMovieToListUseCase(get()) }
     factory { RemoveMovieFromListUseCase(get()) }
     factory { DiscoverMoviesUseCase(get()) }
+    factory { AddMovieToWatchListUseCase(get()) }
 }
 
 val repositoryModule = module {

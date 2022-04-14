@@ -1,4 +1,4 @@
-package com.example.movieappapi.presentation.components
+package com.example.movieappapi.presentation.customComoposables
 
 import android.util.Log
 import androidx.compose.foundation.clickable
@@ -21,7 +21,7 @@ import androidx.constraintlayout.compose.MotionScene
 import com.example.movieappapi.R
 import com.example.movieappapi.ui.theme.MovieAppApiTheme
 
-@OptIn(ExperimentalMotionApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMotionApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun RateMotionLayout(
     initialProgress: Float = (0).toFloat(),
@@ -32,7 +32,7 @@ fun RateMotionLayout(
     val context = LocalContext.current
     val scene = context.resources.openRawResource(R.raw.rate_layout).readBytes().decodeToString()
     var progress by remember {
-        mutableStateOf(initialProgress)
+        mutableStateOf(initialProgress / 10)
     }
 
     Dialog(onDismissRequest = { onDismissRequest() }) {

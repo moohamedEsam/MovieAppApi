@@ -2,6 +2,8 @@ package com.example.movieappapi.data.repository.dataSourceImpl
 
 import com.example.movieappapi.data.repository.dataSource.TMDBRemoteDataSource
 import com.example.movieappapi.domain.model.*
+import com.example.movieappapi.domain.model.utils.AddMediaToWatchListRequestBody
+import com.example.movieappapi.domain.model.utils.MarkMediaFavoriteRequestBody
 import com.example.movieappapi.domain.utils.MainFeedMovieListType
 import com.example.movieappapi.domain.utils.Url
 import io.ktor.client.*
@@ -128,10 +130,13 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
     override suspend fun addToWatchList(
         mediaId: Int,
         accountId: Int,
+        sessionId: String,
         mediaType: String
     ): RateMediaResponse = client.post(Url.addWatchList(accountId)) {
-        parameter("media_type", mediaType)
-        parameter("media_id", mediaId)
+        parameter(SESSION_PARAMETER, sessionId)
+        header("Content-Type", "application/json;charset=utf-8")
+        contentType(ContentType.Application.Json)
+        body = AddMediaToWatchListRequestBody(mediaType, mediaId, true)
     }
 
     override suspend fun getUserRatedTv(accountId: Int, token: String): TvShowsResponse =
