@@ -53,16 +53,16 @@ fun MainScreen(startDestination: String) {
     val navHostController = rememberNavController()
     val navBackStack by navHostController.currentBackStackEntryAsState()
     val currentDestination = navBackStack?.destination?.route?.split("/")?.get(0)
+    val notAllowedScreens = listOf(
+        Screens.LOGIN,
+        Screens.MOVIE_DETAILS,
+        Screens.SIGN_UP,
+        null
+    )
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            if (
-                currentDestination !in listOf(
-                    Screens.LOGIN,
-                    Screens.MOVIE_DETAILS,
-                    null
-                )
-            )
+            if (currentDestination !in notAllowedScreens)
                 BottomBarSetup(navHostController = navHostController)
         },
         content = {
@@ -71,7 +71,10 @@ fun MainScreen(startDestination: String) {
                 startDestination = startDestination
             )
         },
-        drawerContent = { DrawerContent(navHostController) }
+        drawerContent = {
+            if (currentDestination !in notAllowedScreens)
+                DrawerContent(navHostController)
+        }
 
     )
 }

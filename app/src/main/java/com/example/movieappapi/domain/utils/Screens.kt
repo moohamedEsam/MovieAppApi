@@ -2,6 +2,7 @@ package com.example.movieappapi.domain.utils
 
 object Screens {
     const val LOGIN = "login"
+    const val SIGN_UP = "signUp"
     const val MAIN = "Main"
     const val ACCOUNT = "Account"
     const val ACCOUNT_LISTS = "Lists"

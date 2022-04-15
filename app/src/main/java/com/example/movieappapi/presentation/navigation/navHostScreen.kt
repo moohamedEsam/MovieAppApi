@@ -19,6 +19,7 @@ import com.example.movieappapi.presentation.screen.lists.ListScreen
 import com.example.movieappapi.presentation.screen.login.LoginScreen
 import com.example.movieappapi.presentation.screen.movie.MovieDetails
 import com.example.movieappapi.presentation.screen.search.SearchMovieScreen
+import com.example.movieappapi.presentation.screen.signUp.SignUpScreen
 import com.example.movieappapi.presentation.screen.userLists.UserListsScreen
 import com.example.movieappapi.presentation.screen.userMoviesList.UserMovieListScreen
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -42,6 +43,9 @@ fun NavHostScreen(
 
         composable(Screens.LOGIN) {
             LoginScreen(navHostController = navHostController)
+        }
+        composable(Screens.SIGN_UP) {
+            SignUpScreen()
         }
 
         composable(Screens.MAIN) {

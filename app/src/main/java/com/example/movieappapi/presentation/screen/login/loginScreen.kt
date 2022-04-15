@@ -18,6 +18,7 @@ import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -35,6 +36,7 @@ import com.example.movieappapi.domain.utils.Resource
 import com.example.movieappapi.domain.utils.Screens
 import com.example.movieappapi.presentation.components.ResourceErrorSnackBar
 import com.example.movieappapi.presentation.components.TextFieldSetup
+import com.example.movieappapi.presentation.screen.movie.CreateVerticalSpacer
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -54,22 +56,34 @@ fun LoginScreen(navHostController: NavHostController) {
                 .align(Alignment.Center),
             navHostController = navHostController
         )
-        ContinueAsGuest(
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
-        ResourceErrorSnackBar(resource = userState, "") {
+        Column(modifier = Modifier.align(BottomCenter)) {
+            ContinueAsGuest()
+            CreateVerticalSpacer()
+            SignUp(navHostController)
 
         }
+        ResourceErrorSnackBar(resource = userState, "") {}
     }
 }
 
 @Composable
-fun ContinueAsGuest(modifier: Modifier) {
+fun SignUp(navHostController: NavHostController) {
+    Text(
+        text = "Sign up",
+        color = MaterialTheme.colors.primary,
+        modifier = Modifier.clickable {
+            navHostController.navigate(Screens.SIGN_UP)
+        }
+    )
+}
+
+@Composable
+fun ContinueAsGuest() {
     val viewModel: LoginViewModel = getViewModel()
     Text(
         text = "Continue as Guest",
         color = MaterialTheme.colors.primary,
-        modifier = modifier.clickable {
+        modifier = Modifier.clickable {
             viewModel.loginAsGuest()
         }
     )
