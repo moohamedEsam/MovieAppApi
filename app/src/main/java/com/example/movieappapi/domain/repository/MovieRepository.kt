@@ -80,7 +80,8 @@ interface MovieRepository {
 
     suspend fun addToWatchList(
         mediaId: Int,
-        mediaType: String
+        mediaType: String,
+        watchList: Boolean
     ): Resource<RateMediaResponse>
 
     suspend fun rateMovie(

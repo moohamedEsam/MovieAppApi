@@ -131,12 +131,13 @@ class TMDBRemoteDataSourceImpl(private val client: HttpClient) : TMDBRemoteDataS
         mediaId: Int,
         accountId: Int,
         sessionId: String,
-        mediaType: String
+        mediaType: String,
+        watchList: Boolean
     ): RateMediaResponse = client.post(Url.addWatchList(accountId)) {
         parameter(SESSION_PARAMETER, sessionId)
         header("Content-Type", "application/json;charset=utf-8")
         contentType(ContentType.Application.Json)
-        body = AddMediaToWatchListRequestBody(mediaType, mediaId, true)
+        body = AddMediaToWatchListRequestBody(mediaType, mediaId, watchList)
     }
 
     override suspend fun getUserRatedTv(accountId: Int, token: String): TvShowsResponse =

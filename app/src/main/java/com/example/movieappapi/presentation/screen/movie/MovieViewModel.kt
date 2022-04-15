@@ -1,18 +1,14 @@
 package com.example.movieappapi.presentation.screen.movie
 
-import android.util.Log
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movieappapi.domain.model.GenreResponse
 import com.example.movieappapi.domain.model.MovieDetailsResponse
+import com.example.movieappapi.domain.model.RateMediaResponse
 import com.example.movieappapi.domain.useCase.*
 import com.example.movieappapi.domain.utils.Resource
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class MovieViewModel(
@@ -24,73 +20,51 @@ class MovieViewModel(
     private val addMovieToListUseCase: AddMovieToWatchListUseCase,
     private val userCreatedListsUseCase: GetUserCreatedListsUseCase
 ) : ViewModel() {
-    private val _genres = mutableStateOf<GenreResponse?>(null)
-
-    private val _movie = mutableStateOf<Resource<MovieDetailsResponse>>(Resource.Initialized())
-    val movie: State<Resource<MovieDetailsResponse>> = _movie
-
+    val movie = mutableStateOf<Resource<MovieDetailsResponse>>(Resource.Initialized())
+    val favoriteResponse = mutableStateOf<Resource<RateMediaResponse>>(Resource.Initialized())
+    val rateResponse = mutableStateOf<Resource<RateMediaResponse>>(Resource.Initialized())
+    val watchlistResponse = mutableStateOf<Resource<RateMediaResponse>>(Resource.Initialized())
 
     fun setMovie(movieId: Int) = viewModelScope.launch {
-        _movie.value = Resource.Loading(_movie.value.data)
-        _movie.value = movieDetailsUseCase(movieId)
+        movie.value = Resource.Loading(movie.value.data)
+        movie.value = movieDetailsUseCase(movieId)
     }
 
-
-    init {
-        setGenres()
-    }
-
-    private fun setGenres() = viewModelScope.launch {
-        _genres.value = genresUseCase().data
-    }
-
-    fun getMovieGenres(ids: List<Int>): Flow<List<String>> = flow {
-        val genres = mutableListOf<String>()
-        _genres.value?.genres?.let {
-            for (i in it.indices) {
-                if (it[i].id in ids)
-                    genres.add(it[i].name ?: "")
-            }
-        }
-        emit(genres.toList())
-    }
 
     fun markAsFavorite() = viewModelScope.launch {
-        val accountStates = _movie.value.data?.accountStatesResponse
-        accountStates?.favorite = accountStates?.favorite?.not()
-        _movie.value.onSuccess {
-            it.accountStatesResponse = accountStates
-            markAsFavoriteMovieUseCase(
-                _movie.value.data?.id ?: 0,
-                accountStates?.favorite ?: true
+        movie.value.onSuccess {
+            favoriteResponse.value = markAsFavoriteMovieUseCase(
+                it.id ?: 0,
+                it.accountStatesResponse?.favorite?.not() ?: true
             )
+
         }
     }
 
     fun rateMovie(value: Float) = viewModelScope.launch {
-        val accountStates = _movie.value.data?.accountStatesResponse
-        accountStates?.rated?.isRated = true
-        accountStates?.rated?.value = value
-        _movie.value.onSuccess {
-            it.accountStatesResponse = accountStates
-            rateMovieUseCase(_movie.value.data?.id ?: 0, value)
+        movie.value.onSuccess {
+            rateResponse.value = rateMovieUseCase(it.id ?: 0, value)
+
         }
     }
 
     fun removeRate() = viewModelScope.launch {
-        val accountStates = _movie.value.data?.accountStatesResponse
+        val accountStates = movie.value.data?.accountStatesResponse
         accountStates?.rated?.isRated = false
         accountStates?.rated?.value = 0f
-        _movie.value.onSuccess {
+        movie.value.onSuccess {
             it.accountStatesResponse = accountStates
-            deleteMovieRateUseCase(it)
+            rateResponse.value = deleteMovieRateUseCase(it)
         }
     }
 
-    fun addToList() = viewModelScope.launch {
-        _movie.value.onSuccess {
-            val response = addMovieToListUseCase(it.id ?: 0)
-            Log.i("MovieViewModel", "addToList: $response")
+    fun toggleAddToList() = viewModelScope.launch {
+        movie.value.onSuccess {
+            watchlistResponse.value = addMovieToListUseCase(
+                it.id ?: 0,
+                it.accountStatesResponse?.watchlist?.not() ?: false
+            )
+
         }
     }
 

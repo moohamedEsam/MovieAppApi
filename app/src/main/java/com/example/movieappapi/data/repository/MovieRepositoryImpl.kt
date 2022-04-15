@@ -430,7 +430,8 @@ class MovieRepositoryImpl(
 
     override suspend fun addToWatchList(
         mediaId: Int,
-        mediaType: String
+        mediaType: String,
+        watchList: Boolean
     ): Resource<RateMediaResponse> {
         return try {
             val response =
@@ -438,7 +439,8 @@ class MovieRepositoryImpl(
                     mediaId,
                     accountDetailsResponse.value.data?.id ?: 1,
                     getActiveToken(),
-                    mediaType
+                    mediaType,
+                    watchList
                 )
             Resource.Success(response)
         } catch (exception: Exception) {

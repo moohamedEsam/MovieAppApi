@@ -54,7 +54,8 @@ interface TMDBRemoteDataSource : MovieRemoteDataSource, TVRemoteDataSource {
         mediaId: Int,
         accountId: Int,
         sessionId: String,
-        mediaType: String
+        mediaType: String,
+        watchList: Boolean
     ): RateMediaResponse
 
     suspend fun searchAll(query: String): AllSearchResponse
